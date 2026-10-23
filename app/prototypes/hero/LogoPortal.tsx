@@ -42,7 +42,7 @@ export default function LogoPortal({ children }: { children: ReactNode }) {
           -1,
           Math.min(1, ((event.clientY - box.top) / box.height) * 2 - 1),
         );
-        light.current.style.transform = `translate3d(${x * 9}px, ${y * 7}px, 0)`;
+        light.current.style.transform = `translate3d(${x * 38}%, ${y * 28}%, 0)`;
       }}
       onPointerLeave={() => {
         light.current?.style.removeProperty("transform");
@@ -86,8 +86,10 @@ export default function LogoPortal({ children }: { children: ReactNode }) {
       }}
     >
       <span className={s.portalAmbient} aria-hidden="true" />
-      <span ref={light} className={s.portalLight} aria-hidden="true">
-        <span />
+      <span className={s.portalLight} aria-hidden="true">
+        <span>
+          <span ref={light} />
+        </span>
       </span>
       {children}
       <span className={s.portalHint} aria-hidden="true">

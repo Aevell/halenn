@@ -986,11 +986,17 @@
 }
 .artwork {
   pointer-events: auto;
+  display: flex;
+  align-items: center;
+  aspect-ratio: 2;
 }
 .logoPortal {
   position: relative;
   display: block;
   isolation: isolate;
+  width: 100%;
+  max-width: 1774px;
+  margin-inline: auto;
   -webkit-tap-highlight-color: transparent;
 }
 .logoPortal img {
@@ -1010,19 +1016,31 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.7;
-  transition:
-    transform 180ms var(--ease),
-    opacity 200ms ease;
+  opacity: 0.75;
+  /* Blur stays constant on the outer layer, after the inner silhouette mask.
+     Only the soft source inside it moves; no duplicate edge follows the pointer. */
+  filter: blur(24px);
+  transition: opacity 200ms ease;
 }
 .portalLight > span {
   position: absolute;
   inset: 0;
-  /* Alpha is taken from the exact approved PNG, never redrawn. Only this
-     separate lighting silhouette is blurred; the foreground image is untouched. */
-  background: #b1dcff;
+  background: #729aca38;
   mask: url("/prototypes/halenn-original.png") center / 100% 100% no-repeat;
-  filter: blur(9px);
+}
+.portalLight > span > span {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 34% 58% at 50% 50%, #dbedff 5%, #a2cdf6b8 35%, #8bb9ed38 65%, transparent 90%);
+  transition: transform 220ms var(--ease);
+}
+/* Respect the source's physical pixels on high-density displays. The composition
+   keeps its original field; only excessive raster enlargement is prevented. */
+@media (min-resolution: 2dppx) {
+  .logoPortal { max-width: 887px; }
+}
+@media (min-resolution: 3dppx) {
+  .logoPortal { max-width: 591px; }
 }
 .portalHint {
   position: absolute;
@@ -1076,6 +1094,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .portalLight,
+  .portalLight > span > span,
   .portalHint {
     transition: opacity 160ms ease;
   }
@@ -1129,8 +1148,8 @@
   border-top: 0;
 }
 @media (max-width: 600px) {
-  .portalLight > span {
-    filter: blur(5px);
+  .portalLight {
+    filter: blur(14px);
   }
   .portalHint {
     bottom: -5%;

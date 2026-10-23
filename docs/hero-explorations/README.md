@@ -21,7 +21,15 @@ Open [the local picker](http://127.0.0.1:3010/prototypes/hero?v=1). Use **1–3*
 
 Cinematic replaces Monument in the picker. The first-round implementation remains recoverable in commit `5df3a70`. Current changes are limited to the prototype surface, its verification script and evidence. No merge, push or production deployment has occurred.
 
-### Mobile cinema and silhouette lighting (latest)
+### Softer directional logo light (latest)
+
+The logo's moving silhouette has been replaced with a stationary silhouette containing a broad, moving radial light source. The blur is applied outside that mask and stays constant (24px desktop, 14px phone), so movement changes the illumination rather than shifting a second sharp contour. Pointer travel is bounded to 38% horizontally and 28% vertically, with a 220ms interruptible CSS transform transition. Ambient light remains visible at rest. No global pointer listener, React state per pointer event, or continuously running animation was added. Reduced motion retains static light and immediate keyboard navigation.
+
+The full original 1774×887 PNG was already delivered unoptimized, without filters or transforms on the visible image. Its original pixels and checksum remain unchanged. The logo link now has a rendering ceiling of 1774 CSS pixels at standard density, 887 at 2×, and 591 at 3× to avoid excessive enlargement at those densities; the surrounding composition retains its aspect-ratio field. This preserves available detail rather than inventing detail through sharpening or generative upscaling. A larger source master would be needed for genuinely higher resolution at larger physical display sizes.
+
+Validation: visual review at 1440×900 and 390×844; pointer movement across the artwork, reset on leave, Enter navigation and focus transfer checked. The native 2× browser reports the expected 887px ceiling and the original asset URL. No horizontal mobile overflow or fresh console warnings/errors. Build, type-check, all eight HTTP/artwork/production-isolation tests and the Impeccable scan pass; lint retains the two original homepage image warnings. PNG checksum and production application files remain unchanged. Device GPU/frame-rate profiling and fresh reduced-motion emulation were not performed. Screenshots: `screenshots/soft-logo-light/`. No push, merge or deployment.
+
+### Mobile cinema and silhouette lighting (previous revision)
 
 Phones now receive a dedicated cinematic sequence at widths up to 600px and heights of at least 700px, without reduced motion. Native vertical scrolling advances a pinned gallery through three complete website compositions, with reading holds at each project. The process then travels through three horizontal chapters. Subtle overlapping arrivals connect services, projects, process, scope and contact; phone travel is 35% of the desktop camera displacement. No wheel/touch interception or continuous animation loop was added. Short screens, reduced motion and content that cannot fit retain the flowing layout. Geometry is cached and recalculated on resize; scroll updates use transform/opacity rather than React renders per frame.
 
