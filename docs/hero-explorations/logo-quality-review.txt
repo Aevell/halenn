@@ -1,0 +1,25 @@
+Logo quality experiment — 24 October 2026
+
+Restore point: codex/halenn-before-logo-quality-2026-10-24
+Commit: 65fe5f8
+Approved original: public/prototypes/halenn-original.png
+SHA-256: 8d0753ae6b55e250a7880408943cbfb80e9a37d041b1274900140d68d9f94c97
+
+Built-in image_gen edit attempt: rejected, not applied to the site.
+Candidate: /Users/terence/.codex/generated_images/01a1690e-4038-7110-a57f-290dcb9de9ce/exec-294670dd-a9b0-4324-94c4-361327f6ec41.png
+The candidate remained 1774×887, changed the base glow and alpha, and changed 477751 of 1573538 RGBA pixels. Mean absolute alpha difference: 14.016/255. This was not an exact-preservation upscale.
+
+Exact prompt:
+Edit target: the attached approved Halenn logo PNG. Perform a conservative high-resolution restoration/upscale only, at 3552 x 1776 or the highest available exact 2:1 resolution. Keep exactly the same logo: two upright metallic silver-blue split triangular blades. Preserve the exact silhouette, corner coordinates as fractions of the canvas, blade widths, central opening, proportions, perspective, position, original framing, silver-blue color gradients, reflections, and base glow. Preserve actual transparent alpha background and the central transparent opening. Do not redesign, redraw with different geometry, embellish, change material or lighting, add bevels, rotate, crop, add text or create a new logo. Improve only resolution and clarity of the existing artwork; resolve pixelation and edge artifacts gently, without sharpening halos or invented surface features. This is an exact-fidelity asset restoration, not a creative logo generation.
+
+User-approved fallback: non-generative 2× resampling.
+Applied only to Cinematic: public/prototypes/halenn-original-2x.png
+Dimensions: 3548×1774 RGBA, 2665751 bytes.
+SHA-256: 9f829598f578424e588d4e952a1f5bc61b5126ddfe7acfbf4137f95954b53392
+Method: sharp(original).resize(3548, 1774, { kernel: 'lanczos3' }).png({ compressionLevel: 9 })
+No AI synthesis, sharpening, recoloring, geometry edits or changed framing.
+Verified the saved PNG equals a fresh deterministic resample byte-for-byte.
+The normalized alpha silhouette IoU at alpha >=128 is 0.99626 after round-trip downsampling. Minor pixel differences come from interpolation, not a new drawing.
+This is a higher-resolution interpolation, not recovered detail. It adds approximately 1.86MB versus the original PNG; production is unaffected.
+The original file remains untouched and still supplies the lighting mask and other variants.
+Revert the asset selection alone by removing highResolution from Cinematic's Mark, or revert the dedicated quality-experiment commit. Full previous version: Git tag codex/halenn-before-logo-quality-2026-10-24.

@@ -89,7 +89,7 @@ export default function Cinematic() {
                 </div>
                 <div className={styles.artwork}>
                   <LogoPortal>
-                    <Mark priority />
+                    <Mark priority highResolution />
                   </LogoPortal>
                 </div>
 

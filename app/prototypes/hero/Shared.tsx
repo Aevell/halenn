@@ -1,13 +1,17 @@
 import Image from "next/image";
 import styles from "./heroes.module.css";
 
-export function Mark({ className = "", priority = false }: { className?: string; priority?: boolean }) {
+export function Mark({ className = "", priority = false, highResolution = false }: {
+  className?: string;
+  priority?: boolean;
+  highResolution?: boolean;
+}) {
   return (
     <Image
       className={className}
-      src="/prototypes/halenn-original.png"
-      width={1774}
-      height={887}
+      src={highResolution ? "/prototypes/halenn-original-2x.png" : "/prototypes/halenn-original.png"}
+      width={highResolution ? 3548 : 1774}
+      height={highResolution ? 1774 : 887}
       alt=""
       aria-hidden="true"
       unoptimized

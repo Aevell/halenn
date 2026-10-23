@@ -21,7 +21,17 @@ Open [the local picker](http://127.0.0.1:3010/prototypes/hero?v=1). Use **1–3*
 
 Cinematic replaces Monument in the picker. The first-round implementation remains recoverable in commit `5df3a70`. Current changes are limited to the prototype surface, its verification script and evidence. No merge, push or production deployment has occurred.
 
-### Restored scale and persistent cursor tracking (latest)
+### Reversible, non-generative 2× logo comparison (latest)
+
+The owner approved trying standard image resampling after an AI restoration attempt failed the exact-preservation check. Cinematic now uses a separate 3548×1774 transparent PNG produced directly from the approved original with Lanczos3 interpolation, without sharpening, reconstruction, recoloring, altered framing or geometry edits. The display dimensions and existing soft cursor-following glow remain unchanged. The original PNG still supplies the lighting silhouette and other variants and remains byte-for-byte intact.
+
+The 2× PNG is 2.66MB versus the original 0.81MB: a reversible prototype comparison, not a claim of recovered detail or a production asset decision. Any perceived improvement is modest and depends on browser resampling. The rejected AI candidate was not applied. The tool prompt, candidate rejection, deterministic method, asset hashes and comparison measurements are recorded in `logo-quality-review.txt`.
+
+Restore point: **`codex/halenn-before-logo-quality-2026-10-24`**, commit **`65fe5f8`**. To restore only the displayed original, remove `highResolution` from the Cinematic `Mark`; the original file has not been overwritten. The quality experiment is a separate commit that can also be reverted.
+
+Build, type-check, eight existing HTTP/integrity/production-isolation checks and the Impeccable scan pass. Lint retains only two pre-existing production image warnings. The served 2× asset checksum matches its saved derivative and an independently regenerated resample. Browser verification at 1440×900 and 390×844 confirms original aspect ratio and composition, 3548×1774 natural dimensions, unchanged 1094.4px desktop display width, no image filter/transform and no captured fresh warnings/errors. Evidence: `screenshots/logo-2x/`. Production application files and deployment remain unchanged.
+
+### Restored scale and persistent cursor tracking (previous revision)
 
 Removed the raster-density size ceilings at the owner's request: the original screen-filling composition now has the same scale on standard and Retina displays. At 1440px viewport width the approved PNG renders at 1094.4 CSS pixels, including on the native 2× display. Artwork bytes, geometry and material remain unchanged.
 
