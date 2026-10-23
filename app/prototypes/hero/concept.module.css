@@ -1,0 +1,366 @@
+.site {
+  container-type: inline-size;
+  height: auto;
+  min-height: 460px;
+  background: #efede7;
+  color: #282b25;
+  border-radius: 16px;
+  overflow: hidden;
+  font-family: var(--font-body), sans-serif;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+}
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 74px;
+  padding: 0 4%;
+  gap: 20px;
+}
+.brand {
+  font-size: 27px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+.forma .brand {
+  font-family: var(--font-editorial), serif;
+  font-size: 40px;
+}
+.object .brand {
+  font-size: 23px;
+  letter-spacing: 0.08em;
+}
+.menu {
+  font-size: 13px;
+  white-space: pre;
+}
+.menuMobile {
+  display: none;
+}
+.architectureHero {
+  position: relative;
+  flex: 1;
+  min-height: 320px;
+  background: #47504a;
+}
+.architectureHero img {
+  object-fit: cover;
+  object-position: center 57%;
+}
+.architectureHero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #07150ed9, transparent 75%);
+}
+.architectureCopy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 26px;
+  padding: 30px 5%;
+  height: 100%;
+  color: #fffdf7;
+}
+.editorialTitle {
+  font-family: var(--font-editorial), serif;
+  font-size: clamp(44px, 8cqw, 88px);
+  line-height: 0.95;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+}
+.mockAction {
+  display: inline-flex;
+  gap: 22px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 20px;
+  border-radius: 999px;
+  background: #f4f3ed;
+  color: #272d27;
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.mockAction svg {
+  width: 16px;
+  height: 16px;
+}
+.bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 18px 4%;
+  min-height: 65px;
+  font-size: 13px;
+}
+.bottom > span:last-child {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.bottom svg {
+  width: 16px;
+  height: 16px;
+}
+.shopHero {
+  display: grid;
+  grid-template-columns: 46% 54%;
+  flex: 1;
+  min-height: 320px;
+}
+.shopCopy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 26px 9%;
+  gap: 22px;
+}
+.shopTitle {
+  font-size: clamp(30px, 4.6cqw, 56px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+.shopTitle em {
+  font-family: var(--font-editorial), serif;
+  font-weight: 400;
+  font-style: italic;
+}
+.shopCopy p,
+.workflowCopy p {
+  font-size: 14px;
+  line-height: 1.6;
+  letter-spacing: 0;
+  margin: 0;
+}
+.shopCopy .mockAction {
+  background: #30382b;
+  color: #f4f5e8;
+}
+.productImage {
+  position: relative;
+  min-height: 320px;
+  overflow: hidden;
+}
+.productImage img {
+  object-fit: cover;
+  object-position: 73% center;
+}
+.object .bottom {
+  border-top: 1px solid #d8d6cd;
+}
+.connected {
+  background: #eceaf3;
+  color: #29223e;
+}
+.connected .brand {
+  font-size: 26px;
+  letter-spacing: -0.045em;
+}
+.workflowHero {
+  display: grid;
+  grid-template-columns: 46% 54%;
+  align-items: center;
+  flex: 1;
+  min-height: 320px;
+  padding: 18px 4% 32px;
+  gap: 18px;
+}
+.workflowCopy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+}
+.workflowTitle {
+  font-size: clamp(28px, 4.3cqw, 52px);
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+}
+.workflowTitle em {
+  font-style: normal;
+  color: #675186;
+}
+.workflowCopy .mockAction {
+  background: #51416c;
+  color: #fff;
+}
+.workspace {
+  background: #fbfafc;
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 18px 35px #33244912;
+  transform: rotate(-2deg);
+}
+.workspaceTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  margin-bottom: 22px;
+  gap: 15px;
+}
+.live {
+  color: #5f536f;
+}
+.flowRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.flowIcon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: #ebe6f2;
+  font-size: 19px;
+}
+.flowIcon svg {
+  width: 18px;
+}
+.n8n {
+  background: #ffe5e0;
+  color: #8f423b;
+  font-size: 13px;
+}
+.flowRow > div {
+  display: grid;
+  gap: 5px;
+}
+.flowRow strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.flowRow > div > span {
+  font-size: 11px;
+  color: #6b6176;
+}
+.flowCheck {
+  margin-left: auto;
+  color: #49705a;
+}
+.flowConnector {
+  height: 20px;
+  width: 1px;
+  background: #d8d1e1;
+  margin-left: 20px;
+}
+.connected .bottom {
+  border-top: 1px solid #d7d0e3;
+}
+@container (max-width:600px) {
+  .menu {
+    display: none;
+  }
+  .menuMobile {
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+  }
+  .navigation {
+    min-height: 66px;
+    padding: 0 6%;
+  }
+  .brand {
+    font-size: 23px;
+  }
+  .forma .brand {
+    font-size: 34px;
+  }
+  .architectureHero {
+    min-height: 355px;
+  }
+  .architectureCopy {
+    padding: 32px 8%;
+    justify-content: flex-end;
+    gap: 24px;
+  }
+  .editorialTitle {
+    font-size: 56px;
+  }
+  .bottom {
+    padding: 18px 6%;
+    font-size: 13px;
+    min-height: 64px;
+  }
+  .bottom > span:first-child {
+    display: none;
+  }
+  .shopHero {
+    grid-template-columns: 1fr;
+    position: relative;
+    min-height: 355px;
+  }
+  .productImage {
+    position: absolute;
+    inset: 0;
+  }
+  .productImage img {
+    object-position: 60% center;
+  }
+  .shopCopy {
+    position: relative;
+    z-index: 1;
+    padding: 24px 7%;
+    background: linear-gradient(90deg, #efede7f5, #efede7b8 50%, transparent);
+    gap: 20px;
+    justify-content: flex-start;
+  }
+  .shopTitle {
+    font-size: 38px;
+    max-width: 90%;
+  }
+  .shopCopy p {
+    font-size: 14px;
+  }
+  .shopCopy .mockAction {
+    margin-top: auto;
+  }
+  .hideSmall {
+    display: none;
+  }
+  .workflowHero {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 18px 6% 26px;
+    gap: 28px;
+  }
+  .workflowCopy {
+    gap: 18px;
+  }
+  .workflowTitle {
+    font-size: 34px;
+  }
+  .workflowCopy p {
+    display: none;
+  }
+  .workspace {
+    padding: 18px;
+    transform: none;
+  }
+  .workspaceTop {
+    margin-bottom: 16px;
+  }
+  .flowRow > div > span {
+    font-size: 12px;
+  }
+  .connected {
+    min-height: 590px;
+  }
+  .connected .bottom {
+    display: none;
+  }
+}

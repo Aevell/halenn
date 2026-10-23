@@ -1,13 +1,16 @@
+import { Instrument_Serif } from "next/font/google";
 import { Arrow, Mark } from "./Shared";
 import CinematicMotion from "./CinematicMotion";
 import { ExperienceProvider, Projects, Process, Contact } from "./Experience";
 import ProjectScope from "./ProjectScope";
 import styles from "./cinematic.module.css";
 
+const editorial = Instrument_Serif({weight:"400",style:["normal","italic"],subsets:["latin"],display:"swap",variable:"--font-editorial"});
+
 export default function Cinematic() {
   return (
     <ExperienceProvider><CinematicMotion>
-      <div className={styles.world} data-variant="Cinematic">
+      <div className={`${styles.world} ${editorial.variable}`} data-variant="Cinematic">
         <a className={styles.skip} href="#hero-content">Skip to content</a>
         <section className={styles.opening} aria-label="Halenn introduction" data-opening>
           <div className={styles.aperture} aria-hidden="true"><i/><i/><span/></div>
@@ -26,35 +29,35 @@ export default function Cinematic() {
             </div>
             <div className={styles.artwork}><Mark priority /></div>
             <div className={styles.heroNote} data-hero-aside>
-              <span className={styles.smallLabel}>Design meets engineering</span>
+              
               <p>Distinctive websites.<br />Connected systems.<br />Care beyond the launch.</p>
             </div>
             <div className={styles.heroAction} data-hero-aside>
-              <p>Your next chapter,<br />built by Halenn.</p>
+              
               <a className={styles.outlineLink} href="#scope">Plan your project <Arrow /></a>
             </div>
             <a className={styles.scrollCue} href="#services"><span>Scroll to go further</span><Arrow down /></a>
-            <span className={styles.cornerLabel} aria-hidden="true">Independent craft. Connected thinking.</span>
+            
           </main>
         </section>
 
         <section id="services" className={styles.sequence} aria-labelledby="services-title" data-scroll-scene>
           <div className={styles.stage} data-scroll-stage>
             <div className={styles.sceneType} aria-hidden="true" data-scene-type><span>BEYOND</span><span>THE LAUNCH.</span></div>
-            <span className={styles.sceneIndex} aria-hidden="true">01 / A bigger picture</span>
+            
             <div className={styles.frame} data-expanding-frame>
               <div className={styles.frameLight} aria-hidden="true" />
               <div className={styles.frameBar}><span>HALENN / DIGITAL SERVICES</span><span>From first impression to everyday operation <span aria-hidden="true">↗</span></span></div>
               <div className={styles.frameContent}>
-                <p className={styles.eyebrow}>One connected digital presence</p>
+                
                 <h2 id="services-title">Beautiful outside.<br /><span>Connected inside.</span></h2>
-                <p className={styles.frameIntro}>A website is just the beginning. We connect design, commerce and automation — and keep it all moving after launch.</p>
+                <p className={styles.frameIntro}>Websites, commerce and n8n automation — designed together, supported after launch.</p>
                 <div className={styles.capabilities}>
-                  <a href="#scope"><span>01 / Websites</span><h3>Make an impression.</h3><p>Custom design and development.<br />Built around your business.</p><Arrow /></a>
-                  <a href="#scope"><span>02 / Commerce</span><h3>Make it a business.</h3><p>Webshops, carts and checkout.<br />A clear path from interest to order.</p><Arrow /></a>
-                  <a href="#scope"><span>03 / Automation</span><h3>Make things flow.</h3><p>n8n workflows and integrations.<br />Less repetitive work behind the scenes.</p><Arrow /></a>
+                  <a href="#scope"><h3>Websites.</h3><p>Custom design and development. <br />Built around your business.</p><Arrow /></a>
+                  <a href="#scope"><h3>Commerce.</h3><p>Webshops, carts and checkout. <br />A clear path from interest to order.</p><Arrow /></a>
+                  <a href="#scope"><h3>Automation.</h3><p>n8n workflows and integrations. <br />Less repetitive work behind the scenes.</p><Arrow /></a>
                 </div>
-                <div className={styles.connection}><span>Your website</span><i aria-hidden="true" /><span>n8n workflows</span><i aria-hidden="true" /><span>Your tools</span></div>
+
               </div>
               <div className={styles.frameFooter}><span>Launch is a starting point.</span><a href="#scope">Build your brief <Arrow /></a></div>
             </div>
@@ -64,7 +67,7 @@ export default function Cinematic() {
 
         <Projects /><Process />
         <section id="scope" className={styles.scope} aria-labelledby="scope-title">
-          <div className={styles.scopeHeading}><p className={styles.eyebrow}>A starting point, made yours</p><h2 id="scope-title">What do you<br /><span>have in mind?</span></h2><p>Start with the essentials. Add the capabilities your business needs. We’ll shape the scope around the work.</p></div>
+          <div className={styles.scopeHeading}><h2 id="scope-title">What do you<br /><span>have in mind?</span></h2><p>Start with the essentials. Add the capabilities your business needs. We’ll shape the scope around the work.</p></div>
           <ProjectScope />
         </section>
         <Contact />

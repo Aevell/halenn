@@ -21,6 +21,18 @@ Open [the local picker](http://127.0.0.1:3010/prototypes/hero?v=1). Use **1–3*
 
 Cinematic replaces Monument in the picker. The first-round implementation remains recoverable in commit `5df3a70`. Current changes are limited to the prototype surface, its verification script and evidence. No merge, push or production deployment has occurred.
 
+### Project and typography refinement
+
+The latest owner feedback asked for more convincing premium website previews, calmer typography, rounded integrated controls, and less small-text clutter. Variant 1 now uses Geist for Halenn’s headings and body, mostly 400-weight headings, tracking no tighter than −0.04em, 16–18px supporting copy, and 14–15px secondary information. Redundant labels and duplicated service headings were removed. Main actions, dialog close buttons and inputs share rounded shapes; the picker remains its prescribed comparison chrome.
+
+FORMA now has an architectural photo-led composition, OBJECT a furniture collection layout, and CONNECTED an automation landing page with a workflow workspace. Instrument Serif is self-hosted through `next/font` for the two editorial concepts only. The architecture and furniture photographs are AI-generated concept assets stored in `public/prototypes/projects/`; they represent fictional work, not clients or built projects. `next/image` provides responsive optimized image delivery. The supplied Halenn logo remains the exact original PNG. The mini-site navigation/actions are part of a static visual study; clicking the overall project opens its accessible preview, rather than pretending these are deployed client sites.
+
+Controls retain their interactions. Larger service copy caused the mobile expanding frame to exceed its viewport during refinement; the copy hierarchy was simplified and pinning now also checks whether the frame fits. At insufficient height it uses readable flowing content. No animation dependency was added.
+
+Validation: build and type-check pass; lint retains only two original production image warnings; all eight HTTP/artwork/production-isolation checks pass. Reviewed the new projects at desktop 1440×900, phone 390×844, and the narrow workflow at 320×844. Checked project navigation, preview opening/Escape dismissal, replay, keyboard-triggered service expansion, contact navigation and the redesigned form. No horizontal document overflow at 320px; no failed loaded images or captured browser errors. Impeccable’s final mechanical scan returned no findings. This pass does not claim new physical-device, zoom, reduced-motion-emulation or frame-rate measurements.
+
+Updated visual evidence is in `screenshots/refined/`. Production page/layout/global CSS/deployment gate/version endpoint still have no diff against the audited baseline. No push, merge or deployment.
+
 ### Full experience revision
 
 The owner approved extending the cinematic route with projects, process, service options and a large contact ending, and requested a stronger opening. This revision remains isolated to variant 1.

@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import Concept from "./Concept";
 import { Arrow } from "./Shared";
 import s from "./experience.module.css";
 
@@ -65,49 +66,6 @@ const projects = [
     theme: s.workflow,
   },
 ];
-function Concept({ index }: { index: number }) {
-  const p = projects[index];
-  return (
-    <div className={`${s.concept} ${p.theme}`}>
-      <div className={s.conceptNav}>
-        <b>{p.name}</b>
-        <span>
-          {index === 1 ? "Collection / About" : "Independent by design"} ↗
-        </span>
-      </div>
-      <div className={s.conceptTitle}>{p.title}</div>
-      {index === 0 ? (
-        <div className={s.building}>
-          <i />
-          <i />
-          <i />
-        </div>
-      ) : index === 1 ? (
-        <div className={s.objects}>
-          <i />
-          <i />
-          <i />
-        </div>
-      ) : (
-        <div className={s.nodes}>
-          <span>New enquiry</span>
-          <i>→</i>
-          <span>n8n</span>
-          <i>→</i>
-          <span>Your CRM</span>
-        </div>
-      )}
-      <div className={s.conceptBottom}>
-        {index === 0
-          ? "Spaces shaped around life."
-          : index === 1
-            ? "Considered forms. Everyday rituals."
-            : "Enquiry → Qualification → Follow-up"}
-        <span>Concept / 2026</span>
-      </div>
-    </div>
-  );
-}
 export function Projects() {
   const section = useRef<HTMLElement>(null),
     track = useRef<HTMLDivElement>(null),
@@ -211,12 +169,11 @@ export function Projects() {
     >
       <div className={s.projectStage}>
         <div className={s.sectionTop}>
-          <span>02 / Concept explorations</span>
-          <span>Scroll, drag or explore with arrows</span>
+          <span>Concept projects</span>
+          <span>Imagined businesses. Real possibilities.</span>
         </div>
         <h2 id="projects-title">
-          What we
-          <br />
+          What we <br />
           <em>could build.</em>
         </h2>
         <div
@@ -285,10 +242,6 @@ export function Projects() {
                 aria-label={`Open ${p.name} concept project`}
               >
                 <Concept index={i} />
-                <span className={s.projectLabel}>
-                  {p.type}
-                  <span>Explore concept ↗</span>
-                </span>
               </button>
             ))}
           </div>
@@ -296,7 +249,7 @@ export function Projects() {
         <div className={s.projectControls}>
           <p aria-live="polite">
             <b>{projects[active].name}</b>
-            <span>Concept project · illustrative content</span>
+            <span>{projects[active].type.replace(" / ", " · ")}</span>
           </p>
           <div>
             <button
@@ -351,10 +304,6 @@ export function Projects() {
 export function Process() {
   return (
     <section id="process" className={s.process} aria-labelledby="process-title">
-      <div className={s.sectionTop}>
-        <span>03 / From idea to everyday</span>
-        <span>A considered way forward</span>
-      </div>
       <h2 id="process-title">
         Good work.
         <br />
@@ -382,9 +331,6 @@ export function Process() {
             0{i + 1}
           </span>
           <div>
-            <span className={s.kicker}>
-              0{i + 1} / {step.list}
-            </span>
             <h3>{step.title}</h3>
             <p>{step.text}</p>
           </div>
@@ -400,8 +346,7 @@ export function Contact() {
   return (
     <section id="contact" className={s.contact} aria-labelledby="contact-title">
       <div className={s.sectionTop}>
-        <span>04 / Your next chapter</span>
-        <span>A company by Aevell</span>
+        <span>Let’s make something worthwhile.</span>
       </div>
       <p>Have something in mind?</p>
       <h2 id="contact-title">

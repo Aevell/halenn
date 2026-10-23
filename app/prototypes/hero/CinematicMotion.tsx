@@ -54,7 +54,7 @@ export default function CinematicMotion({ children }: { children: ReactNode }) {
     };
     const requestPaint = () => { if (!pending && active) pending = requestAnimationFrame(paint); };
     const measure = () => {
-      active = !reduced.matches && !compact.matches;
+      active = !reduced.matches && !compact.matches && frame.offsetHeight <= window.innerHeight - 100;
       element.toggleAttribute("data-cinematic-motion", active);
       reset();
       height = stage.offsetHeight;
@@ -69,6 +69,7 @@ export default function CinematicMotion({ children }: { children: ReactNode }) {
     compact.addEventListener("change", measure);
     const resize = new ResizeObserver(measure);
     resize.observe(stage);
+    resize.observe(frame);
     // Keyboard focus must never land inside a visually miniaturised scene.
     const revealFocusedFrame = (event: FocusEvent) => {
       if (!active || !(event.target instanceof Node) || !frame.contains(event.target)) return;
