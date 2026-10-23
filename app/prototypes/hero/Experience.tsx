@@ -302,40 +302,92 @@ export function Projects() {
   );
 }
 export function Process() {
+  const root = useRef<HTMLElement>(null);
+  const rail = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const section = root.current!,
+      track = rail.current!;
+    const media = matchMedia(
+      "(min-width: 1001px) and (min-height: 800px) and (prefers-reduced-motion: no-preference)",
+    );
+    let frame = 0,
+      top = 0,
+      range = 1;
+    function paint() {
+      frame = 0;
+      if (!media.matches) return;
+      const p = Math.max(0, Math.min(1, (scrollY - top) / range));
+      track.style.transform = `translate3d(${(-p * 200) / 3}%,0,0)`;
+    }
+    function schedule() {
+      if (!frame && media.matches) frame = requestAnimationFrame(paint);
+    }
+    function measure() {
+      section.toggleAttribute("data-process-motion", media.matches);
+      track.style.removeProperty("transform");
+      top = section.getBoundingClientRect().top + scrollY;
+      range = Math.max(1, section.offsetHeight - innerHeight);
+      schedule();
+    }
+    measure();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", measure);
+    media.addEventListener("change", measure);
+    const resize = new ResizeObserver(measure);
+    resize.observe(track);
+    if (section.parentElement) resize.observe(section.parentElement);
+    return () => {
+      cancelAnimationFrame(frame);
+      resize.disconnect();
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", measure);
+      media.removeEventListener("change", measure);
+    };
+  }, []);
   return (
-    <section id="process" className={s.process} aria-labelledby="process-title">
-      <h2 id="process-title">
-        Good work.
-        <br />
-        <em>Clear process.</em>
-      </h2>
-      {[
-        {
-          title: "Shape it.",
-          text: "We start with your business, your audience and what the website needs to do.",
-          list: "Discovery / Direction / Scope",
-        },
-        {
-          title: "Build it.",
-          text: "Design and development move together. You see the work take shape, from the first screen to the connected systems.",
-          list: "Design / Development / Integrations",
-        },
-        {
-          title: "Keep it moving.",
-          text: "Launch with a clear handover. Add ongoing maintenance and improvements as your business evolves.",
-          list: "Launch / Care / Iteration",
-        },
-      ].map((step, i) => (
-        <article className={s.chapter} key={step.title}>
-          <span className={s.chapterNumber} aria-hidden="true">
-            0{i + 1}
-          </span>
-          <div>
-            <h3>{step.title}</h3>
-            <p>{step.text}</p>
-          </div>
-        </article>
-      ))}
+    <section
+      ref={root}
+      id="process"
+      className={s.process}
+      aria-labelledby="process-title"
+    >
+      <div className={s.processStage}>
+        <h2 id="process-title">
+          From first thought.
+          <br />
+          <em>To what’s next.</em>
+        </h2>
+        <div ref={rail} className={s.processRail}>
+          {[
+            {
+              title: "Shape it.",
+              text: "We start with your business, your audience and what the website needs to do.",
+              detail: "Discovery. Direction. A clear scope.",
+            },
+            {
+              title: "Build it.",
+              text: "Design and development move together. You see the work take shape, from the first screen to the connected systems.",
+              detail: "Design. Development. Connected tools.",
+            },
+            {
+              title: "Keep it moving.",
+              text: "Launch with a clear handover. Add ongoing maintenance and improvements as your business evolves.",
+              detail: "Launch. Care. Continuous improvement.",
+            },
+          ].map((step, i) => (
+            <article className={s.chapter} key={step.title}>
+              <span className={s.chapterNumber} aria-hidden="true">
+                0{i + 1}
+              </span>
+              <div>
+                <h3>{step.title}</h3>
+                <p>{step.text}</p>
+                <span className={s.chapterDetail}>{step.detail}</span>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }
@@ -350,9 +402,7 @@ export function Contact() {
       </div>
       <p>Have something in mind?</p>
       <h2 id="contact-title">
-        LET’S
-        <br />
-        <em>TALK.</em>
+        LET’S <em>TALK.</em>
       </h2>
       <div className={s.contactBottom}>
         <button

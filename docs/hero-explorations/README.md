@@ -21,7 +21,22 @@ Open [the local picker](http://127.0.0.1:3010/prototypes/hero?v=1). Use **1–3*
 
 Cinematic replaces Monument in the picker. The first-round implementation remains recoverable in commit `5df3a70`. Current changes are limited to the prototype surface, its verification script and evidence. No merge, push or production deployment has occurred.
 
-### Project and typography refinement
+### Echo-inspired dark direction (latest)
+
+The owner requested the reference video's bolder typography and scroll choreography across the rest of the prototype, and removal of the gray process section. Variant 1 now uses locally bundled Barlow Condensed at 500/600 for display type, with Geist supporting copy and the existing concept-specific typography preserved. Font files are sourced from Google Fonts; the SIL Open Font License is included beside them. A failed development font fetch was caught visually and replaced with deterministic local font files.
+
+- A large HALENN wordmark precedes the opening panels. The hero resolves into asymmetric, screen-filling “Built to impress.” typography and the upright original artwork. The artwork itself is not animated or altered.
+- Services, projects, process, scope and contact share the condensed display hierarchy, generous spacing, and rounded controls. The former light gray process surface is now near-black with cool blue accents.
+- Desktop process chapters travel horizontally under a fixed heading using native scroll and transform updates. The enhancement runs only at widths above 1000px, heights of at least 800px, and without reduced motion; smaller/shorter layouts and static server output retain all three chapters in normal document flow. Resize observation refreshes geometry after layout changes.
+- The contact ending is a single oversized “LET’S TALK.” line. Project preview designs and their dialog behavior are preserved.
+
+**Verification:** type-check and production build pass. Lint has only the two pre-existing production image warnings. All eight HTTP/asset/isolation tests pass, including unchanged artwork bytes and production prototype 404s. Production page, layout, global styles, update gate and version endpoint remain identical to the audited baseline. Impeccable's mechanical scan returned no findings. Browser logs contained no captured application errors; development warnings included Fast Refresh and an LCP advisory for a lazy project image when navigating directly into the projects area. Project images remain lazy for normal hero-first entry.
+
+Visual checks covered 1440×900, 390×844, 320×844, 768×1024, and the 1440×650 flowing fallback. A tablet headline/artwork overlap was corrected. Inspected opening, service expansion, project ribbon, forward/reverse process travel, scope disclosure, contact navigation and native dialog Escape/focus restoration. Narrow document width matches the viewport. Reduced-motion behavior and server-visible content were reviewed in code/HTTP output; this pass does not claim new browser motion emulation, physical-device touch/GPU profiling, zoom tests or measured Core Web Vitals.
+
+Evidence: `screenshots/echo-direction/` contains desktop/mobile heroes, expanded desktop services, desktop/mobile process and desktop/mobile contact. This revision stays on the prototype route; no push, merge or deployment.
+
+### Project and typography refinement (previous revision)
 
 The latest owner feedback asked for more convincing premium website previews, calmer typography, rounded integrated controls, and less small-text clutter. Variant 1 now uses Geist for Halenn’s headings and body, mostly 400-weight headings, tracking no tighter than −0.04em, 16–18px supporting copy, and 14–15px secondary information. Redundant labels and duplicated service headings were removed. Main actions, dialog close buttons and inputs share rounded shapes; the picker remains its prescribed comparison chrome.
 
