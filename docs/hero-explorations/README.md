@@ -21,7 +21,15 @@ Open [the local picker](http://127.0.0.1:3010/prototypes/hero?v=1). Use **1–3*
 
 Cinematic replaces Monument in the picker. The first-round implementation remains recoverable in commit `5df3a70`. Current changes are limited to the prototype surface, its verification script and evidence. No merge, push or production deployment has occurred.
 
-### Softer directional logo light (latest)
+### Restored scale and persistent cursor tracking (latest)
+
+Removed the raster-density size ceilings at the owner's request: the original screen-filling composition now has the same scale on standard and Retina displays. At 1440px viewport width the approved PNG renders at 1094.4 CSS pixels, including on the native 2× display. Artwork bytes, geometry and material remain unchanged.
+
+The soft source now follows the cursor across the entire viewport while the hero is visible, rather than activating only within the logo link. The glow remains illuminated at 0.78 opacity and rises continuously toward 1 as the cursor approaches the artwork's center. Leaving the logo no longer resets the source. The same stationary silhouette, broad blur and 220ms transform easing are retained; hover brightness switching is removed. A visibility observer disconnects pointer tracking offscreen. Pointer events are batched into a single animation-frame write, with cached geometry invalidated by resize/scroll. Touch and reduced motion keep a static, always-on glow; the logo remains a keyboard-accessible services link.
+
+Verified cursor response far outside the logo, proximity opacity from 0.78 to 0.992, offscreen tracking suspension, Enter/focus transfer, 390×844 mobile layout, and the uncapped 1440px/2× desktop rendering. Fresh browser logs are clean. Build, type-check, eight HTTP/artwork/production-isolation tests and the Impeccable scan pass; lint retains the two existing production image warnings. Screenshots: `screenshots/full-scale-glow/`. No physical-device frame-rate measurements or fresh reduced-motion emulation claimed. Production remains untouched; no push, merge or deployment.
+
+### Softer directional logo light (previous revision)
 
 The logo's moving silhouette has been replaced with a stationary silhouette containing a broad, moving radial light source. The blur is applied outside that mask and stays constant (24px desktop, 14px phone), so movement changes the illumination rather than shifting a second sharp contour. Pointer travel is bounded to 38% horizontally and 28% vertically, with a 220ms interruptible CSS transform transition. Ambient light remains visible at rest. No global pointer listener, React state per pointer event, or continuously running animation was added. Reduced motion retains static light and immediate keyboard navigation.
 

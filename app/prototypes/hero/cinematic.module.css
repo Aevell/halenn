@@ -995,7 +995,6 @@
   display: block;
   isolation: isolate;
   width: 100%;
-  max-width: 1774px;
   margin-inline: auto;
   -webkit-tap-highlight-color: transparent;
 }
@@ -1016,7 +1015,7 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.75;
+  opacity: 0.78;
   /* Blur stays constant on the outer layer, after the inner silhouette mask.
      Only the soft source inside it moves; no duplicate edge follows the pointer. */
   filter: blur(24px);
@@ -1033,14 +1032,6 @@
   inset: 0;
   background: radial-gradient(ellipse 34% 58% at 50% 50%, #dbedff 5%, #a2cdf6b8 35%, #8bb9ed38 65%, transparent 90%);
   transition: transform 220ms var(--ease);
-}
-/* Respect the source's physical pixels on high-density displays. The composition
-   keeps its original field; only excessive raster enlargement is prevented. */
-@media (min-resolution: 2dppx) {
-  .logoPortal { max-width: 887px; }
-}
-@media (min-resolution: 3dppx) {
-  .logoPortal { max-width: 591px; }
 }
 .portalHint {
   position: absolute;
@@ -1072,14 +1063,7 @@
   opacity: 1;
   transform: translate(-50%, 0);
 }
-.logoPortal:focus-visible .portalLight,
-.logoPortal:active .portalLight {
-  opacity: 1;
-}
 @media (hover: hover) and (pointer: fine) {
-  .logoPortal:hover .portalLight {
-    opacity: 1;
-  }
   .logoPortal:hover .portalHint {
     opacity: 1;
     transform: translate(-50%, 0);
