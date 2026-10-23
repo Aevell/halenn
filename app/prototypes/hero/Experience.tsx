@@ -136,7 +136,10 @@ export function Projects() {
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", measure);
     media.addEventListener("change", measure);
+    const resize = new ResizeObserver(measure);
+    if (root.parentElement) resize.observe(root.parentElement);
     return () => {
+      resize.disconnect();
       cancelAnimationFrame(raf);
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", measure);
@@ -167,7 +170,7 @@ export function Projects() {
       aria-labelledby="projects-title"
       data-local-keys
     >
-      <div className={s.projectStage}>
+      <div className={s.projectStage} data-project-stage>
         <div className={s.sectionTop}>
           <span>Concept projects</span>
           <span>Imagined businesses. Real possibilities.</span>
@@ -178,6 +181,7 @@ export function Projects() {
         </h2>
         <div
           className={s.viewport}
+          data-project-viewport
           onPointerDown={(e) => {
             if (enhanced.current) {
               drag.current = { x: e.clientX, y: scrollY };
@@ -351,7 +355,7 @@ export function Process() {
       className={s.process}
       aria-labelledby="process-title"
     >
-      <div className={s.processStage}>
+      <div className={s.processStage} data-process-stage>
         <h2 id="process-title">
           From first thought.
           <br />
@@ -402,7 +406,7 @@ export function Contact() {
       </div>
       <p>Have something in mind?</p>
       <h2 id="contact-title">
-        LET’S <em>TALK.</em>
+        <span data-contact-word>LET’S</span> <em data-contact-word>TALK.</em>
       </h2>
       <div className={s.contactBottom}>
         <button

@@ -21,7 +21,17 @@ Open [the local picker](http://127.0.0.1:3010/prototypes/hero?v=1). Use **1–3*
 
 Cinematic replaces Monument in the picker. The first-round implementation remains recoverable in commit `5df3a70`. Current changes are limited to the prototype surface, its verification script and evidence. No merge, push or production deployment has occurred.
 
-### Echo-inspired dark direction (latest)
+### Continuous scroll and interactive logo (latest)
+
+The cinematic prototype now connects adjacent scenes with a shared scroll timeline. The hero holds briefly behind the incoming services scene. Services recede left as the gallery arrives; the gallery recedes into the process chapters; scope leads into two contact words that assemble into the final headline. Adjacent desktop scenes overlap by 16svh, and every transformation reverses directly with native scrolling. No wheel interception, smooth-scroll dependency, or animation library was added.
+
+The hero artwork is now a real services link. Fine-pointer movement translates a separate ambient light behind the unchanged original PNG. Hover/focus reveals “Explore the experience”; pointer activation uses native smooth scrolling to the fully expanded services frame. Enter and reduced-motion activation move immediately, transfer focus to the services landmark, and update the URL hash. Touch has a persistent affordance and the same link action. No logo rotation, recoloring, masking or image transform was introduced.
+
+The full connecting choreography runs at widths above 1000px and heights of at least 800px with no reduced-motion preference. Phone/tablet/short-screen layouts retain flowing sections and the existing fit-checked service expansion. Reduced motion restores static composition; the logo retains gentle opacity feedback and ordinary navigation. Keyboard-focused controls are exempt from outgoing camera transforms. Transparent section overlap was corrected so it cannot intercept the outgoing gallery controls. Layout observers refresh cached positions when upstream content changes.
+
+Validation: production build, type-check and eight HTTP/integrity/isolation tests pass. Lint has only the two existing production image warnings; the final Impeccable scan found no issues. Desktop forward/reverse handoffs, gallery previous navigation at the overlap boundary, logo pointer response/click, keyboard Enter/focus transfer, mobile full-size service arrival, 320px contact reflow and short-screen fallback were checked in the browser. Screenshot evidence is in `screenshots/continuous-flow/`. Production application files remain identical to the audited baseline. Reduced-motion media behavior was reviewed in source; fresh OS/browser media emulation and physical-device frame-rate measurements were not performed. No push, merge or deployment.
+
+### Echo-inspired dark direction (previous revision)
 
 The owner requested the reference video's bolder typography and scroll choreography across the rest of the prototype, and removal of the gray process section. Variant 1 now uses locally bundled Barlow Condensed at 500/600 for display type, with Geist supporting copy and the existing concept-specific typography preserved. Font files are sourced from Google Fonts; the SIL Open Font License is included beside them. A failed development font fetch was caught visually and replaced with deterministic local font files.
 
