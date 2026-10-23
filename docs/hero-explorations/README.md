@@ -21,7 +21,17 @@ Open [the local picker](http://127.0.0.1:3010/prototypes/hero?v=1). Use **1–3*
 
 Cinematic replaces Monument in the picker. The first-round implementation remains recoverable in commit `5df3a70`. Current changes are limited to the prototype surface, its verification script and evidence. No merge, push or production deployment has occurred.
 
-### Continuous scroll and interactive logo (latest)
+### Mobile cinema and silhouette lighting (latest)
+
+Phones now receive a dedicated cinematic sequence at widths up to 600px and heights of at least 700px, without reduced motion. Native vertical scrolling advances a pinned gallery through three complete website compositions, with reading holds at each project. The process then travels through three horizontal chapters. Subtle overlapping arrivals connect services, projects, process, scope and contact; phone travel is 35% of the desktop camera displacement. No wheel/touch interception or continuous animation loop was added. Short screens, reduced motion and content that cannot fit retain the flowing layout. Geometry is cached and recalculated on resize; scroll updates use transform/opacity rather than React renders per frame.
+
+The rectangular logo light has been replaced with an always-present silhouette glow. A separate decorative layer uses the approved PNG’s alpha to shape the light, with a static blur and bounded 9px/7px pointer translation. The visible original image is unchanged, unfiltered and untransformed; its checksum still matches the supplied file. No artwork editing or reconstruction was needed. A wider ambient ellipse fades into the surrounding background. The old outlined pill is now a quiet “Explore services” hint, separated from the main CTA. Keyboard activation still transfers focus directly to services; reduced motion disables pointer tracking.
+
+**Validation:** build, type-check and all eight HTTP/artwork/production-isolation checks pass. Lint retains only the two original production image warnings; Impeccable's scan returned no findings. Browser inspection covered 390×844, 320×740, 390×650 fallback, and desktop 1440×900. All three compact previews fit their 370px containers at 320px, without document overflow. Verified gallery next controls, scroll-driven transitions, reverse scrolling, complete final process copy, full-size modal preview/Escape/focus restoration, contact navigation, desktop pointer response, and logo keyboard focus transfer. A fresh reload captured no application warnings/errors; earlier editing-only Fast Refresh reload notices were observed. Screenshot evidence is in `screenshots/mobile-cinema/`.
+
+These are development-browser viewport and interaction checks, not physical-device touch/GPU profiling or measured frame-rate/Core Web Vitals results. Reduced-motion behavior and server-visible content were checked in source/server output; fresh OS preference emulation and browser zoom were not performed in this revision. Production application files remain identical to the audited baseline; prototypes return 404 in a normal production build. No push, merge or deployment.
+
+### Continuous scroll and interactive logo (previous revision)
 
 The cinematic prototype now connects adjacent scenes with a shared scroll timeline. The hero holds briefly behind the incoming services scene. Services recede left as the gallery arrives; the gallery recedes into the process chapters; scope leads into two contact words that assemble into the final headline. Adjacent desktop scenes overlap by 16svh, and every transformation reverses directly with native scrolling. No wheel interception, smooth-scroll dependency, or animation library was added.
 

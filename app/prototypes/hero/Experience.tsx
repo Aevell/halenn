@@ -25,6 +25,11 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
     </ScopeContext.Provider>
   );
 }
+// Reading holds on phone: each complete composition has room to settle.
+const phoneStep = (p: number) =>
+  Math.max(0, Math.min(1, (p - 0.1) / 0.28)) +
+  Math.max(0, Math.min(1, (p - 0.58) / 0.28));
+
 const projects = [
   {
     name: "FORMA",
@@ -74,6 +79,8 @@ export function Projects() {
     [opened, setOpened] = useState(0);
   const current = useRef(0),
     enhanced = useRef(false),
+    pocket = useRef(false),
+    step = useRef(1),
     bounds = useRef({ top: 0, range: 1 });
   const drag = useRef<{ x: number; y: number } | null>(null);
   useEffect(() => {
@@ -82,6 +89,10 @@ export function Projects() {
     const media = matchMedia(
       "(min-width: 1001px) and (min-height: 681px) and (prefers-reduced-motion: no-preference)",
     );
+    const phone = matchMedia(
+      "(max-width: 600px) and (min-height: 700px) and (prefers-reduced-motion: no-preference)",
+    );
+    const stage = root.querySelector<HTMLElement>("[data-project-stage]")!;
     let raf = 0;
     function paint() {
       raf = 0;
@@ -90,11 +101,12 @@ export function Projects() {
         0,
         Math.min(1, (scrollY - bounds.current.top) / bounds.current.range),
       );
-      const v = p * 2;
-      rail.style.transform = `translate3d(${-v * 68}vw,0,0)`;
+      const v = pocket.current ? phoneStep(p) : p * 2;
+      rail.style.transform = `translate3d(${-v * step.current}px,0,0)`;
       Array.from(rail.children).forEach((node, i) => {
-        (node as HTMLElement).style.transform =
-          `perspective(1600px) rotateY(${(i - v) * -15}deg) translateY(${Math.abs(i - v) * 35}px)`;
+        (node as HTMLElement).style.transform = pocket.current
+          ? `translate3d(0, ${Math.min(1, Math.abs(i - v)) * 16}px, 0)`
+          : `perspective(1600px) rotateY(${(i - v) * -15}deg) translateY(${Math.abs(i - v) * 35}px)`;
       });
       const next = Math.round(v);
       if (next !== current.current) {
@@ -106,10 +118,28 @@ export function Projects() {
       if (!raf) raf = requestAnimationFrame(paint);
     }
     function measure() {
-      enhanced.current = media.matches;
-      root.toggleAttribute("data-ribbon", media.matches);
+      pocket.current = phone.matches;
+      enhanced.current = media.matches || pocket.current;
+      root.toggleAttribute("data-ribbon", enhanced.current);
+      root.toggleAttribute("data-pocket-ribbon", pocket.current);
+      // If text zoom/content cannot fit, preserve the native, flowing carousel.
+      if (
+        pocket.current &&
+        (stage.scrollHeight > stage.clientHeight + 1 ||
+          Array.from(rail.querySelectorAll<HTMLElement>("[data-concept]")).some(
+            (card) => card.scrollHeight > card.clientHeight + 1,
+          ))
+      ) {
+        pocket.current = false;
+        enhanced.current = false;
+        root.removeAttribute("data-ribbon");
+        root.removeAttribute("data-pocket-ribbon");
+      }
+      step.current =
+        (rail.children[0] as HTMLElement).offsetWidth +
+        parseFloat(getComputedStyle(rail).columnGap || "0");
       rail.style.transform = "";
-      if (!media.matches) {
+      if (!enhanced.current) {
         const n = Math.max(
           0,
           Math.min(
@@ -128,7 +158,7 @@ export function Projects() {
       );
       bounds.current = {
         top: root.getBoundingClientRect().top + scrollY,
-        range: Math.max(1, root.offsetHeight - innerHeight),
+        range: Math.max(1, root.offsetHeight - stage.offsetHeight),
       };
       schedule();
     }
@@ -136,6 +166,7 @@ export function Projects() {
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", measure);
     media.addEventListener("change", measure);
+    phone.addEventListener("change", measure);
     const resize = new ResizeObserver(measure);
     if (root.parentElement) resize.observe(root.parentElement);
     return () => {
@@ -144,6 +175,7 @@ export function Projects() {
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", measure);
       media.removeEventListener("change", measure);
+      phone.removeEventListener("change", measure);
     };
   }, []);
   const go = (index: number) => {
@@ -183,7 +215,11 @@ export function Projects() {
           className={s.viewport}
           data-project-viewport
           onPointerDown={(e) => {
-            if (enhanced.current) {
+            if (
+              enhanced.current &&
+              !pocket.current &&
+              e.pointerType === "mouse"
+            ) {
               drag.current = { x: e.clientX, y: scrollY };
               e.currentTarget.setPointerCapture(e.pointerId);
             }
@@ -231,7 +267,7 @@ export function Projects() {
                 key={p.name}
                 className={s.project}
                 onClick={(e) => {
-                  if (!enhanced.current || e.detail === 0) {
+                  if (!enhanced.current || pocket.current || e.detail === 0) {
                     setOpened(i);
                     dialog.current?.showModal();
                   }
@@ -314,29 +350,43 @@ export function Process() {
     const media = matchMedia(
       "(min-width: 1001px) and (min-height: 800px) and (prefers-reduced-motion: no-preference)",
     );
+    const phone = matchMedia(
+      "(max-width: 600px) and (min-height: 700px) and (prefers-reduced-motion: no-preference)",
+    );
+    const stage = section.querySelector<HTMLElement>("[data-process-stage]")!;
+    let active = false;
     let frame = 0,
       top = 0,
       range = 1;
     function paint() {
       frame = 0;
-      if (!media.matches) return;
+      if (!active) return;
       const p = Math.max(0, Math.min(1, (scrollY - top) / range));
-      track.style.transform = `translate3d(${(-p * 200) / 3}%,0,0)`;
+      const position = phone.matches ? phoneStep(p) : p * 2;
+      track.style.transform = `translate3d(${(-position * 100) / 3}%,0,0)`;
     }
     function schedule() {
-      if (!frame && media.matches) frame = requestAnimationFrame(paint);
+      if (!frame && active) frame = requestAnimationFrame(paint);
     }
     function measure() {
-      section.toggleAttribute("data-process-motion", media.matches);
+      active = media.matches || phone.matches;
+      section.toggleAttribute("data-process-motion", active);
+      section.toggleAttribute("data-pocket-process", phone.matches);
+      if (phone.matches && stage.scrollHeight > stage.clientHeight + 1) {
+        active = false;
+        section.removeAttribute("data-process-motion");
+        section.removeAttribute("data-pocket-process");
+      }
       track.style.removeProperty("transform");
       top = section.getBoundingClientRect().top + scrollY;
-      range = Math.max(1, section.offsetHeight - innerHeight);
+      range = Math.max(1, section.offsetHeight - stage.offsetHeight);
       schedule();
     }
     measure();
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", measure);
     media.addEventListener("change", measure);
+    phone.addEventListener("change", measure);
     const resize = new ResizeObserver(measure);
     resize.observe(track);
     if (section.parentElement) resize.observe(section.parentElement);
@@ -346,6 +396,7 @@ export function Process() {
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", measure);
       media.removeEventListener("change", measure);
+      phone.removeEventListener("change", measure);
     };
   }, []);
   return (

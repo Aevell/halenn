@@ -140,6 +140,9 @@ export default function CinematicMotion({ children }: { children: ReactNode }) {
     const media = matchMedia(
       "(min-width: 1001px) and (min-height: 800px) and (prefers-reduced-motion: no-preference)",
     );
+    const phone = matchMedia(
+      "(max-width: 600px) and (min-height: 700px) and (prefers-reduced-motion: no-preference)",
+    );
     let pending = 0;
     let height = innerHeight,
       width = innerWidth;
@@ -155,7 +158,8 @@ export default function CinematicMotion({ children }: { children: ReactNode }) {
       clamp((scrollY - top + height * 0.8) / (height * 0.68));
     const paint = () => {
       pending = 0;
-      if (!media.matches) return;
+      if (!media.matches && !phone.matches) return;
+      const travel = phone.matches ? 0.35 : 1;
       const [gallery, chapters, brief, ending] = boundaries.map(arrival);
       sceneProgress.style.opacity = String(1 - clamp(gallery * 4));
       const focused = document.activeElement;
@@ -169,37 +173,39 @@ export default function CinematicMotion({ children }: { children: ReactNode }) {
       };
       pose(
         serviceCamera,
-        `translate3d(${-gallery * width * 0.12}px, ${-gallery * 70}px, 0) scale(${1 - gallery * 0.08})`,
-        1 - gallery * 0.65,
+        `translate3d(${-gallery * width * 0.12 * travel}px, ${-gallery * 70 * travel}px, 0) scale(${1 - gallery * 0.08 * travel})`,
+        1 - gallery * 0.65 * travel,
       );
       pose(
         projectStage,
-        `translate3d(${(1 - gallery) * width * 0.12 - chapters * width * 0.08}px, ${(1 - gallery) * 90 - chapters * 40}px, 0) scale(${0.94 + gallery * 0.06 - chapters * 0.04})`,
-        1 - chapters * 0.65,
+        `translate3d(${((1 - gallery) * width * 0.12 - chapters * width * 0.08) * travel}px, ${((1 - gallery) * 90 - chapters * 40) * travel}px, 0) scale(${0.94 + gallery * 0.06 - chapters * 0.04})`,
+        1 - chapters * 0.65 * travel,
       );
       pose(
         processStage,
-        `translate3d(${(1 - chapters) * width * 0.1}px, ${(1 - chapters) * 70 - brief * 50}px, 0)`,
-        1 - brief * 0.55,
+        `translate3d(${(1 - chapters) * width * 0.1 * travel}px, ${((1 - chapters) * 70 - brief * 50) * travel}px, 0)`,
+        1 - brief * 0.55 * travel,
       );
       pose(
         scopeHeading,
-        `translate3d(0, ${(1 - brief) * 70 - ending * 55}px, 0)`,
-        1 - ending * 0.45,
+        `translate3d(0, ${((1 - brief) * 70 - ending * 55) * travel}px, 0)`,
+        1 - ending * 0.45 * travel,
       );
       words.forEach((word, index) =>
         pose(
           word,
-          `translate3d(${(index ? 1 : -1) * (1 - ending) * width * 0.12}px, ${(1 - ending) * 90}px, 0)`,
+          `translate3d(${(index ? 1 : -1) * (1 - ending) * width * 0.12 * travel}px, ${(1 - ending) * 90 * travel}px, 0)`,
           0.35 + ending * 0.65,
         ),
       );
     };
     const schedule = () => {
-      if (!pending && media.matches) pending = requestAnimationFrame(paint);
+      if (!pending && (media.matches || phone.matches))
+        pending = requestAnimationFrame(paint);
     };
     const measure = () => {
       element.toggleAttribute("data-flow-motion", media.matches);
+      element.toggleAttribute("data-mobile-flow", phone.matches);
       clear();
       height = innerHeight;
       width = innerWidth;
@@ -216,6 +222,7 @@ export default function CinematicMotion({ children }: { children: ReactNode }) {
     element.addEventListener("focusin", schedule);
     element.addEventListener("focusout", schedule);
     media.addEventListener("change", measure);
+    phone.addEventListener("change", measure);
     return () => {
       cancelAnimationFrame(pending);
       resize.disconnect();
@@ -224,6 +231,7 @@ export default function CinematicMotion({ children }: { children: ReactNode }) {
       element.removeEventListener("focusin", schedule);
       element.removeEventListener("focusout", schedule);
       media.removeEventListener("change", measure);
+      phone.removeEventListener("change", measure);
       clear();
     };
   }, []);

@@ -364,3 +364,58 @@
     display: none;
   }
 }
+
+/* The scroll gallery presents a complete compact website study, never a cropped card. */
+@media (max-width: 600px) {
+  :global([data-pocket-ribbon] [data-project]) .site {
+    min-height: 0;
+    height: 50svh;
+  }
+  :global([data-pocket-ribbon] [data-project]) .navigation {
+    min-height: 48px;
+  }
+  :global([data-pocket-ribbon] [data-project]) .bottom {
+    min-height: 48px;
+    padding-block: 12px;
+  }
+  :global([data-pocket-ribbon] [data-project]) .architectureHero,
+  :global([data-pocket-ribbon] [data-project]) .shopHero {
+    min-height: 0;
+  }
+  :global([data-pocket-ribbon] [data-project]) .architectureCopy {
+    padding: 24px 8%;
+    gap: 20px;
+  }
+  :global([data-pocket-ribbon] [data-project]) .editorialTitle {
+    font-size: 46px;
+  }
+  :global([data-pocket-ribbon] [data-project]) .shopTitle {
+    font-size: 34px;
+  }
+  :global([data-pocket-ribbon] [data-project]) .workflowHero {
+    min-height: 0;
+    gap: 14px;
+    padding: 14px 6%;
+  }
+  :global([data-pocket-ribbon] [data-project]) .workflowTitle {
+    font-size: 28px;
+  }
+  :global([data-pocket-ribbon] [data-project]) .workflowCopy {
+    gap: 12px;
+  }
+  :global([data-pocket-ribbon] [data-project]) .workflowCopy .mockAction {
+    display: none;
+  }
+  :global([data-pocket-ribbon] [data-project]) .workspace {
+    padding: 12px;
+  }
+  :global([data-pocket-ribbon] [data-project]) .workspaceTop {
+    margin-bottom: 10px;
+  }
+  :global([data-pocket-ribbon] [data-project]) .flowRow {
+    padding-block: 0;
+  }
+  :global([data-pocket-ribbon] [data-project]) .flowConnector {
+    height: 12px;
+  }
+}

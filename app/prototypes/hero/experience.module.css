@@ -730,3 +730,78 @@
     position: relative;
   }
 }
+
+/* Phone-sized scenes: native vertical scroll, one full project/chapter at a time. */
+@media (max-width: 600px) {
+  .projects[data-pocket-ribbon] {
+    height: 250svh;
+  }
+  .projects[data-pocket-ribbon] .projectStage {
+    padding: 28px 0 65px;
+  }
+  .projects[data-pocket-ribbon] .sectionTop {
+    display: none;
+  }
+  .projects[data-pocket-ribbon] .projectStage > h2 {
+    font-size: 16vw;
+    margin: 8px 6% 20px;
+    line-height: 0.95;
+  }
+  .projects[data-pocket-ribbon] .projectStage > h2 br {
+    display: block;
+  }
+  .projects[data-pocket-ribbon] .track {
+    padding: 0 6vw;
+    gap: 6vw;
+    scroll-snap-type: none;
+  }
+  .projects[data-pocket-ribbon] .project {
+    flex-basis: 88vw;
+  }
+  .projects[data-pocket-ribbon] .projectControls {
+    margin: 22px 6% 0;
+  }
+  .projects[data-pocket-ribbon] .projectControls > div > span {
+    display: inline;
+  }
+  .projects[data-pocket-ribbon] .projectControls p span {
+    max-width: 155px;
+  }
+  .projects[data-pocket-ribbon] .project [data-concept] {
+    min-height: 0;
+    height: 50svh;
+  }
+  .process[data-pocket-process] {
+    height: 235svh;
+  }
+  .process[data-pocket-process] .processStage {
+    padding: 36px 6% 65px;
+  }
+  .process[data-pocket-process] h2 {
+    font-size: 13.6vw;
+    line-height: 0.98;
+    margin-bottom: 38px;
+  }
+  .process[data-pocket-process] .chapter {
+    flex-direction: column;
+    gap: 22px;
+    padding: 0 24px 0 0;
+  }
+  .process[data-pocket-process] .chapterNumber {
+    font-size: 23vw;
+  }
+  .process[data-pocket-process] .chapter > div {
+    padding: 0;
+  }
+  .process[data-pocket-process] .chapter h3 {
+    font-size: 16vw;
+    margin-bottom: 24px;
+  }
+  .process[data-pocket-process] .chapter p {
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  .process[data-pocket-process] .chapterDetail {
+    margin-top: 22px;
+  }
+}

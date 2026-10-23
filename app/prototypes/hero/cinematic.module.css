@@ -998,41 +998,49 @@
   z-index: 1;
   pointer-events: none;
 }
+.portalAmbient {
+  position: absolute;
+  inset: -22% -8% -35%;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 58%, #446a8e20, transparent 62%);
+}
 .portalLight {
   position: absolute;
-  inset: 4% 14% 0;
+  inset: 0;
   z-index: 0;
-  background: radial-gradient(
-    ellipse at 50% 72%,
-    #7fb9ef60,
-    #36669024 40%,
-    transparent 70%
-  );
-  opacity: 0;
   pointer-events: none;
+  opacity: 0.7;
   transition:
     transform 180ms var(--ease),
     opacity 200ms ease;
 }
+.portalLight > span {
+  position: absolute;
+  inset: 0;
+  /* Alpha is taken from the exact approved PNG, never redrawn. Only this
+     separate lighting silhouette is blurred; the foreground image is untouched. */
+  background: #b1dcff;
+  mask: url("/prototypes/halenn-original.png") center / 100% 100% no-repeat;
+  filter: blur(9px);
+}
 .portalHint {
   position: absolute;
   z-index: 2;
-  bottom: 2%;
+  bottom: 4%;
   left: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 12px;
   min-height: 44px;
-  padding: 0 18px;
-  border: 1px solid #5d7895;
-  border-radius: 999px;
-  background: #0b131e;
-  color: #e1edfa;
+  padding: 0 10px;
+  border-radius: 6px;
+  color: #c5d9ec;
   font-size: 14px;
   white-space: nowrap;
   opacity: 0;
-  transform: translate(-50%, 8px);
+  transform: translate(-50%, 5px);
   transition:
     transform 180ms var(--ease),
     opacity 180ms ease;
@@ -1090,4 +1098,42 @@
 /* Programmatic landmark focus transfers keyboard position; controls retain their rings. */
 .sequence:focus {
   outline: none;
+}
+
+/* Smaller travel and overlap preserve touch scrolling while joining the phone scenes. */
+.motionRoot[data-mobile-flow] :global(#projects[data-pocket-ribbon]),
+.motionRoot[data-mobile-flow] :global(#process[data-pocket-process]) {
+  margin-top: -8svh;
+  background: transparent;
+  border-top: 0;
+}
+.motionRoot[data-mobile-flow] :global([data-project-stage]),
+.motionRoot[data-mobile-flow] :global([data-process-stage]) {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    #07090d 8%,
+    #07090d 92%,
+    transparent
+  );
+}
+.motionRoot[data-mobile-flow] :global(#process) {
+  pointer-events: none;
+}
+.motionRoot[data-mobile-flow] :global([data-process-stage]) {
+  pointer-events: auto;
+}
+.motionRoot[data-mobile-flow] .scope,
+.motionRoot[data-mobile-flow] :global(#contact) {
+  background: #07090d;
+  border-top: 0;
+}
+@media (max-width: 600px) {
+  .portalLight > span {
+    filter: blur(5px);
+  }
+  .portalHint {
+    bottom: -5%;
+    font-size: 14px;
+  }
 }
