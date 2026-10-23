@@ -1,0 +1,522 @@
+{
+  "layoutChecks": [
+    {
+      "active": 1,
+      "h1s": 1,
+      "nav": [
+        {
+          "height": 44,
+          "text": "Companies",
+          "width": 56.5546875
+        },
+        {
+          "height": 44,
+          "text": "Principles",
+          "width": 49.6796875
+        },
+        {
+          "height": 44,
+          "text": "About",
+          "width": 30.0859375
+        }
+      ],
+      "outside": [],
+      "picker": {
+        "bottom": 716,
+        "height": 36,
+        "left": 4.97265625,
+        "right": 315.02734375,
+        "top": 680,
+        "width": 310.0546875,
+        "x": 4.97265625,
+        "y": 680
+      },
+      "variant": "Monument",
+      "viewport": [
+        320,
+        740
+      ],
+      "width": 320
+    },
+    {
+      "active": 1,
+      "h1s": 1,
+      "nav": [
+        {
+          "height": 44,
+          "text": "Companies",
+          "width": 56.5546875
+        },
+        {
+          "height": 44,
+          "text": "Principles",
+          "width": 49.6796875
+        },
+        {
+          "height": 44,
+          "text": "About",
+          "width": 30.0859375
+        }
+      ],
+      "outside": [],
+      "picker": {
+        "bottom": 716,
+        "height": 36,
+        "left": 4.97265625,
+        "right": 315.02734375,
+        "top": 680,
+        "width": 310.0546875,
+        "x": 4.97265625,
+        "y": 680
+      },
+      "variant": "Editorial",
+      "viewport": [
+        320,
+        740
+      ],
+      "width": 320
+    },
+    {
+      "active": 1,
+      "h1s": 1,
+      "nav": [
+        {
+          "height": 44,
+          "text": "Companies",
+          "width": 56.5546875
+        },
+        {
+          "height": 44,
+          "text": "Principles",
+          "width": 49.6796875
+        },
+        {
+          "height": 44,
+          "text": "About",
+          "width": 30.0859375
+        }
+      ],
+      "outside": [],
+      "picker": {
+        "bottom": 716,
+        "height": 36,
+        "left": 4.97265625,
+        "right": 315.02734375,
+        "top": 680,
+        "width": 310.0546875,
+        "x": 4.97265625,
+        "y": 680
+      },
+      "variant": "Foundation",
+      "viewport": [
+        320,
+        740
+      ],
+      "width": 320
+    },
+    {
+      "active": 1,
+      "h1s": 1,
+      "nav": [
+        {
+          "height": 44,
+          "text": "Companies",
+          "width": 66.8359375
+        },
+        {
+          "height": 44,
+          "text": "Principles",
+          "width": 58.7109375
+        },
+        {
+          "height": 44,
+          "text": "About",
+          "width": 35.5625
+        }
+      ],
+      "outside": [],
+      "picker": {
+        "bottom": 1000,
+        "height": 36,
+        "left": 228.97265625,
+        "right": 539.02734375,
+        "top": 964,
+        "width": 310.0546875,
+        "x": 228.97265625,
+        "y": 964
+      },
+      "variant": "Monument",
+      "viewport": [
+        768,
+        1024
+      ],
+      "width": 768
+    },
+    {
+      "active": 1,
+      "h1s": 1,
+      "nav": [
+        {
+          "height": 44,
+          "text": "Companies",
+          "width": 66.8359375
+        },
+        {
+          "height": 44,
+          "text": "Principles",
+          "width": 58.7109375
+        },
+        {
+          "height": 44,
+          "text": "About",
+          "width": 35.5625
+        }
+      ],
+      "outside": [],
+      "picker": {
+        "bottom": 1000,
+        "height": 36,
+        "left": 228.97265625,
+        "right": 539.02734375,
+        "top": 964,
+        "width": 310.0546875,
+        "x": 228.97265625,
+        "y": 964
+      },
+      "variant": "Editorial",
+      "viewport": [
+        768,
+        1024
+      ],
+      "width": 768
+    },
+    {
+      "active": 1,
+      "h1s": 1,
+      "nav": [
+        {
+          "height": 44,
+          "text": "Companies",
+          "width": 66.8359375
+        },
+        {
+          "height": 44,
+          "text": "Principles",
+          "width": 58.7109375
+        },
+        {
+          "height": 44,
+          "text": "About",
+          "width": 35.5625
+        }
+      ],
+      "outside": [],
+      "picker": {
+        "bottom": 1000,
+        "height": 36,
+        "left": 228.97265625,
+        "right": 539.02734375,
+        "top": 964,
+        "width": 310.0546875,
+        "x": 228.97265625,
+        "y": 964
+      },
+      "variant": "Foundation",
+      "viewport": [
+        768,
+        1024
+      ],
+      "width": 768
+    },
+    {
+      "active": 1,
+      "h1s": 1,
+      "nav": [
+        {
+          "height": 44,
+          "text": "Companies",
+          "width": 66.8359375
+        },
+        {
+          "height": 44,
+          "text": "Principles",
+          "width": 58.7109375
+        },
+        {
+          "height": 44,
+          "text": "About",
+          "width": 35.5625
+        }
+      ],
+      "outside": [],
+      "picker": {
+        "bottom": 696,
+        "height": 36,
+        "left": 484.97265625,
+        "right": 795.02734375,
+        "top": 660,
+        "width": 310.0546875,
+        "x": 484.97265625,
+        "y": 660
+      },
+      "variant": "Monument",
+      "viewport": [
+        1280,
+        720
+      ],
+      "width": 1280
+    },
+    {
+      "active": 1,
+      "h1s": 1,
+      "nav": [
+        {
+          "height": 44,
+          "text": "Companies",
+          "width": 66.8359375
+        },
+        {
+          "height": 44,
+          "text": "Principles",
+          "width": 58.7109375
+        },
+        {
+          "height": 44,
+          "text": "About",
+          "width": 35.5625
+        }
+      ],
+      "outside": [],
+      "picker": {
+        "bottom": 696,
+        "height": 36,
+        "left": 484.97265625,
+        "right": 795.02734375,
+        "top": 660,
+        "width": 310.0546875,
+        "x": 484.97265625,
+        "y": 660
+      },
+      "variant": "Editorial",
+      "viewport": [
+        1280,
+        720
+      ],
+      "width": 1280
+    },
+    {
+      "active": 1,
+      "h1s": 1,
+      "nav": [
+        {
+          "height": 44,
+          "text": "Companies",
+          "width": 66.8359375
+        },
+        {
+          "height": 44,
+          "text": "Principles",
+          "width": 58.7109375
+        },
+        {
+          "height": 44,
+          "text": "About",
+          "width": 35.5625
+        }
+      ],
+      "outside": [],
+      "picker": {
+        "bottom": 696,
+        "height": 36,
+        "left": 484.97265625,
+        "right": 795.02734375,
+        "top": 660,
+        "width": 310.0546875,
+        "x": 484.97265625,
+        "y": 660
+      },
+      "variant": "Foundation",
+      "viewport": [
+        1280,
+        720
+      ],
+      "width": 1280
+    }
+  ],
+  "keyboardChecks": [
+    {
+      "active": "Foundation",
+      "href": "http://127.0.0.1:3010/prototypes/hero?v=3#hero-content",
+      "variant": "Foundation"
+    },
+    {
+      "active": "Monument",
+      "href": "http://127.0.0.1:3010/prototypes/hero?v=1#hero-content",
+      "variant": "Monument"
+    },
+    {
+      "active": "Foundation",
+      "href": "http://127.0.0.1:3010/prototypes/hero?v=3#hero-content",
+      "variant": "Foundation"
+    },
+    {
+      "active": "Editorial",
+      "href": "http://127.0.0.1:3010/prototypes/hero?v=2#hero-content",
+      "variant": "Editorial"
+    },
+    {
+      "active": "Editorial",
+      "href": "http://127.0.0.1:3010/prototypes/hero?v=2#hero-content",
+      "variant": "Editorial"
+    },
+    {
+      "reload": "true"
+    }
+  ],
+  "noJsChecks": [
+    {
+      "heading": "A parent company\nfor what comes next.",
+      "imageLoaded": true,
+      "opacity": "1",
+      "transform": "none",
+      "variant": "Monument"
+    },
+    {
+      "heading": "Built to\ncompound.\nDesigned\nto endure.",
+      "imageLoaded": true,
+      "opacity": "1",
+      "transform": "none",
+      "variant": "Editorial"
+    },
+    {
+      "heading": "Focused companies.\nOne foundation.",
+      "imageLoaded": true,
+      "opacity": "1",
+      "transform": "none",
+      "variant": "Foundation"
+    }
+  ],
+  "navigationChecks": [
+    {
+      "name": "Companies",
+      "url": "http://127.0.0.1:3010/#companies"
+    },
+    {
+      "name": "Principles",
+      "url": "http://127.0.0.1:3010/#principles"
+    },
+    {
+      "name": "About",
+      "url": "http://127.0.0.1:3010/#about"
+    },
+    {
+      "name": "Explore companies",
+      "url": "http://127.0.0.1:3010/#companies"
+    },
+    {
+      "name": "About Halenn",
+      "url": "http://127.0.0.1:3010/#about"
+    },
+    {
+      "name": "Halenn home",
+      "url": "http://127.0.0.1:3010/"
+    }
+  ],
+  "contrastChecks": [
+    {
+      "failures": [],
+      "minimum": 6.817657708768822,
+      "variant": "Foundation"
+    },
+    {
+      "failures": [],
+      "minimum": 6.932218846550259,
+      "variant": "Monument"
+    },
+    {
+      "failures": [],
+      "minimum": 6.73829154628559,
+      "variant": "Editorial"
+    }
+  ],
+  "zoomChecks": [
+    {
+      "h1": {
+        "bottom": 462.0546875,
+        "height": 92.3984375,
+        "left": 243.921875,
+        "right": 620.078125,
+        "top": 369.65625,
+        "width": 376.15625,
+        "x": 243.921875,
+        "y": 369.65625
+      },
+      "picker": {
+        "bottom": 446.5,
+        "height": 36,
+        "left": 276.978515625,
+        "right": 587.021484375,
+        "top": 410.5,
+        "width": 310.04296875,
+        "x": 276.978515625,
+        "y": 410.5
+      },
+      "scrollWidth": 864,
+      "variant": "Monument",
+      "width": 864
+    },
+    {
+      "h1": {
+        "bottom": 463.5547180175781,
+        "height": 273.71875,
+        "left": 32,
+        "right": 437.91015625,
+        "top": 189.83596801757812,
+        "width": 405.91015625,
+        "x": 32,
+        "y": 189.83596801757812
+      },
+      "picker": {
+        "bottom": 446.5,
+        "height": 36,
+        "left": 276.978515625,
+        "right": 587.021484375,
+        "top": 410.5,
+        "width": 310.04296875,
+        "x": 276.978515625,
+        "y": 410.5
+      },
+      "scrollWidth": 864,
+      "variant": "Editorial",
+      "width": 864
+    },
+    {
+      "h1": {
+        "bottom": 276.1953125,
+        "height": 92.3984375,
+        "left": 32,
+        "right": 832,
+        "top": 183.796875,
+        "width": 800,
+        "x": 32,
+        "y": 183.796875
+      },
+      "picker": {
+        "bottom": 446.5,
+        "height": 36,
+        "left": 276.978515625,
+        "right": 587.021484375,
+        "top": 410.5,
+        "width": 310.04296875,
+        "x": 276.978515625,
+        "y": 410.5
+      },
+      "scrollWidth": 864,
+      "variant": "Foundation",
+      "width": 864
+    }
+  ],
+  "finalNormalFlowConsole": [],
+  "finalNavigationUsesFreshDocuments": true,
+  "aevellDomain": "Owner confirmed aevell.com; target retained despite current parking page."
+}
