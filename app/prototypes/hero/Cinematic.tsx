@@ -1,19 +1,21 @@
 import { Arrow, Mark } from "./Shared";
 import CinematicMotion from "./CinematicMotion";
+import { ExperienceProvider, Projects, Process, Contact } from "./Experience";
 import ProjectScope from "./ProjectScope";
 import styles from "./cinematic.module.css";
 
 export default function Cinematic() {
   return (
-    <CinematicMotion>
+    <ExperienceProvider><CinematicMotion>
       <div className={styles.world} data-variant="Cinematic">
         <a className={styles.skip} href="#hero-content">Skip to content</a>
         <section className={styles.opening} aria-label="Halenn introduction" data-opening>
+          <div className={styles.aperture} aria-hidden="true"><i/><i/><span/></div>
           <div className={styles.atmosphere} aria-hidden="true"><i /><i /><i /></div>
           <header className={styles.header}>
             <a href="#hero-content" className={styles.wordmark} aria-label="Halenn home">HALENN<span>A company by Aevell</span></a>
             <nav aria-label="Primary navigation">
-              <a href="#services">Services</a>
+              <a href="#projects">Projects</a><a href="#contact">Contact</a>
               <a href="#scope">Build your brief <Arrow /></a>
             </nav>
           </header>
@@ -60,12 +62,14 @@ export default function Cinematic() {
           </div>
         </section>
 
+        <Projects /><Process />
         <section id="scope" className={styles.scope} aria-labelledby="scope-title">
           <div className={styles.scopeHeading}><p className={styles.eyebrow}>A starting point, made yours</p><h2 id="scope-title">What do you<br /><span>have in mind?</span></h2><p>Start with the essentials. Add the capabilities your business needs. We’ll shape the scope around the work.</p></div>
           <ProjectScope />
         </section>
+        <Contact />
         <footer className={styles.footer}><span className={styles.wordmark}>HALENN</span><p>Websites & systems, thoughtfully connected.</p><a href="https://aevell.com" target="_blank" rel="noreferrer">Part of Aevell <span className={styles.srOnly}>(opens in a new tab)</span><Arrow /></a></footer>
       </div>
-    </CinematicMotion>
+    </CinematicMotion></ExperienceProvider>
   );
 }

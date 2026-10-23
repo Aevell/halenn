@@ -21,7 +21,23 @@ Open [the local picker](http://127.0.0.1:3010/prototypes/hero?v=1). Use **1–3*
 
 Cinematic replaces Monument in the picker. The first-round implementation remains recoverable in commit `5df3a70`. Current changes are limited to the prototype surface, its verification script and evidence. No merge, push or production deployment has occurred.
 
-### What the cinematic prototype does
+### Full experience revision
+
+The owner approved extending the cinematic route with projects, process, service options and a large contact ending, and requested a stronger opening. This revision remains isolated to variant 1.
+
+- **Opening:** a silver-blue seam opens into two receding panels over 1.8 seconds. The surrounding light resolves and the headline composition settles as a whole; the earlier line-by-line reveal is removed. Navigation remains available. The original artwork stays still and unchanged. Reduced motion removes the aperture and composition entrance.
+- **Projects:** three clearly labelled fictional concepts (FORMA architecture, OBJECT commerce, CONNECTED automation) have designed interface previews and modal close-ups. On large, tall screens, native vertical scrolling moves a perspective ribbon; dragging and previous/next buttons also work. Smaller screens use a native horizontal carousel. Reduced motion removes the perspective/pinning enhancement.
+- **Process:** three large stacked chapters explain discovery, build and ongoing care. Mobile uses ordinary flowing sections.
+- **Scope and contact:** native disclosure controls expose optional services. Selections feed both the existing text brief and a local enquiry demo. The ending uses oversized LET’S TALK typography. The form validates required fields but sends nothing; its reserved `.example` contact address is explicitly labelled as a placeholder.
+- **Accessibility:** project and enquiry previews use native modal dialogs with Escape dismissal and focus restoration. Picker shortcuts ignore dialogs, service disclosures and local project controls. Sections remain server-rendered and readable before hydration.
+
+**Verification for this revision:** build and type-check pass; lint has only the two existing production image warnings. All eight HTTP/artwork/production-isolation tests pass. Existing production page, layout, CSS, deployment gate and version endpoint have no diff against the original baseline. Desktop project arrows, dragging, project preview, Escape/focus restoration, service selection, scope transfer and local form submission were exercised. Mobile project arrows and preview were exercised at 390px, with an additional 320px workflow-layout correction. 768px and 1440×650 layouts use the unpinned fallback; no document overflow was found at 320, 390, 768 or 1440px. Opening replay was observed. Browser logs contained development Fast Refresh reload notices and no captured application errors.
+
+Screenshots are in `screenshots/full-experience/`: hero, projects and process desktop views; contact desktop/mobile; projects mobile; workflow at 320px. These are development observations, not measured Core Web Vitals or frame-rate results. Real-device touch/GPU performance, fresh reduced-motion emulation, disabled-JavaScript browser operation and browser zoom were not re-run in this revision; reduced-motion and static rendering were checked in source/server output. Placeholder project screens do not imply existing clients or delivered results.
+
+### Previous cinematic revision (historical)
+
+The following details and screenshots describe the preceding hero/expanding-scene revision. Its masked entrance has now been replaced by the aperture opening above.
 
 - A 1,150ms masked headline entrance, with a 70ms stagger; surrounding light resolves over 1,500–1,600ms. The approved logo stays upright and still. No filters, masks, recolouring, reconstruction or cropping are applied to the artwork.
 - Native scrolling moves into “Beyond the launch.” A sticky scene expands its service frame from 46% to full size. Background typography recedes; reverse scrolling reverses the transformation. The expansion finishes before unpinning so the content can be read at full size.

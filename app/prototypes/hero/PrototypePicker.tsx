@@ -50,7 +50,7 @@ export default function PrototypePicker({ initial, children }: { initial: number
     });
     const handleKey = (event: KeyboardEvent) => {
       const target = event.target;
-      if (target instanceof HTMLElement && (target.closest("input, textarea, select, details, [data-local-keys], [contenteditable]:not([contenteditable='false'])"))) return;
+      if (target instanceof HTMLElement && (target.closest("input, textarea, select, details, dialog, [data-local-keys], [contenteditable]:not([contenteditable='false'])"))) return;
       if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
       if (/^[1-3]$/.test(event.key)) select(Number(event.key) - 1);
       else if (event.key === "ArrowRight") select((activeIndex.current + 1) % names.length);

@@ -222,3 +222,19 @@
   .outlineLink svg, .capabilities svg, .scopeSummary button { transition: none; }
   .world { scroll-behavior: auto; }
 }
+/* The opening is a scene reveal. The artwork itself never transforms. */
+.aperture{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden;animation:apertureGone 2100ms step-end both}
+.aperture i{position:absolute;top:0;bottom:0;width:50%;background:#030508;animation:apertureOpen 1800ms cubic-bezier(.77,0,.175,1) 150ms both}
+.aperture i:first-child{left:0;transform-origin:left;box-shadow:2px 0 24px #a8d5ff44}
+.aperture i:nth-child(2){right:0;transform-origin:right;box-shadow:-2px 0 24px #a8d5ff44}
+.aperture>span{position:absolute;left:50%;top:10%;width:1px;height:80%;background:linear-gradient(transparent,#def2ff,transparent);animation:seam 1700ms var(--ease) both}
+.headline h1 > span > span{animation:none}
+.headline{animation:compositionIn 1900ms var(--ease) backwards}
+.atmosphere::before{animation:lightIn 2100ms var(--ease) both}
+@keyframes apertureOpen{0%{transform:scaleX(1)}100%{transform:scaleX(0)}}
+@keyframes apertureGone{0%{visibility:visible}100%{visibility:hidden}}
+@keyframes seam{0%{opacity:0;transform:scaleY(.1)}25%{opacity:1;transform:scaleY(1)}100%{opacity:0;transform:scaleY(1)}}
+@keyframes compositionIn{0%{opacity:.2;transform:scale(1.045)}100%{opacity:1;transform:scale(1)}}
+.serviceDetail{border-bottom:1px solid #293341}.serviceDetail summary{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:76px;cursor:pointer;font-size:18px;list-style:none}.serviceDetail summary::-webkit-details-marker{display:none}.serviceDetail summary>span{font-size:10px;color:#a7b6cb}.serviceDetail[open] summary{color:#bdd8fa}.serviceDetail .addition{border-bottom:0}.serviceDetail summary:focus-visible{outline:2px solid #bddbff;outline-offset:4px}
+@media(max-width:600px){.header nav{gap:14px}.header nav a:last-child{display:none}}
+@media(prefers-reduced-motion:reduce){.aperture{display:none}.headline,.atmosphere::before{animation:none}}
