@@ -105,40 +105,6 @@
 .skipLink:focus { transform: none; }
 .srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
-/* MONUMENT — the artwork is the event; the surrounding light settles once. */
-.monument { background: #050608; }
-.monument .header { border-color: transparent; }
-.monumentMain {
-  position: relative;
-  display: flex;
-  flex: 1;
-  align-items: center;
-  flex-direction: column;
-  justify-content: center;
-  padding: 10px 24px 48px;
-  text-align: center;
-}
-.monumentLight {
-  position: absolute;
-  z-index: -1;
-  top: 0;
-  left: 10%;
-  width: 80%;
-  height: 55%;
-  background: radial-gradient(ellipse at 50% 45%, #17212d 0%, #0b1017 34%, transparent 68%);
-  opacity: .7;
-  animation: atmosphere 650ms var(--ease) both;
-  pointer-events: none;
-}
-.monumentOverline { margin: 0 0 8px; color: #9ea9b7; font-size: 11px; letter-spacing: .12em; }
-.monumentArtwork { width: min(48vw, 650px); }
-.monumentCopy { margin-top: 0; }
-.monumentCopy .eyebrow { margin-top: 4px; }
-.monumentCopy h1 { margin: 18px 0 0; font-size: clamp(44px, 4.45vw, 72px); font-weight: 430; letter-spacing: -.055em; line-height: 1.05; }
-.monumentCopy h1 span { color: #b8c4d3; }
-.monumentCopy .description { margin-top: 20px; font-size: 14px; }
-.monumentCopy .actions { justify-content: center; }
-
 /* EDITORIAL — a typographic front page, with an independent artwork field. */
 .editorial { background: #090b0e; }
 .editorialMain { display: grid; flex: 1; grid-template-columns: 1.03fr 1fr; align-items: center; gap: 24px; padding: 54px 5.5% 56px; }
@@ -151,7 +117,7 @@
 .editorial .actions { justify-content: flex-start; margin-top: 26px; }
 .editorialVisual { position: relative; align-self: stretch; display: flex; flex-direction: column; justify-content: center; }
 .editorialHalo { position: absolute; z-index: -1; inset: 7% -20%; background: radial-gradient(ellipse at 50% 48%, #1b2736, transparent 60%); opacity: .48; pointer-events: none; }
-.editorialVisual .artwork { width: 118%; max-width: none; margin-left: -8%; }
+.editorialVisual .artwork { width: 100%; max-width: 100%; margin-left: 0; }
 .artCaption { align-self: flex-end; margin: 44px 20px 0 0; color: #d3dbe5; font-size: 13px; line-height: 1.8; }
 .artCaption span { color: #929eaf; }
 .editorialEnter { animation: editorial-entry 240ms var(--ease) both; }
@@ -187,7 +153,6 @@
 .foundationBottom p span { color: #99a6b7; }
 .foundationBottom .textAction { border-bottom: none; }
 
-@keyframes atmosphere { from { opacity: .15; } to { opacity: .7; } }
 @keyframes editorial-entry { from { opacity: .25; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
 @media (hover: hover) and (pointer: fine) {
@@ -199,10 +164,6 @@
 
 @media (min-width: 1000px) and (max-height: 800px) {
   .header { min-height: 80px; }
-  .monumentArtwork { width: min(40vw, 490px); }
-  .monumentMain { padding-bottom: 32px; }
-  .monumentCopy h1 { font-size: 52px; }
-  .monumentOverline { margin-bottom: 0; }
   .editorialMain { padding-block: 34px; }
   .editorialCopy h1 { font-size: 70px; }
   .foundationMain { padding-block: 36px 26px; }
@@ -244,21 +205,14 @@
   .actions { gap: 24px; }
   .primaryAction, .textAction, .secondaryAction { font-size: 12px; gap: 12px; }
   .primaryAction { padding-inline: 16px; }
-  .monumentMain { justify-content: center; padding: 30px 22px 36px; }
-  .monumentOverline { font-size: 11px; letter-spacing: .045em; margin-bottom: 20px; }
-  .monumentArtwork { width: 112%; max-width: 470px; }
-  .monumentCopy { margin-top: 22px; }
-  .monumentCopy h1 { margin-top: 20px; font-size: clamp(36px, 10.3vw, 54px); line-height: 1.08; letter-spacing: -.06em; }
-  .monumentCopy .description { margin-top: 22px; font-size: 14px; }
   .desktopBreak { display: none; }
-  .monumentCopy .actions { margin-top: 26px; gap: 22px; }
   .editorialMain { grid-template-columns: 1fr; gap: 20px; padding: 40px 24px 42px; }
   .editorialCopy h1 { margin-top: 26px; font-size: clamp(60px, 17vw, 84px); line-height: 1.01; }
   .editorialIntro { gap: 16px; margin-top: 26px; }
   .editorialIntro p { font-size: 14px; }
   .editorial .actions { gap: 26px; }
   .editorialVisual { grid-row: 2; min-height: 230px; }
-  .editorialVisual .artwork { width: 112%; margin-left: -6%; }
+  .editorialVisual .artwork { width: 100%; margin-left: 0; }
   .artCaption { margin: 16px 4px 0 0; font-size: 11px; }
   .editorial .footnote { border-top: 1px solid var(--prototype-line); padding-top: 22px; }
   .foundationMain { padding: 40px 24px 36px; }
@@ -283,14 +237,12 @@
   .headerMark { display: none; }
   .brand { font-size: 11px; }
   .navigation { gap: 13px; }
-  .monumentCopy .actions { gap: 18px; }
-  .monumentMain { padding-inline: 18px; }
   .editorialMain, .foundationMain { padding-inline: 20px; }
   .footnote { margin-inline: 20px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .editorialEnter, .monumentLight { animation: none; }
+  .editorialEnter { animation: none; }
   .harness a { transition: color 160ms ease, background-color 160ms ease; }
   .harness a:active, .harness a:hover svg { transform: none; }
 }

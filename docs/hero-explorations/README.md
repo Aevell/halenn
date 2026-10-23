@@ -1,41 +1,80 @@
 # Halenn hero explorations
 
-Local branch: `codex/halenn-hero-explorations` · audited baseline: `0f4c17251b0502e13ffbf44e106a7937ce537945` · 23 October 2026.
+Branch: `codex/halenn-hero-explorations` · original production baseline: `0f4c17251b0502e13ffbf44e106a7937ce537945` · 23 October 2026.
 
-## Open the comparison
+## Current direction: Cinematic
+
+The owner approved a cinematic hero and expanding scroll scene after reviewing the portfolio recording. The business positioning has also changed: **Halenn offers websites, commerce, maintenance and n8n workflows. Aevell is Halenn’s parent company.** All three prototypes now reflect that relationship. The production homepage retains its original content until integration is approved.
 
 ```sh
 npm ci --ignore-scripts
 npm run dev -- --hostname 127.0.0.1 --port 3010
 ```
 
-Open [the picker](http://127.0.0.1:3010/prototypes/hero?v=1). Click a direction, use **1–3** or **← / →**, and use **R** or **↻** to replay. Selection survives reload through `?v=1–3`. Each switch mounts one full-size direction and returns to the top. Form fields, editable content, and modified shortcuts are excluded from picker shortcuts.
+Open [the local picker](http://127.0.0.1:3010/prototypes/hero?v=1). Use **1–3**, **← / →**, or the picker; use **R / ↻** to replay. The URL preserves selection. Form fields are excluded from picker shortcuts. Anchor navigation into the new scene works from the comparison variants.
 
-The route returns **404 outside development** and carries `noindex, nofollow`. It shares the existing root font resources, but all prototype components and visual styles are separate. Links into the preserved homepage deliberately use document navigation to isolate its legacy global smooth scrolling and interactive lifecycle. The existing homepage, global CSS, layout, logo modules, version API, deployment-update component, and existing public artwork remain unchanged. Nothing has been pushed, merged, or deployed.
+| # | Direction | Composition | Tradeoff |
+| --- | --- | --- | --- |
+| 1 | Cinematic | Screen-filling typography and original artwork, coordinated entrance, a reversible inset-to-full-size scroll scene | Strongest motion and brand presence; adds a deliberate scroll sequence |
+| 2 | Editorial | Asymmetric typography with an independent artwork field | Direct and confident; less theatrical |
+| 3 | Foundation | Halenn’s services alongside its relationship to Aevell | Clearest corporate relationship; less distinctive as a service-business hero |
 
-## Directions
+Cinematic replaces Monument in the picker. The first-round implementation remains recoverable in commit `5df3a70`. Current changes are limited to the prototype surface, its verification script and evidence. No merge, push or production deployment has occurred.
 
-| # | Variant | Axis | When it is right | Cost |
-| --- | --- | --- | --- | --- |
-| 1 | [Monument](http://127.0.0.1:3010/prototypes/hero?v=1) | Artwork-led, centered, one quiet light entrance | Establishing the metallic mark as Halenn's main visual signature | More vertical space; a familiar centered reading order |
-| 2 | [Editorial](http://127.0.0.1:3010/prototypes/hero?v=2) | Type-led, asymmetric, short text entrances | Giving the parent company a confident editorial voice | More scroll on mobile; the large artwork follows the copy |
-| 3 | [Foundation](http://127.0.0.1:3010/prototypes/hero?v=3) | Company-led, horizontal relationship that becomes vertical | Explaining Halenn's relationship with Aevell immediately | Densest direction; the longest mobile composition |
+### What the cinematic prototype does
 
-The factual positioning and navigation come from the existing site. There are no invented companies or metrics. The cursor flashlight is replaced with static environmental light. The logo never tilts, shimmers, moves, changes surface, or acts as a lighting button.
+- A 1,150ms masked headline entrance, with a 70ms stagger; surrounding light resolves over 1,500–1,600ms. The approved logo stays upright and still. No filters, masks, recolouring, reconstruction or cropping are applied to the artwork.
+- Native scrolling moves into “Beyond the launch.” A sticky scene expands its service frame from 46% to full size. Background typography recedes; reverse scrolling reverses the transformation. The expansion finishes before unpinning so the content can be read at full size.
+- The frame explains custom websites, commerce and n8n automation. A compact project planner offers webshops, cart/checkout, workflows, monthly website care, bookings/forms, and CMS/technical SEO. No clients, results, price amounts or delivery promises are fabricated.
+- Selected services produce a real local text-file download. This is a project brief, not an enquiry submission; there is no external form endpoint, payment flow or invented contact address.
+- Server markup is passed through small client boundaries. Content is visible by default. The sticky/zoom sequence is enabled only after hydration, and is removed for reduced motion, short viewports and the tablet/reflow range.
+- A focus entering the small frame brings it to full size instantly. Hover motion is fine-pointer gated. Native anchors work without the old global smooth-scroll delay; the override is conditional on the cinematic component being present.
 
-### Desktop captures
+### Current screenshots
 
-| Monument | Editorial | Foundation |
+| Desktop hero | Mobile hero |
+| --- | --- |
+| ![Cinematic desktop](screenshots/cinematic/hero-desktop.jpg) | ![Cinematic mobile](screenshots/cinematic/hero-mobile.jpg) |
+
+| Inset scene | Expanding scene | Expanded scene |
 | --- | --- | --- |
-| ![Monument](screenshots/monument-desktop.jpg) | ![Editorial](screenshots/editorial-desktop.jpg) | ![Foundation](screenshots/foundation-desktop.jpg) |
+| ![Inset](screenshots/cinematic/transition-start-desktop.jpg) | ![Expanding](screenshots/cinematic/transition-middle-desktop.jpg) | ![Expanded](screenshots/cinematic/transition-expanded-desktop.jpg) |
 
-### Mobile captures
+Also captured: expanded phone scene, 320px hero, tablet services, keyboard focus, project brief selection, and refreshed Editorial/Foundation desktop and phone views in `screenshots/cinematic/`.
 
-| Monument | Editorial | Foundation |
+### Current verification
+
+**Story:** enter the local prototype → watch the opening → scroll forward/back through the expanding scene → select services → download the matching brief. No backend integration is part of this prototype.
+
+| Boundary | Evidence |
+| --- | --- |
+| Build and static analysis | `npm run build` and `npm run typecheck` pass. Lint has zero errors and only the two existing image warnings in untouched production components. |
+| Development HTTP / server content | All six variant/invalid-query cases pass. Each response has one h1, noindex metadata, Aevell positioning and n8n content without requiring JavaScript to render it. |
+| Artwork | Served bytes match the supplied 1774×887 PNG SHA-256 `8d0753ae6b55e250a7880408943cbfb80e9a37d041b1274900140d68d9f94c97`. |
+| Production isolation | Local `next start`: homepage 200, version API 200, all three prototype URLs 404. Original production app files have no diff against the audited baseline. |
+| Browser geometry | 1440×900, 390×844, 320×844, 768×1024 and 1440×650 inspected. No horizontal overflow in these views. Tablet and short-screen layouts use unpinned content. |
+| Reversible motion | Desktop frame width measured 622.66px → 1010.43px → 816.55px when reversing → 1353.61px fully expanded. Phone full-size frame is 358×709.47px within 390×844. |
+| Keyboard | Number/arrow selection, URL reload, replay, visible focus, and focus-triggered full expansion checked. |
+| Brief | Four options selected through phone-size controls. Downloaded file contains Webshop, Cart & checkout, n8n workflows and Website care, with project/monthly pricing models and no invented amount. |
+| Console | No captured warnings or errors in the final development browser session. |
+
+Browser measurements are saved in `cinematic-checks.json`. These are development-layout and interaction observations, **not a measured frame-rate, CLS or Lighthouse benchmark**. Scroll writes are limited to transform/opacity, with geometry cached on resize, a passive scroll listener and no React state updates per frame. Gradients are static; there is no perpetual animation or animated blur. Actual phone hardware/GPU performance remains unmeasured.
+
+Reduced-motion handling and the no-JavaScript static layout were verified from source and server output in this round. A separate Chrome QA tab could not open native DevTools emulation, so a fresh browser emulation of reduced motion, disabled JavaScript and actual browser zoom is not claimed. The historical first-round checks below apply only to that round. No browser settings were changed.
+
+**Motion verdict: approve for prototype design review.** Marketing entrances provide delight; the scroll transformation provides spatial continuity and explanation. Production integration and device performance acceptance remain separate steps.
+
+| Before | After | Why |
 | --- | --- | --- |
-| ![Monument mobile](screenshots/monument-mobile.jpg) | ![Editorial mobile](screenshots/editorial-mobile.jpg) | ![Foundation mobile](screenshots/foundation-mobile.jpg) |
+| Quiet centered Monument hero | Larger coordinated headline and surrounding light, followed by an expanding scene | Restore the original’s scale and implement the approved reference-inspired motion |
+| Parent-company positioning for Halenn | Halenn services, Aevell parent relationship across all variants | Reflect the owner’s new business structure |
+| Small scene links could receive keyboard focus | Focus instantly expands the frame | Keep keyboard navigation legible |
+| Floated legend displaced the first mobile option | Normal fieldset legend flow | Keep every option aligned and usable |
+| Inherited smooth scrolling interfered with rapid anchor interaction | Prototype-conditional native anchor jumps | Preserve direct navigation without changing production globals |
 
-## Audit before implementation
+The following audit and verification describe the **first exploration round**, before the positioning change and cinematic revision. Existing screenshot filenames outside `screenshots/cinematic/` are historical evidence.
+
+## First-round audit (historical)
 
 The connected GitHub repository and live deployment were inspected before edits. `/api/version` identified the same audited commit. The current workspace was an empty, unrelated Aevell repository; a separate Halenn checkout was created without changing it.
 
@@ -69,7 +108,7 @@ Original supplied file: `ChatGPT Image Oct 8, 2026, 03_21_35 PM.png`.
 - Both the copied file and HTTP-served bytes match this checksum.
 - No lossy optimization, cropping, masking, recoloring, generation, or geometry edits. Intrinsic dimensions reserve layout space. Header and hero instances share one asset URL.
 
-## Verification
+## First-round verification (historical)
 
 ```sh
 npm run lint

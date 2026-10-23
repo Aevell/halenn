@@ -4,7 +4,7 @@ import { type ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useSta
 import styles from "./heroes.module.css";
 import "./picker.css";
 
-const names = ["Monument", "Editorial", "Foundation"];
+const names = ["Cinematic", "Editorial", "Foundation"];
 
 export default function PrototypePicker({ initial, children }: { initial: number; children: ReactNode[] }) {
   const [selected, setSelected] = useState(initial);
@@ -20,11 +20,17 @@ export default function PrototypePicker({ initial, children }: { initial: number
     setReplay((value) => value + 1);
     const url = new URL(window.location.href);
     url.searchParams.set("v", String(index + 1));
+    url.hash = "";
     window.history.replaceState(null, "", url);
   }, []);
 
   useLayoutEffect(() => {
-    window.scrollTo({ top: 0, behavior: "instant" });
+    if (replay > 0 || !window.location.hash) window.scrollTo({ top: 0, behavior: "instant" });
+    if (replay > 0 && window.location.hash) {
+      const url = new URL(window.location.href);
+      url.hash = "";
+      window.history.replaceState(null, "", url);
+    }
     const measure = () => {
       const item = items.current[selected];
       if (!item || !highlight.current) return;
@@ -44,7 +50,7 @@ export default function PrototypePicker({ initial, children }: { initial: number
     });
     const handleKey = (event: KeyboardEvent) => {
       const target = event.target;
-      if (target instanceof HTMLElement && (target.closest("input, textarea, select, [contenteditable]:not([contenteditable='false'])"))) return;
+      if (target instanceof HTMLElement && (target.closest("input, textarea, select, details, [data-local-keys], [contenteditable]:not([contenteditable='false'])"))) return;
       if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
       if (/^[1-3]$/.test(event.key)) select(Number(event.key) - 1);
       else if (event.key === "ArrowRight") select((activeIndex.current + 1) % names.length);

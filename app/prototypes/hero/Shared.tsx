@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-html-link-for-pages -- Reference destinations intentionally load a fresh document to isolate the preserved homepage and its global smooth scrolling. */
 import Image from "next/image";
 import styles from "./heroes.module.css";
 
@@ -32,14 +31,14 @@ export function Header({ wordmark = false }: { wordmark?: boolean }) {
     <>
       <a className={styles.skipLink} href="#hero-content">Skip to content</a>
       <header className={styles.header}>
-        <a className={styles.brand} href="/" aria-label="Halenn home">
+        <a className={styles.brand} href="/prototypes/hero?v=1" aria-label="Halenn prototype home">
           {!wordmark && <Mark className={styles.headerMark} />}
           <span>HALENN</span>
         </a>
         <nav className={styles.navigation} aria-label="Primary navigation">
-          <a href="/#companies">Companies</a>
-          <a href="/#principles">Principles</a>
-          <a href="/#about">About</a>
+          <a href="/prototypes/hero?v=1#services">Services</a>
+          <a href="/prototypes/hero?v=1#scope">Project brief</a>
+          <a href="https://aevell.com">Aevell</a>
         </nav>
       </header>
     </>
@@ -49,10 +48,10 @@ export function Header({ wordmark = false }: { wordmark?: boolean }) {
 export function Actions({ quiet = false }: { quiet?: boolean }) {
   return (
     <div className={styles.actions}>
-      <a className={quiet ? styles.textAction : styles.primaryAction} href="/#companies">
-        Explore companies <Arrow />
+      <a className={quiet ? styles.textAction : styles.primaryAction} href="/prototypes/hero?v=1#services">
+        Explore services <Arrow />
       </a>
-      <a className={styles.secondaryAction} href="/#about">About Halenn <Arrow /></a>
+      <a className={styles.secondaryAction} href="https://aevell.com">Part of Aevell <Arrow /></a>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import PrototypePicker from "./PrototypePicker";
-import Monument from "./Monument";
+import Cinematic from "./Cinematic";
 import Editorial from "./Editorial";
 import Foundation from "./Foundation";
 
@@ -21,7 +21,7 @@ export default async function HeroExplorations({
 
   return (
     <PrototypePicker initial={initial}>
-      {[<Monument key="monument" />, <Editorial key="editorial" />, <Foundation key="foundation" />]}
+      {[<Cinematic key="cinematic" />, <Editorial key="editorial" />, <Foundation key="foundation" />]}
     </PrototypePicker>
   );
 }

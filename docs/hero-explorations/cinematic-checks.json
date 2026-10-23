@@ -1,0 +1,244 @@
+[
+  {
+    "height": 844,
+    "logo": {
+      "bottom": 612.2734375,
+      "height": 195,
+      "left": 0,
+      "right": 390,
+      "top": 417.2734375,
+      "width": 390,
+      "x": 0,
+      "y": 417.2734375
+    },
+    "logoTransform": "none",
+    "overflow": false,
+    "test": "390px hero",
+    "width": 390
+  },
+  {
+    "test": "service selection and brief download",
+    "selected": 4,
+    "path": "/Users/terence/Downloads/halenn-project-brief.txt"
+  },
+  {
+    "test": "desktop scene start",
+    "frame": {
+      "bottom": 618.6058349609375,
+      "height": 337.2195129394531,
+      "left": 408.6698303222656,
+      "right": 1031.3302307128906,
+      "top": 281.3863220214844,
+      "width": 622.660400390625,
+      "x": 408.6698303222656,
+      "y": 281.3863220214844
+    },
+    "frameTransform": "matrix(0.46, 0, 0, 0.46, 0, 0)",
+    "heading": "Built to impress.Made to work.",
+    "height": 900,
+    "motion": true,
+    "overflow": false,
+    "scrollY": 900,
+    "width": 1440
+  },
+  {
+    "test": "desktop expansion forward",
+    "frame": {
+      "bottom": 723.6102600097656,
+      "height": 547.228271484375,
+      "left": 214.7841796875,
+      "right": 1225.2158203125,
+      "top": 176.38198852539062,
+      "width": 1010.431640625,
+      "x": 214.7841796875,
+      "y": 176.38198852539062
+    },
+    "frameTransform": "matrix(0.746472, 0, 0, 0.746472, 0, 0)",
+    "heading": "Built to impress.Made to work.",
+    "height": 900,
+    "motion": true,
+    "overflow": false,
+    "scrollY": 1440,
+    "width": 1440
+  },
+  {
+    "test": "desktop expansion reverses",
+    "frame": {
+      "bottom": 671.1080322265625,
+      "height": 442.223876953125,
+      "left": 311.72698974609375,
+      "right": 1128.27294921875,
+      "top": 228.8841552734375,
+      "width": 816.5459594726562,
+      "x": 311.72698974609375,
+      "y": 228.8841552734375
+    },
+    "frameTransform": "matrix(0.603236, 0, 0, 0.603236, 0, 0)",
+    "heading": "Built to impress.Made to work.",
+    "height": 900,
+    "motion": true,
+    "overflow": false,
+    "scrollY": 1170,
+    "width": 1440
+  },
+  {
+    "test": "desktop scene fully expanded",
+    "frame": {
+      "bottom": 816.5390625,
+      "height": 733.0859375,
+      "left": 43.1953125,
+      "right": 1396.8046875,
+      "top": 83.453125,
+      "width": 1353.609375,
+      "x": 43.1953125,
+      "y": 83.453125
+    },
+    "frameTransform": "matrix(1, 0, 0, 1, 0, 0)",
+    "heading": "Built to impress.Made to work.",
+    "height": 900,
+    "motion": true,
+    "overflow": false,
+    "scrollY": 1980,
+    "width": 1440
+  },
+  {
+    "test": "short desktop static fallback",
+    "frame": {
+      "bottom": 1382.3828125,
+      "height": 652.3828125,
+      "left": 43.1953125,
+      "right": 1396.8046875,
+      "top": 730,
+      "width": 1353.609375,
+      "x": 43.1953125,
+      "y": 730
+    },
+    "frameTransform": "none",
+    "heading": "Built to impress.Made to work.",
+    "height": 650,
+    "motion": false,
+    "overflow": false,
+    "scrollY": 0,
+    "width": 1440
+  },
+  {
+    "test": "tablet static layout",
+    "frame": {
+      "bottom": 1771.6875,
+      "height": 697.6875,
+      "left": 23.0390625,
+      "right": 744.9609375,
+      "top": 1074,
+      "width": 721.921875,
+      "x": 23.0390625,
+      "y": 1074
+    },
+    "frameTransform": "none",
+    "heading": "Built to impress.Made to work.",
+    "height": 1024,
+    "motion": false,
+    "overflow": false,
+    "scrollY": 0,
+    "width": 768
+  },
+  {
+    "test": "keyboard focus expands frame",
+    "frame": {
+      "bottom": 816.5390625,
+      "height": 733.0859375,
+      "left": 43.1953125,
+      "right": 1396.8046875,
+      "top": 83.453125,
+      "width": 1353.609375,
+      "x": 43.1953125,
+      "y": 83.453125
+    },
+    "frameTransform": "matrix(1, 0, 0, 1, 0, 0)",
+    "heading": "Built to impress.Made to work.",
+    "height": 900,
+    "motion": true,
+    "overflow": false,
+    "scrollY": 1918,
+    "width": 1440
+  },
+  {
+    "test": "number key selects Editorial",
+    "frameTransform": null,
+    "heading": "Built toimpress.Madeto work.",
+    "height": 900,
+    "motion": false,
+    "overflow": false,
+    "scrollY": 0,
+    "width": 1440
+  },
+  {
+    "test": "arrow key selects Foundation",
+    "frameTransform": null,
+    "heading": "Your website.Connected to more.",
+    "height": 900,
+    "motion": false,
+    "overflow": false,
+    "scrollY": 0,
+    "width": 1440
+  },
+  {
+    "test": "comparison link reaches cinematic services anchor",
+    "frame": {
+      "bottom": 572.6777801513672,
+      "height": 326.3555908203125,
+      "left": 112.65999603271484,
+      "right": 277.3399887084961,
+      "top": 246.3221893310547,
+      "width": 164.67999267578125,
+      "x": 112.65999603271484,
+      "y": 246.3221893310547
+    },
+    "frameTransform": "matrix(0.46, 0, 0, 0.46, 0, 0)",
+    "heading": "Built to impress.Made to work.",
+    "height": 844,
+    "motion": true,
+    "overflow": false,
+    "scrollY": 844,
+    "width": 390
+  },
+  {
+    "test": "mobile full expansion",
+    "frame": {
+      "bottom": 764.234375,
+      "height": 709.46875,
+      "left": 16,
+      "right": 374,
+      "top": 54.765625,
+      "width": 358,
+      "x": 16,
+      "y": 54.765625
+    },
+    "frameTransform": "matrix(1, 0, 0, 1, 0, 0)",
+    "heading": "Built to impress.Made to work.",
+    "height": 844,
+    "motion": true,
+    "overflow": false,
+    "scrollY": 1688,
+    "width": 390
+  },
+  {
+    "test": "320px final reflow",
+    "frame": {
+      "bottom": 1412.85400390625,
+      "height": 318.7080078125,
+      "left": 93.76000213623048,
+      "right": 226.23998260498047,
+      "top": 1094.14599609375,
+      "width": 132.47998046875,
+      "x": 93.76000213623048,
+      "y": 1094.14599609375
+    },
+    "frameTransform": "matrix(0.46, 0, 0, 0.46, 0, 0)",
+    "heading": "Built to impress.Made to work.",
+    "height": 844,
+    "motion": true,
+    "overflow": false,
+    "scrollY": 0,
+    "width": 320
+  }
+]

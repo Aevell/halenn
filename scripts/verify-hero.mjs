@@ -8,7 +8,7 @@ const production = process.env.HALENN_PRODUCTION_URL;
 const artworkHash = "8d0753ae6b55e250a7880408943cbfb80e9a37d041b1274900140d68d9f94c97";
 const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
 
-for (const [value, name] of [["1", "Monument"], ["2", "Editorial"], ["3", "Foundation"], ["invalid", "Monument"], ["4", "Monument"], ["2&v=3", "Monument"]]) {
+for (const [value, name] of [["1", "Cinematic"], ["2", "Editorial"], ["3", "Foundation"], ["invalid", "Cinematic"], ["4", "Cinematic"], ["2&v=3", "Cinematic"]]) {
   test(`server renders ${name} for v=${value} without requiring JavaScript`, async () => {
     const response = await fetch(`${development}/prototypes/hero?v=${value}`);
     assert.equal(response.status, 200);
@@ -16,8 +16,13 @@ for (const [value, name] of [["1", "Monument"], ["2", "Editorial"], ["3", "Found
     assert.match(html, new RegExp(`data-variant="${name}"`));
     assert.equal((html.match(/<h1(?:\s|>)/g) || []).length, 1);
     assert.match(html, /name="robots" content="noindex, nofollow"/);
-    for (const destination of ["companies", "principles", "about"]) {
-      assert.ok(html.includes(`href="/#${destination}"`));
+    assert.ok(html.includes("https://aevell.com"));
+    assert.ok(html.includes("Aevell"));
+    assert.ok(html.includes("n8n"));
+    assert.ok(!html.includes("A Halenn company"));
+    if (name === "Cinematic") {
+      for (const destination of ["services", "scope"]) assert.ok(html.includes(`href="#${destination}"`));
+      for (const service of ["Webshop", "Cart &amp; checkout", "Website care", "Bookings &amp; forms"]) assert.ok(html.includes(service));
     }
   });
 }
