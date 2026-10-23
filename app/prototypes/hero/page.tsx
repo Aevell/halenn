@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import PrototypePicker from "./PrototypePicker";
-import Cinematic from "./Cinematic";
+import Cinematic from "../../components/halenn/Cinematic";
 import Editorial from "./Editorial";
 import Foundation from "./Foundation";
 

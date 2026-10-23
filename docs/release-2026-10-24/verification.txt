@@ -1,0 +1,36 @@
+Halenn public release — 2026-10-24
+
+Approved prototype: 7536cc4
+Previous production: 0f4c17251b0502e13ffbf44e106a7937ce537945
+Restore tags:
+- codex/halenn-approved-prototype-2026-10-24
+- codex/halenn-before-public-launch-2026-10-24
+- codex/halenn-before-logo-quality-2026-10-24
+
+Cinematic components extracted to app/components/halenn and shared by the
+public server-rendered homepage and development-only comparison route.
+Logo assets are unchanged, including the approved non-generative 2x derivative.
+Removed old homepage styles, unused font, legacy icon and deployment modal.
+Contact opens a prefilled email addressed to contact@halenn.com. No messages
+are sent or stored by the site. Direct mailto fallback remains server rendered.
+Concept projects remain visibly identified as concepts, not client work.
+
+Local production build: PASS
+ESLint: PASS, no warnings
+TypeScript: PASS
+verify:hero: 9/9 PASS against dev :3010 and production :3011
+- public content and email rendered without JavaScript
+- prototype route returns 404 in production
+- all development variant selections render
+- original logo checksum unchanged
+- canonical, robots, sitemap and version endpoint verified
+Browser: desktop hero, contact navigation, native dialog open/Escape/focus return
+verified. No email was sent by verification.
+
+Existing Vercel project: ripplstudios/halenn
+Production branch: main
+Previous deployment: halenn-h43pb78q3-ripplstudios.vercel.app
+Custom domains already attached; GoDaddy DNS initially invalid.
+Required records observed in Vercel dashboard:
+A @ 216.198.79.1
+CNAME www 3fd9e32b8305276e.vercel-dns-017.com.

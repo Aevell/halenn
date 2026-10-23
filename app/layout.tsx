@@ -1,18 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Michroma, Syne } from "next/font/google";
-import DeploymentUpdateGate from "./DeploymentUpdateGate";
+import { Geist, Syne } from "next/font/google";
 import "./globals.css";
 
 const bodyFont = Geist({
   subsets: ["latin"],
   variable: "--font-body",
-  display: "swap",
-});
-
-const brandFont = Michroma({
-  subsets: ["latin"],
-  weight: "400",
-  variable: "--font-brand",
   display: "swap",
 });
 
@@ -25,18 +17,20 @@ const displayFont = Syne({
 export const metadata: Metadata = {
   metadataBase: new URL("https://halenn.com"),
   title: {
-    default: "Halenn | Building what comes next",
+    default: "Halenn | Websites, commerce & connected systems",
     template: "%s | Halenn",
   },
   description:
-    "Halenn is a parent company that creates and grows focused digital businesses with a long-term view.",
+    "Halenn designs and builds websites, webshops and n8n workflows, with ongoing care after launch. A company by Aevell.",
+  icons: { icon: "/prototypes/halenn-original.png", apple: "/prototypes/halenn-original.png" },
   openGraph: {
-    title: "Halenn | Building what comes next",
+    title: "Halenn | Websites, commerce & connected systems",
     description:
-      "A parent company creating and growing focused digital businesses with a long-term view.",
+      "Websites, commerce and automation — designed together, supported after launch.",
     url: "https://halenn.com",
     siteName: "Halenn",
     type: "website",
+    images: [{ url: "/prototypes/halenn-original.png", width: 1774, height: 887, alt: "Halenn" }],
   },
 };
 
@@ -50,17 +44,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const currentBuild =
-    process.env.VERCEL_GIT_COMMIT_SHA ||
-    process.env.VERCEL_DEPLOYMENT_ID ||
-    process.env.VERCEL_URL ||
-    "local";
-
   return (
     <html lang="en">
-      <body className={`${bodyFont.variable} ${brandFont.variable} ${displayFont.variable}`}>
+      <body className={`${bodyFont.variable} ${displayFont.variable}`}>
         {children}
-        <DeploymentUpdateGate currentBuild={currentBuild} />
       </body>
     </html>
   );

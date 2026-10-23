@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useProjectScope } from "./Experience";
-import { Arrow } from "./Shared";
+import { Arrow } from "./Brand";
 import styles from "./cinematic.module.css";
 
 const additions = [

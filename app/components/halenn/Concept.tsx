@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Arrow } from "./Shared";
+import { Arrow } from "./Brand";
 import s from "./concept.module.css";
 
 /** Static website studies inside one accessible project-preview button. */

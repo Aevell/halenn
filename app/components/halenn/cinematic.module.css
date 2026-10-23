@@ -5,6 +5,7 @@
   scroll-behavior: auto;
 }
 .world {
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
   --ink: #f2f1ed;
   --muted: #a6b1c2;
   --font-display: var(--font-cinematic);

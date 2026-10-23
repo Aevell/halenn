@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import Concept from "./Concept";
-import { Arrow } from "./Shared";
+import { Arrow } from "./Brand";
 import s from "./experience.module.css";
 
 const ScopeContext = createContext<{
@@ -446,7 +446,7 @@ export function Process() {
     </section>
   );
 }
-export function Contact() {
+export function Contact({ email }: { email?: string }) {
   const { selected } = useProjectScope();
   const form = useRef<HTMLDialogElement>(null);
   const [saved, setSaved] = useState(false);
@@ -471,7 +471,7 @@ export function Contact() {
         <span>
           Websites. Commerce. Connected systems.
           <br />
-          <small>Example contact: hello@halenn.example</small>
+          {email ? <a href={`mailto:${email}`}>{email}</a> : <small>Example contact: hello@halenn.example</small>}
         </span>
       </div>
       <dialog
@@ -486,11 +486,16 @@ export function Contact() {
         >
           Close ×
         </button>
-        <p className={s.kicker}>Local prototype / Nothing is sent</p>
+        <p className={s.kicker}>{email ? "Opens your email app. Send your enquiry from there." : "Local prototype / Nothing is sent"}</p>
         <h2 id="contact-dialog-title">Tell us about it.</h2>
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            if (email) {
+              const values = new FormData(e.currentTarget);
+              const body = `Name: ${values.get("name")}\nEmail: ${values.get("email")}\n\n${values.get("project")}\n\nSelected scope: website${selected.length ? ` + ${selected.join(", ")}` : ""}.`;
+              window.location.href = `mailto:${email}?subject=${encodeURIComponent("A new project for Halenn")}&body=${encodeURIComponent(body)}`;
+            }
             setSaved(true);
           }}
         >
@@ -511,12 +516,11 @@ export function Contact() {
             {selected.length ? ` + ${selected.join(", ")}` : ""}.
           </p>
           <button type="submit">
-            Preview enquiry <Arrow />
+            {email ? "Open email draft" : "Preview enquiry"} <Arrow />
           </button>
           {saved && (
             <p role="status">
-              Your example enquiry is ready. This demo has not sent or stored
-              your details.
+              {email ? `Complete your enquiry in your email app. If it did not open, email ${email} directly.` : "Your example enquiry is ready. This demo has not sent or stored your details."}
             </p>
           )}
         </form>

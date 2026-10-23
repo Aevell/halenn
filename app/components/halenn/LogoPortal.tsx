@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode, useEffect, useRef } from "react";
-import { Arrow } from "./Shared";
+import { Arrow } from "./Brand";
 import s from "./cinematic.module.css";
 
 /** The original image stays still. Only its surrounding light responds. */

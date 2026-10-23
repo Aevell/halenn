@@ -44,3 +44,15 @@ test("production retains the homepage and returns 404 for prototypes", { skip: !
   }
   assert.equal((await fetch(`${production}/api/version`)).status, 200);
 });
+
+test("public release renders the approved site and real contact without the picker", { skip: !production }, async () => {
+  const html = await (await fetch(production)).text();
+  assert.match(html, /data-variant="Cinematic"/);
+  assert.match(html, /mailto:contact@halenn\.com/);
+  assert.match(html, /Opens your email app/);
+  assert.match(html, /halenn-original-2x\.png/);
+  assert.match(html, /rel="canonical" href="https:\/\/halenn\.com"/);
+  assert.doesNotMatch(html, /hello@halenn\.example|noindex|Halenn is a parent company|Preview enquiry/);
+  assert.match(await (await fetch(`${production}/robots.txt`)).text(), /Allow: \/\n/);
+  assert.match(await (await fetch(`${production}/sitemap.xml`)).text(), /https:\/\/halenn.com/);
+});

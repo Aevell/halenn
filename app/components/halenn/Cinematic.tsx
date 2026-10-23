@@ -1,6 +1,6 @@
 import { Instrument_Serif } from "next/font/google";
 import localFont from "next/font/local";
-import { Arrow, Mark } from "./Shared";
+import { Arrow, Mark } from "./Brand";
 import CinematicMotion from "./CinematicMotion";
 import LogoPortal from "./LogoPortal";
 import { ExperienceProvider, Projects, Process, Contact } from "./Experience";
@@ -32,7 +32,7 @@ const display = localFont({
   variable: "--font-cinematic",
 });
 
-export default function Cinematic() {
+export default function Cinematic({ contactEmail }: { contactEmail?: string }) {
   return (
     <ExperienceProvider>
       <CinematicMotion>
@@ -212,7 +212,7 @@ export default function Cinematic() {
             </div>
             <ProjectScope />
           </section>
-          <Contact />
+          <Contact email={contactEmail} />
           <footer className={styles.footer}>
             <span className={styles.wordmark}>HALENN</span>
             <p>Websites & systems, thoughtfully connected.</p>
