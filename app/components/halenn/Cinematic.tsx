@@ -140,7 +140,7 @@ export default function Cinematic({ contactEmail }: { contactEmail?: string }) {
                       <span>Connected inside.</span>
                     </h2>
                     <p className={styles.frameIntro}>
-                      Websites, commerce and n8n automation — designed together,
+                      Websites, commerce and n8n automation. Designed together,
                       supported after launch.
                     </p>
                     <div className={styles.capabilities}>

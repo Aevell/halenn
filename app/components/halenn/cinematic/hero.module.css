@@ -1,0 +1,64 @@
+.track { position: relative; outline: none; }
+.opening { position: relative; height: 100svh; min-height: 700px; padding-top: 112px; }
+.hero { position: relative; height: 100%; min-height: 588px; }
+.content { position: absolute; z-index: 2; top: 46%; left: 5%; width: 44%; animation: arrive 1100ms cubic-bezier(.23,1,.32,1) 350ms backwards; }
+.hero .description { margin-top: 32px; color: #bdc8d6; max-width: 42ch; font-size: clamp(18px,1.3vw,23px); line-height: 1.5; }
+.description h1, .description p { font: inherit; letter-spacing: -.015em; }
+.artwork { position: absolute; top: 10%; right: 9%; width: 43.5%; aspect-ratio: 3 / 2; animation: illuminate 1600ms cubic-bezier(.23,1,.32,1) 300ms backwards; }
+.ribbon { position: relative; display: block; width: 100%; height: 100%; isolation: isolate; border-radius: 50%; -webkit-tap-highlight-color: transparent; }
+.ribbon img { position: relative; z-index: 1; display: block; width: 100%; height: auto; user-select: none; }
+.ribbonLight, .ribbonBloom, .ribbonRim, .ribbonMask, .lightSource { position: absolute; inset: 0; pointer-events: none; }
+.ribbonLight { opacity: .7; transition: opacity 420ms ease; }
+.ribbonBloom { filter: blur(18px); opacity: .85; }
+.ribbonRim { filter: blur(6px); opacity: .35; }
+.ribbonMask { mask: url('/brand/halenn-ribbon-v1.png') center / 100% 100% no-repeat; }
+.lightSource {
+  background: radial-gradient(ellipse 25% 34% at center, #e7f3ff 0%, #b4d5f8d9 22%, #7bb2ea66 44%, transparent 72%);
+  transform: translate3d(var(--ribbon-light-x, 24%), var(--ribbon-light-y, -28%), 0);
+  transition: transform 420ms cubic-bezier(.16,1,.3,1);
+}
+.heroAction > a { min-width: 286px; min-height: 60px; }
+.scrollCue { position: absolute; z-index: 2; bottom: 4%; left: 5%; display: inline-flex; align-items: center; gap: 34px; min-height: 48px; color: #a4afbf; font-size: 16px; }
+.scrollCue svg { width: 20px; height: 20px; transition: transform 220ms ease; }
+.aperture { position: absolute; z-index: 4; inset: 0; pointer-events: none; overflow: hidden; animation: finish 1700ms step-end both; }
+.aperture i { position: absolute; inset: 0 auto 0 0; width: 50%; background: #07090d; transform-origin: left; animation: open 1100ms cubic-bezier(.77,0,.175,1) 400ms both; }
+.aperture i:nth-child(2) { inset: 0 0 0 auto; transform-origin: right; }
+.introWord { position: absolute; left: 50%; top: 50%; width: min(44vw,560px); height: auto; transform: translate(-50%,-50%); color: #edf0f4; animation: word 900ms cubic-bezier(.23,1,.32,1) both; }
+@keyframes arrive { from { opacity: .4; translate: 0 18px; } to { opacity: 1; translate: 0 0; } }
+@keyframes illuminate { from { opacity: .25; } to { opacity: 1; } }
+@keyframes open { to { transform: scaleX(0); } }
+@keyframes finish { to { visibility: hidden; } }
+@keyframes word { 0% { opacity: 0; } 30%,65% { opacity: 1; } 100% { opacity: 0; } }
+@media (hover:hover) and (pointer:fine) { .scrollCue:hover svg { transform: translateY(4px); } }
+@media (min-width:1001px) and (min-height:850px) {
+  .artwork { top: 17%; width: 47%; right: 7%; }
+  .scrollCue { bottom: 7%; }
+}
+@media (min-width:1001px) and (max-height:700px) {
+  .opening { min-height: 650px; }
+  .hero { min-height: 538px; }
+}
+@media (min-width:601px) and (max-width:1000px) {
+  .opening { min-height: 820px; padding-top: 100px; }
+  .hero { min-height: 720px; }
+  .artwork { top: 5%; right: 6%; width: min(86%, calc(100svh - 250px)); }
+  .content { top: auto; bottom: clamp(100px, calc(50svh - 310px), 220px); left: 6%; width: 88%; }
+  .hero .description { font-size: 19px; }
+  .scrollCue { bottom: 20px; left: 6%; }
+}
+@media (max-width:600px) {
+  .opening { min-height: 760px; padding-top: 88px; }
+  .hero { min-height: 672px; }
+  .content { top: auto; bottom: 136px; left: 6%; width: 88%; }
+  .hero .description { margin-top: 28px; font-size: 17px; line-height: 1.5; max-width: none; }
+  .artwork { width: 130%; right: -7%; top: 12%; }
+  .heroAction > a { width: 100%; min-width: 0; min-height: 58px; }
+  .scrollCue { left: 6%; bottom: 60px; font-size: 15px; }
+  .introWord { width: 64vw; }
+}
+@media (max-width:360px) { .opening { min-height: 740px; } .hero { min-height: 652px; } .artwork { width: 120%; right: -3%; } }
+@media (prefers-reduced-motion:reduce) {
+  .aperture { display: none; }
+  .content, .artwork { animation: none; }
+  .ribbonLight, .lightSource, .scrollCue svg { transition: none; }
+}

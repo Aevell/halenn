@@ -1,0 +1,88 @@
+.passage {
+  --silk-scene-height: max(150svh, 82vw);
+  position: relative;
+  isolation: isolate;
+  background: #07090d;
+}
+.field {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+}
+.viewport {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: var(--silk-scene-height);
+  overflow: clip;
+  contain: paint;
+  opacity: .15;
+  mask-image: linear-gradient(#000, #000 65%, transparent);
+}
+.maskDefinitions { position: absolute; width: 100%; height: var(--silk-scene-height); pointer-events: none; }
+.clearance {
+  position: absolute;
+  inset: 0;
+  mask-image: linear-gradient(90deg, #000 28%, transparent 56%);
+}
+.clearance[data-silk-clearance-ready] {
+  mask-image: url(#silk-logo-clearance);
+  mask-mode: luminance;
+}
+.travel { position: absolute; inset: 0; }
+.leftFold {
+  position: absolute;
+  top: 17svh;
+  left: -30vw;
+  width: 100vw;
+  aspect-ratio: 1672 / 941;
+  transform: scaleX(-1);
+  opacity: .7;
+  mask-image: radial-gradient(ellipse at 55% 28%, #000 10%, transparent 63%);
+}
+.leftFold img { object-fit: contain; user-select: none; }
+/* Overscan lets the fabric continue above and beyond the right edge of the hero. */
+.silkPlacement {
+  position: absolute;
+  top: -4svh;
+  left: -20vw;
+  width: 144vw;
+  aspect-ratio: 1672 / 941;
+  min-height: 150svh;
+  mask-image: linear-gradient(transparent, #000 9%, #000 88%, transparent);
+}
+.silk {
+  position: absolute;
+  inset: 0;
+}
+.silk img { object-fit: fill; user-select: none; }
+.fabric { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
+.silk[data-silk-ready] .fabric { opacity: 1; }
+.silk[data-silk-ready] img { opacity: 0; }
+@media (max-width:1000px) {
+  .passage { --silk-scene-height: 150svh; }
+  .clearance:not([data-silk-clearance-ready]) {
+    mask-image: linear-gradient(transparent 65svh, #000 calc(65svh + 90px));
+  }
+  .silkPlacement {
+    width: 220vw;
+    left: -70vw;
+    min-height: 145svh;
+  }
+  .leftFold { top: 14svh; width: 130vw; left: -35vw; }
+}
+@media (max-width:600px) {
+  .silkPlacement {
+    width: 360vw;
+    left: -170vw;
+    top: 0;
+  }
+  .leftFold { top: 8svh; width: 180vw; left: -50vw; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .viewport { opacity: .15 !important; }
+  .travel { transform: none !important; }
+  .fabric { display: none; }
+  .silk[data-silk-ready] img { opacity: 1; }
+}

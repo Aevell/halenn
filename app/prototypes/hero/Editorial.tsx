@@ -11,7 +11,7 @@ export default function Editorial() {
           <h1 className={styles.editorialEnter}>Built to<br />impress.<br /><span>Made<br />to work.</span></h1>
           <div className={`${styles.editorialIntro} ${styles.editorialEnter}`}>
             <span className={styles.editorialDash} aria-hidden="true" />
-            <p>Custom websites, commerce and n8n workflows. Halenn brings your digital presence together — and keeps it moving after launch.</p>
+            <p>Custom websites, commerce and n8n workflows. Halenn brings your digital presence together and keeps it moving after launch.</p>
           </div>
           <div className={styles.editorialEnter}><Actions quiet /></div>
         </div>

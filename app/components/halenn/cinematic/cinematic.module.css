@@ -1,0 +1,373 @@
+.motionRoot {
+  background: #07090d;
+}
+:global(html):has(.motionRoot) {
+  scroll-behavior: auto;
+}
+.world {
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --ink: #f2f1ed;
+  --muted: #a6b1c2;
+  --font-display: var(--font-cinematic);
+  color: var(--ink);
+  background: #07090d;
+  overflow: clip;
+  isolation: isolate;
+  font-family: var(--font-body), sans-serif;
+  font-size: 16px;
+}
+.world * {
+  box-sizing: border-box;
+}
+.world ::selection {
+  background: #c9dbed;
+  color: #0a111a;
+}
+.world a {
+  text-decoration: none;
+}
+.world :is(a, button, input, summary):focus-visible {
+  outline: 2px solid #bddbff;
+  outline-offset: 6px;
+}
+.world :is(h1, h2, h3, p) {
+  margin: 0;
+}
+.world p {
+  text-wrap: pretty;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.skip {
+  position: fixed;
+  left: 24px;
+  top: 16px;
+  z-index: 50;
+  padding: 14px 20px;
+  border-radius: 999px;
+  background: #edf1f6;
+  color: #060709;
+  transform: translateY(-180%);
+}
+.skip:focus {
+  transform: none;
+}
+.scope {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 10%;
+  padding: 140px 6%;
+  background: #0a0e15;
+  scroll-margin-top: 32px;
+}
+.scopeHeading {
+  position: sticky;
+  top: 65px;
+  align-self: start;
+}
+.scopeHeading h2 {
+  font-family: var(--font-cinematic), sans-serif;
+  font-size: clamp(64px, 7vw, 112px);
+  font-weight: 500;
+  line-height: 0.93;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+}
+.scopeHeading h2 span {
+  color: #a8bbd2;
+}
+.scopeHeading > p {
+  max-width: 34ch;
+  margin-top: 30px !important;
+  font-size: 18px;
+  line-height: 1.6;
+  color: #aabbd0;
+}
+.scopeBuilder {
+  min-width: 0;
+}
+.baseScope {
+  padding-bottom: 30px;
+  border-bottom: 1px solid #4c5c70;
+}
+.baseScope > span:first-child {
+  display: none;
+}
+.baseScope h3 {
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+.baseScope p {
+  margin-top: 14px;
+  font-size: 16px;
+  color: #b1bfd0;
+  line-height: 1.6;
+  max-width: 43ch;
+}
+.priceModel {
+  display: block;
+  margin-top: 20px;
+  font-size: 15px;
+  color: #c2d0e1;
+}
+.additions {
+  border: 0;
+  padding: 30px 0 0;
+  margin: 0;
+  min-width: 0;
+}
+.additions legend {
+  font-size: 16px;
+  color: #b4c3d6;
+  margin-bottom: 10px;
+}
+.serviceDetail {
+  border-bottom: 1px solid #2d3b4e;
+}
+.serviceDetail summary {
+  min-height: 86px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  font-size: 23px;
+  list-style: none;
+  cursor: pointer;
+}
+.serviceDetail summary::-webkit-details-marker {
+  display: none;
+}
+.serviceDetail summary > span {
+  font-size: 14px;
+  color: #b2c1d5;
+}
+.serviceDetail[open] summary {
+  color: #c1dbfa;
+}
+.addition {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 110px;
+  padding: 12px 0 24px;
+  cursor: pointer;
+}
+.addition input {
+  width: 22px;
+  height: 22px;
+  accent-color: #bed7f5;
+  flex-shrink: 0;
+}
+.addition > span {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.addition strong {
+  font-size: 17px;
+  font-weight: 400;
+}
+.addition > span > span {
+  font-size: 16px;
+  line-height: 1.55;
+  color: #9fb2ca;
+}
+.addition small {
+  margin-left: auto;
+  width: 100px;
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #b0c1d6;
+  text-align: right;
+}
+.scopeSummary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 26px;
+  padding-top: 30px;
+}
+.scopeSummary p {
+  font-size: 17px;
+}
+.scopeSummary p span {
+  display: block;
+  margin-top: 8px;
+  color: #a8b8ce;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.downloadNote {
+  margin-top: 20px !important;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #a8b8cc;
+}
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin: 0 5%;
+  padding: 35px 0 105px;
+  border-top: 1px solid #344156;
+  color: #aabbd1;
+  font-size: 15px;
+}
+.footer p {
+  display: none;
+}
+.footer a {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  gap: 20px;
+}
+.footer a svg {
+  width: 18px;
+}
+.footerWordmark { width: 144px; height: auto; color: #edf0f4; }
+@media (hover: hover) and (pointer: fine) {
+  .footer a:hover {
+    color: #fff;
+  }
+  .serviceDetail summary:hover {
+    color: #fff;
+  }
+}
+@media (max-width: 1000px) {
+  .scope {
+    gap: 7%;
+    padding: 100px 5%;
+  }
+  .scopeHeading h2 {
+    font-size: 68px;
+  }
+  .addition {
+    flex-wrap: wrap;
+  }
+  .addition small {
+    margin-left: 40px;
+    width: auto;
+    text-align: left;
+  }
+}
+@media (max-width: 600px) {
+  .scope {
+    grid-template-columns: 1fr;
+    padding: 80px 6%;
+    gap: 50px;
+  }
+  .scopeHeading {
+    position: static;
+  }
+  .scopeHeading h2 {
+    font-size: 20vw;
+  }
+  .scopeHeading > p {
+    font-size: 17px;
+    max-width: 34ch;
+  }
+  .serviceDetail summary {
+    font-size: 22px;
+  }
+  .baseScope h3 {
+    font-size: 28px;
+  }
+  .addition > span {
+    flex: 1;
+  }
+  .footer {
+    font-size: 14px;
+  }
+}
+
+/* One camera language connects the existing scenes, without transforming the artwork. */
+.motionRoot[data-flow-motion] :global(#projects),
+.motionRoot[data-flow-motion] :global(#process) {
+  margin-top: -16svh;
+  background: transparent;
+  border-top: 0;
+}
+.motionRoot[data-flow-motion] :global([data-project-stage]),
+.motionRoot[data-flow-motion] :global([data-process-stage]) {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    #07090d 14%,
+    #07090d 88%,
+    transparent
+  );
+  transform-origin: center;
+}
+.motionRoot[data-flow-motion] .scope {
+  background: #07090d;
+  border-top: 0;
+}
+.motionRoot :global([data-contact-word]) {
+  display: inline-block;
+}
+
+/* Transparent overlap must not intercept the outgoing gallery controls. */
+.motionRoot[data-flow-motion] :global(#process) {
+  pointer-events: none;
+}
+.motionRoot[data-flow-motion] :global([data-process-stage]) {
+  pointer-events: auto;
+}
+.motionRoot[data-flow-motion] :global(#contact) {
+  border-top: 0;
+  background: #07090d;
+}
+/* Programmatic landmark focus transfers keyboard position; controls retain their rings. */
+
+/* Smaller travel and overlap preserve touch scrolling while joining the phone scenes. */
+.motionRoot[data-mobile-flow] :global(#projects[data-pocket-ribbon]),
+.motionRoot[data-mobile-flow] :global(#process[data-pocket-process]) {
+  margin-top: -8svh;
+  background: transparent;
+  border-top: 0;
+}
+.motionRoot[data-mobile-flow] :global([data-project-stage]),
+.motionRoot[data-mobile-flow] :global([data-process-stage]) {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    #07090d 8%,
+    #07090d 92%,
+    transparent
+  );
+}
+.motionRoot[data-mobile-flow] :global(#process) {
+  pointer-events: none;
+}
+.motionRoot[data-mobile-flow] :global([data-process-stage]) {
+  pointer-events: auto;
+}
+.motionRoot[data-mobile-flow] .scope,
+.motionRoot[data-mobile-flow] :global(#contact) {
+  background: #07090d;
+  border-top: 0;
+}
+
+/* Prototype-only continuity. */
+.world :is(section, [data-service-chapter]) { scroll-margin-top: 96px; }
+.motionRoot[data-flow-motion] [data-service-chapter] { scroll-margin-top: 0; }
+.scope { background: #07090d; }
+.scopeHeading h2 { font-family: var(--font-body), sans-serif; text-transform: none; font-size: clamp(48px, 5.6vw, 88px); line-height: 1.04; letter-spacing: -.055em; font-weight: 400; }
+.scopeHeading h2 span { font-family: var(--font-editorial), serif; font-style: italic; letter-spacing: -.025em; }
+.scopeSummary > button { min-height: 58px; }
+.world :is(textarea, details):focus-visible { outline: 2px solid #bddbff; outline-offset: 5px; }
+@media (max-width:600px) {
+  .scopeHeading h2 { font-size: 14vw; }
+  .scopeSummary > button { width: 100%; }
+  .motionRoot[data-mobile-flow] [data-service-chapter] { scroll-margin-top: 0; }
+}

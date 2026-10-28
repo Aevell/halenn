@@ -105,7 +105,7 @@
 .skipLink:focus { transform: none; }
 .srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
-/* EDITORIAL — a typographic front page, with an independent artwork field. */
+/* EDITORIAL: a typographic front page, with an independent artwork field. */
 .editorial { background: #090b0e; }
 .editorialMain { display: grid; flex: 1; grid-template-columns: 1.03fr 1fr; align-items: center; gap: 24px; padding: 54px 5.5% 56px; }
 .editorialCopy { position: relative; z-index: 1; }
@@ -125,7 +125,7 @@
 .editorialEnter:nth-child(3) { animation-delay: 80ms; }
 .editorialEnter:nth-child(4) { animation-delay: 120ms; }
 
-/* FOUNDATION — the parent / company relationship becomes the composition. */
+/* FOUNDATION: the parent / company relationship becomes the composition. */
 .foundation { background: #07090c; }
 .foundationMain { display: flex; flex: 1; flex-direction: column; justify-content: center; padding: 54px 6.5% 36px; }
 .foundationHeading { display: grid; grid-template-columns: 1.45fr 1fr; column-gap: 60px; align-items: end; }

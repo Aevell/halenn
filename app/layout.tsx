@@ -17,20 +17,27 @@ const displayFont = Syne({
 export const metadata: Metadata = {
   metadataBase: new URL("https://halenn.com"),
   title: {
-    default: "Halenn | Websites, commerce & connected systems",
+    default: "Halenn | Websites & Connected Systems",
     template: "%s | Halenn",
   },
   description:
     "Halenn designs and builds websites, webshops and n8n workflows, with ongoing care after launch. A company by Aevell.",
-  icons: { icon: "/prototypes/halenn-original.png", apple: "/prototypes/halenn-original.png" },
+  icons: {
+    icon: [
+      { url: "/brand/halenn-ribbon-favicon.ico", sizes: "16x16 32x32 48x48 64x64", type: "image/x-icon" },
+      { url: "/brand/halenn-ribbon-icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/brand/halenn-ribbon-icon-64.png", sizes: "64x64", type: "image/png" },
+    ],
+    apple: { url: "/brand/halenn-ribbon-icon-180.png", sizes: "180x180", type: "image/png" },
+  },
   openGraph: {
-    title: "Halenn | Websites, commerce & connected systems",
+    title: "Halenn | Websites & Connected Systems",
     description:
-      "Websites, commerce and automation — designed together, supported after launch.",
+      "Websites, commerce and automation. Designed together, supported after launch.",
     url: "https://halenn.com",
     siteName: "Halenn",
     type: "website",
-    images: [{ url: "/prototypes/halenn-original.png", width: 1774, height: 887, alt: "Halenn" }],
+    images: [{ url: "/brand/halenn-ribbon-v1.png", width: 1536, height: 1024, alt: "Halenn silver ribbon logo" }],
   },
 };
 

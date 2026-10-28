@@ -51,7 +51,7 @@ export default function ProjectScope() {
   };
   const download = () => {
     const text = [
-      "HALENN — PROJECT STARTING POINT",
+      "HALENN: PROJECT STARTING POINT",
       "A company by Aevell",
       "",
       "Foundation: Custom website design & development",

@@ -1,0 +1,23 @@
+.echo {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  overflow: clip;
+  pointer-events: none;
+  opacity: .15;
+  mask-image: linear-gradient(transparent, #000 22%, #000 72%, transparent);
+}
+.fold {
+  position: absolute;
+  width: 140%;
+  height: 135%;
+  left: -20%;
+  top: -18%;
+}
+.fold img { object-fit: fill; user-select: none; }
+.projects .fold { transform: scaleX(-1); }
+.contact .fold { top: -28%; left: -10%; }
+@media (max-width:600px) {
+  .fold { width: 240%; left: -85%; height: 125%; top: -10%; }
+  .contact .fold { left: -90%; top: -22%; }
+}

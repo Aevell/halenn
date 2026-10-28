@@ -17,7 +17,7 @@ export default function Foundation() {
             <div className={styles.parentLabel}><span>HALENN</span><span>Websites & automation</span></div>
           </div>
           <div className={styles.connection} aria-hidden="true"><span /><i /></div>
-          <a className={styles.companyIdentity} href="https://aevell.com" target="_blank" rel="noreferrer" aria-label="Visit Aevell — opens in a new tab">
+          <a className={styles.companyIdentity} href="https://aevell.com" target="_blank" rel="noreferrer" aria-label="Visit Aevell (opens in a new tab)">
             <div className={styles.companyTopline}><span>The parent company</span><Arrow /></div>
             <span className={styles.aevellName}>Aevell</span>
             <p>The parent company<br />behind Halenn.</p>

@@ -1,0 +1,864 @@
+.sectionTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  color: #a8b4c4;
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0 5%;
+}
+.projects {
+  position: relative;
+  background: #090c11;
+  padding-bottom: 60px;
+}
+.projectStage {
+  position: relative;
+  isolation: isolate;
+  padding: 60px 0 30px;
+  overflow: hidden;
+}
+.projects h2,
+.process h2 {
+  font-family: var(--font-body), sans-serif;
+  font-size: clamp(48px, 6vw, 88px);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 1.06;
+  margin: 30px 5% 38px;
+  text-wrap: balance;
+}
+.projects h2 em,
+.process h2 em {
+  font-style: normal;
+  color: #a6b1c1;
+}
+.viewport {
+  touch-action: auto;
+}
+.projects[data-ribbon] .viewport {
+  touch-action: pan-y;
+}
+.track {
+  display: flex;
+  gap: 24px;
+  overflow: auto;
+  scroll-snap-type: x mandatory;
+  padding: 20px 5%;
+  scrollbar-width: thin;
+  scrollbar-color: #53647b transparent;
+}
+.project {
+  flex: 0 0 78%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  scroll-snap-align: center;
+  container-type: inline-size;
+}
+.projectControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30px;
+  margin: 28px 5% 0;
+}
+.projectControls p {
+  display: grid;
+  gap: 8px;
+}
+.projectControls b {
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+}
+.projectControls p span {
+  font-size: 15px;
+  color: #a3afc1;
+  line-height: 1.5;
+}
+.projectControls > div {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.projectControls button {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid #455164;
+  background: none;
+  color: #e1e8f1;
+  font: inherit;
+  font-size: 22px;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    transform 160ms var(--ease);
+}
+.projectControls button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.projectControls button:active:not(:disabled) {
+  transform: scale(0.96);
+}
+.projects[data-ribbon] {
+  height: 240svh;
+  padding: 0;
+}
+.projects[data-ribbon] .projectStage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+}
+.projects[data-ribbon] .track {
+  overflow: visible;
+  padding-left: 18vw;
+  gap: 4vw;
+}
+.projects[data-ribbon] .project {
+  flex-basis: 64vw;
+}
+.projects[data-ribbon] .projectStage > h2 {
+  font-size: clamp(48px, 5vw, 78px);
+  margin: 20px 5% 22px;
+}
+.projects[data-ribbon] .projectStage > h2 br {
+  display: none;
+}
+.projects[data-ribbon] .projectControls {
+  margin-top: 16px;
+}
+.process {
+  padding: 90px 5%;
+  background: #d4d8d9;
+  color: #10171d;
+}
+.process h2 {
+  margin: 20px 0 70px;
+}
+.process h2 em {
+  color: #59656d;
+}
+.chapter {
+  position: sticky;
+  top: 30px;
+  min-height: 65vh;
+  display: flex;
+  align-items: center;
+  gap: 8%;
+  padding: 60px 4%;
+  border-top: 1px solid #919ba1;
+  background: #d4d8d9;
+}
+.chapterNumber {
+  font-size: clamp(120px, 23vw, 330px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: #aeb8be;
+}
+.chapter > div {
+  max-width: 560px;
+}
+.chapter h3 {
+  font-size: clamp(44px, 5.5vw, 82px);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+  margin: 0 0 26px;
+  text-wrap: balance;
+}
+.chapter p {
+  font-size: 18px;
+  line-height: 1.65;
+  color: #384750;
+  max-width: 46ch;
+  text-wrap: pretty;
+}
+.contact {
+  position: relative;
+  padding: 70px 5% 90px;
+  background:
+    radial-gradient(ellipse at 75% 100%, #263d5b55, transparent 55%), #070b11;
+  border-top: 1px solid #29394d;
+  overflow: hidden;
+}
+.contact .sectionTop {
+  margin: 0;
+}
+.contact > p {
+  display: none;
+}
+.contact h2 {
+  font-size: clamp(100px, 21vw, 330px);
+  font-weight: 400;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  margin: 60px 0 70px;
+}
+.contact h2 em {
+  font-style: normal;
+  color: #a5b6cb;
+}
+.contactBottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30px;
+}
+.contactBottom > span {
+  color: #afbed1;
+  font-size: 16px;
+  line-height: 1.7;
+}
+.contactBottom small {
+  font-size: 14px;
+  color: #a3b1c4;
+}
+.legacyContactButton,
+.legacyFormButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 50px;
+  min-height: 60px;
+  padding: 8px 26px;
+  border-radius: 999px;
+  background: #e4ebf4;
+  color: #15202c;
+  border: 0;
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+  transition:
+    transform 160ms var(--ease),
+    background-color 160ms ease;
+}
+.contact button:active {
+  transform: scale(0.98);
+}
+.legacyContactButton svg,
+.legacyFormButton svg {
+  width: 20px;
+}
+.dialog {
+  position: fixed;
+  inset: 0;
+  width: min(1100px, 94vw);
+  max-height: 90svh;
+  margin: auto;
+  padding: 32px;
+  border: 1px solid #48586d;
+  border-radius: 24px;
+  background: #101721;
+  color: #e6edf8;
+  overflow: auto;
+}
+.dialog::backdrop {
+  background: #020508de;
+  backdrop-filter: blur(5px);
+}
+.close {
+  display: block;
+  margin-left: auto;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid #64728a;
+  border-radius: 999px;
+  background: none;
+  color: #e6edf8;
+  cursor: pointer;
+  font: inherit;
+}
+.dialog h2 {
+  font-size: clamp(32px, 5vw, 60px);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  margin: 20px 0 28px;
+}
+.dialog [data-concept] {
+  margin: 28px 0;
+}
+.dialog > p,
+.dialog li {
+  line-height: 1.7;
+  color: #afbed1;
+  font-size: 16px;
+}
+.dialog ul {
+  padding-left: 20px;
+}
+.kicker {
+  font-size: 14px;
+  color: #afbed1;
+  line-height: 1.6;
+}
+.dialog form {
+  display: grid;
+  gap: 24px;
+}
+.dialog label {
+  display: grid;
+  gap: 10px;
+  font-size: 16px;
+  color: #bdcadb;
+}
+.dialog input,
+.dialog textarea {
+  width: 100%;
+  padding: 14px;
+  background: #080e16;
+  border: 1px solid #53647b;
+  color: #edf3fc;
+  font: inherit;
+  border-radius: 12px;
+  caret-color: #c6defa;
+}
+.dialog form p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #b4c3d6;
+}
+.dialog :focus-visible,
+.projects :focus-visible,
+.contact :focus-visible {
+  outline: 2px solid #cae3ff;
+  outline-offset: 5px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .projectControls button:hover:not(:disabled) {
+    background: #253246;
+  }
+  .legacyContactButton:hover,
+  .legacyFormButton:hover {
+    background: #fff;
+  }
+  .close:hover {
+    background: #253246;
+  }
+}
+@media (min-width: 1001px) and (max-height: 800px) {
+  .projects[data-ribbon] .projectStage {
+    padding-top: 26px;
+  }
+  .projects[data-ribbon] .projectStage > h2 {
+    font-size: 48px;
+    margin: 12px 5%;
+  }
+  .projects[data-ribbon] .track {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .projects[data-ribbon] [data-concept] {
+    min-height: 410px;
+  }
+  .projects[data-ribbon] .projectControls {
+    margin-top: 8px;
+  }
+}
+@media (max-width: 1000px) {
+  .chapter {
+    position: relative;
+    min-height: 500px;
+  }
+  .contactBottom {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .project {
+    flex-basis: 86%;
+  }
+}
+@media (max-width: 600px) {
+  .sectionTop {
+    font-size: 14px;
+  }
+  .sectionTop > span:last-child {
+    display: none;
+  }
+  .projectStage {
+    padding-top: 44px;
+  }
+  .projects h2,
+  .process h2 {
+    font-size: 48px;
+    line-height: 1.08;
+  }
+  .project {
+    flex-basis: 90%;
+  }
+  .projectControls {
+    align-items: flex-start;
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .projectControls > div {
+    gap: 10px;
+    font-size: 14px;
+  }
+  .projectControls button {
+    width: 44px;
+    height: 44px;
+  }
+  .projectControls b {
+    font-size: 18px;
+  }
+  .projectControls p span {
+    font-size: 14px;
+    max-width: 150px;
+  }
+  .projectControls > div > span {
+    display: none;
+  }
+  .process {
+    padding: 70px 6%;
+  }
+  .process h2 {
+    margin: 0 0 48px;
+  }
+  .chapter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 26px;
+    padding: 40px 0;
+    min-height: 0;
+  }
+  .chapterNumber {
+    font-size: 90px;
+  }
+  .chapter h3 {
+    font-size: 42px;
+    margin-bottom: 22px;
+  }
+  .chapter p {
+    font-size: 17px;
+  }
+  .contact {
+    padding: 50px 6% 70px;
+  }
+  .contact h2 {
+    font-size: 30vw;
+    margin: 48px 0;
+  }
+  .contactBottom {
+    gap: 30px;
+  }
+  .legacyContactButton {
+    width: 100%;
+  }
+  .contactBottom > span {
+    font-size: 16px;
+  }
+  .contactBottom small {
+    display: block;
+    margin-top: 8px;
+    overflow-wrap: anywhere;
+  }
+  .dialog {
+    padding: 22px;
+    border-radius: 20px;
+  }
+  .dialog h2 {
+    font-size: 36px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chapter {
+    position: relative;
+  }
+  .projectControls button,
+  .legacyContactButton,
+  .legacyFormButton {
+    transition: none;
+  }
+}
+
+/* A continuous dark editorial world, inspired by the reference's chapter pacing. */
+.projects {
+  background: #07090d;
+}
+.projects .projectStage > h2 {
+  font-family: var(--font-cinematic), sans-serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: clamp(64px, 8vw, 120px);
+  line-height: 0.95;
+  letter-spacing: -0.015em;
+}
+.projects[data-ribbon] .projectStage > h2 {
+  font-size: clamp(64px, 7.5vw, 108px);
+  margin: 22px 5% 30px;
+}
+.projects .projectStage > h2 em {
+  color: #c2cddc;
+}
+.sectionTop {
+  font-size: 15px;
+}
+.projects .projectStage > .sectionTop {
+  padding-top: 5px;
+}
+.process {
+  padding: 0;
+  background: #080b10;
+  color: #eef1f5;
+  position: relative;
+  border-top: 1px solid #263347;
+}
+.processStage {
+  padding: 80px 5%;
+  overflow: hidden;
+}
+.process h2 {
+  font-family: var(--font-cinematic), sans-serif;
+  font-weight: 500;
+  font-size: clamp(64px, 8vw, 120px);
+  line-height: 0.94;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  margin: 0 0 60px;
+}
+.process h2 em {
+  color: #95abc5;
+}
+.processRail {
+  display: flex;
+  flex-direction: column;
+}
+.chapter {
+  position: relative;
+  top: auto;
+  background: transparent;
+  min-height: 480px;
+  border-top: 1px solid #34445b;
+  padding: 60px 0;
+  gap: 7%;
+  box-shadow: none;
+}
+.chapterNumber {
+  font-family: var(--font-cinematic), sans-serif;
+  font-size: clamp(180px, 26vw, 400px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 0.85;
+  color: #24344b;
+}
+.chapter h3 {
+  font-family: var(--font-cinematic), sans-serif;
+  font-size: clamp(64px, 7vw, 110px);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: -0.015em;
+  line-height: 0.95;
+  margin-bottom: 24px;
+}
+.chapter p {
+  color: #b7c6d9;
+  font-size: 18px;
+  max-width: 42ch;
+  line-height: 1.6;
+}
+.chapterDetail {
+  display: block;
+  margin-top: 32px;
+  color: #8fa9c8;
+  font-size: 16px;
+  line-height: 1.6;
+}
+.process[data-process-motion] {
+  height: 260svh;
+}
+.process[data-process-motion] .processStage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  padding-top: 70px;
+}
+.process[data-process-motion] .processRail {
+  width: 300%;
+  flex-direction: row;
+}
+.process[data-process-motion] .chapter {
+  flex: 0 0 33.333333%;
+  min-width: 0;
+  min-height: 0;
+  padding: 42px 5% 0 0;
+  align-items: flex-start;
+  border: 0;
+}
+.process[data-process-motion] .chapterNumber {
+  font-size: 25vw;
+}
+.process[data-process-motion] .chapter > div {
+  max-width: 510px;
+  padding-top: 12px;
+}
+.process[data-process-motion] .chapter h3 {
+  font-size: 7.5vw;
+}
+.contact {
+  background:
+    radial-gradient(ellipse at 70% 100%, #253e5c22, transparent 65%), #07090d;
+  padding: 100px 5% 80px;
+  min-height: 75svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.contact > h2 {
+  font-family: var(--font-cinematic), sans-serif;
+  font-size: clamp(72px, 23vw, 370px);
+  font-weight: 600;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  margin: 55px 0 60px;
+  white-space: nowrap;
+}
+.contact > h2 em {
+  color: #f0f2f5;
+}
+.contactBottom {
+  align-items: center;
+}
+.contactBottom > span {
+  font-size: 16px;
+}
+.contact .sectionTop {
+  display: block;
+}
+.contact .sectionTop > span {
+  display: block;
+}
+.contact .dialog h2 {
+  font-family: var(--font-body), sans-serif;
+  white-space: normal;
+  text-transform: none;
+}
+@media (max-width: 1000px) {
+  .processStage {
+    padding: 75px 6%;
+  }
+  .chapter {
+    min-height: 0;
+    padding: 45px 0;
+  }
+  .chapterNumber {
+    font-size: 24vw;
+  }
+  .chapter h3 {
+    font-size: 8vw;
+  }
+  .contact {
+    min-height: 65svh;
+  }
+  .contactBottom {
+    align-items: flex-start;
+  }
+}
+@media (max-width: 600px) {
+  .projects .projectStage > h2 {
+    font-size: 18vw;
+    line-height: 0.95;
+    margin: 26px 5% 30px;
+  }
+  .projects .projectStage > .sectionTop {
+    font-size: 14px;
+  }
+  .processStage {
+    padding: 70px 6%;
+  }
+  .process h2 {
+    font-size: 18vw;
+    line-height: 0.98;
+    margin-bottom: 45px;
+  }
+  .chapter {
+    flex-direction: row;
+    gap: 24px;
+    padding: 38px 0;
+    align-items: flex-start;
+  }
+  .chapterNumber {
+    font-size: 24vw;
+    min-width: 70px;
+  }
+  .chapter h3 {
+    font-size: 13vw;
+    line-height: 0.95;
+    margin-bottom: 20px;
+  }
+  .chapter p {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .chapterDetail {
+    font-size: 14px;
+    margin-top: 20px;
+  }
+  .contact {
+    min-height: 550px;
+    padding: 80px 6% 70px;
+  }
+  .contact > h2 {
+    font-size: 23vw;
+    margin: 40px 0;
+    line-height: 1;
+  }
+  .contact .sectionTop {
+    font-size: 16px;
+  }
+  .contactBottom {
+    gap: 26px;
+  }
+  .contactBottom > span {
+    font-size: 15px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .process .chapter {
+    position: relative;
+  }
+}
+
+/* Phone-sized scenes: native vertical scroll, one full project/chapter at a time. */
+@media (max-width: 600px) {
+  .projects[data-pocket-ribbon] {
+    height: 250svh;
+  }
+  .projects[data-pocket-ribbon] .projectStage {
+    padding: 28px 0 65px;
+  }
+  .projects[data-pocket-ribbon] .sectionTop {
+    display: none;
+  }
+  .projects[data-pocket-ribbon] .projectStage > h2 {
+    font-size: 16vw;
+    margin: 8px 6% 20px;
+    line-height: 0.95;
+  }
+  .projects[data-pocket-ribbon] .projectStage > h2 br {
+    display: block;
+  }
+  .projects[data-pocket-ribbon] .track {
+    padding: 0 6vw;
+    gap: 6vw;
+    scroll-snap-type: none;
+  }
+  .projects[data-pocket-ribbon] .project {
+    flex-basis: 88vw;
+  }
+  .projects[data-pocket-ribbon] .projectControls {
+    margin: 22px 6% 0;
+  }
+  .projects[data-pocket-ribbon] .projectControls > div > span {
+    display: inline;
+  }
+  .projects[data-pocket-ribbon] .projectControls p span {
+    max-width: 155px;
+  }
+  .projects[data-pocket-ribbon] .project [data-concept] {
+    min-height: 0;
+    height: 50svh;
+  }
+  .process[data-pocket-process] {
+    height: 235svh;
+  }
+  .process[data-pocket-process] .processStage {
+    padding: 36px 6% 65px;
+  }
+  .process[data-pocket-process] h2 {
+    font-size: 13.6vw;
+    line-height: 0.98;
+    margin-bottom: 38px;
+  }
+  .process[data-pocket-process] .chapter {
+    flex-direction: column;
+    gap: 22px;
+    padding: 0 24px 0 0;
+  }
+  .process[data-pocket-process] .chapterNumber {
+    font-size: 23vw;
+  }
+  .process[data-pocket-process] .chapter > div {
+    padding: 0;
+  }
+  .process[data-pocket-process] .chapter h3 {
+    font-size: 16vw;
+    margin-bottom: 24px;
+  }
+  .process[data-pocket-process] .chapter p {
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  .process[data-pocket-process] .chapterDetail {
+    margin-top: 22px;
+  }
+}
+
+/* Four connected milestones, with a quiet reading hold at each one. */
+.processNav { position: relative; display: flex; justify-content: space-between; margin: 0 0 30px; }
+.processNav a { position: relative; display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 70px; min-height: 84px; padding: 5px 0 12px; color: #8ea4bc; font-size: 16px; }
+.processNav a > span { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid #4c6684; background: #0c1521; font-size: 13px; transition: background-color 180ms, color 180ms; }
+.processNav a[aria-current] { color: #e3edf8; }
+.processNav a[aria-current] > span { background: #d2e5f8; border-color: #d2e5f8; color: #182b40; box-shadow: 0 0 26px #b8d9fa26; }
+.processLine { position: absolute; top: 23px; left: 35px; right: 35px; height: 1px; background: #30465f; }
+.processLine span { display: block; height: 100%; background: #b3d6fa; transform: scaleX(0); transform-origin: left; }
+.process h2 { font-family: var(--font-body),sans-serif; text-transform: none; font-size: clamp(52px,6vw,92px); letter-spacing: -.055em; line-height: 1.06; margin-bottom: 40px; font-weight: 400; }
+.process h2 em { font-family: var(--font-editorial),serif; font-style: italic; letter-spacing: -.025em; }
+.process[data-process-motion] { height: 300svh; }
+.process[data-process-motion] .processRail { width: 400%; }
+.process[data-process-motion] .chapter { flex-basis: 25%; padding: 20px 2% 0 0; }
+.process[data-process-motion] .chapterNumber { font-size: 19vw; }
+.process[data-process-motion] .chapter h3 { font-family: var(--font-body),sans-serif; font-size: clamp(44px,5vw,78px); text-transform: none; letter-spacing: -.045em; font-weight: 400; }
+.process[data-process-motion] .chapter > div { max-width: 520px; }
+.chapter { scroll-margin-top: 110px; }
+.contact { isolation: isolate; }
+.contactLight { position: absolute; pointer-events: none; z-index: -1; inset: -10% -15% -30%; background: radial-gradient(ellipse at 63% 65%, #486e9b60, #243d602b 33%, transparent 62%); }
+.contactBottom > button { min-width: 250px; }
+.contactBottom > span { text-align: right; }
+.dialog form > button { justify-self: start; }
+@media (max-width:600px) {
+  .process[data-pocket-process] { height: 270svh; }
+  .process[data-pocket-process] .processStage { padding-top: 44px; }
+  .process[data-pocket-process] h2 { font-size: 11.5vw; margin-bottom: 28px; }
+  .processNav a { font-size: 13px; min-width: 52px; }
+  .processNav a > span { width: 30px; height: 30px; font-size: 12px; }
+  .processLine { top: 20px; left: 26px; right: 26px; }
+  .process[data-pocket-process] .chapter { padding: 0 2% 0 0; gap: 18px; }
+  .process[data-pocket-process] .chapterNumber { font-size: 20vw; }
+  .process[data-pocket-process] .chapter h3 { font-size: 10vw; margin-bottom: 18px; }
+  .process[data-pocket-process] .chapterDetail { margin-top: 18px; }
+  .contactBottom > button { width: 100%; }
+  .contactBottom > span { text-align: left; }
+}
+@media (prefers-reduced-motion:reduce) { .processNav a > span { transition: none; } }
+.contactLight { inset: 0 -15%; mask-image: linear-gradient(to bottom, transparent, #000 20%, #000 70%, transparent); }
+.chapter h3 { font-family: var(--font-body), sans-serif; text-transform: none; font-weight: 400; letter-spacing: -.045em; }
+
+.processViewport { overflow: clip; }
+@media (min-width:1001px) and (max-height:799px) {
+  .process[data-process-motion] .processStage { padding: 40px 5% 45px; }
+  .process[data-process-motion] h2 { font-size: clamp(44px,4.8vw,68px); margin-bottom: 25px; }
+  .processNav { margin-bottom: 20px; }
+  .processNav a { min-height: 70px; gap: 10px; padding-bottom: 5px; }
+  .process[data-process-motion] .chapter h3 { font-size: clamp(40px,4.6vw,64px); margin-bottom: 18px; }
+  .process[data-process-motion] .chapter p { font-size: 16px; line-height: 1.55; }
+  .process[data-process-motion] .chapterDetail { margin-top: 18px; }
+  .process[data-process-motion] .chapterNumber { font-size: min(19vw,250px); }
+}
+@media (min-width:1001px) and (max-height:799px) {
+  .projects[data-ribbon] .projectStage > h2 { font-size: clamp(52px,5vw,68px); margin: 14px 5% 16px; }
+}

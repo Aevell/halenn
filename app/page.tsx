@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Cinematic from "./components/halenn/Cinematic";
+import Cinematic from "./components/halenn/cinematic/Cinematic";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 

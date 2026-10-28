@@ -1,12 +1,20 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import PrototypePicker from "./PrototypePicker";
-import Cinematic from "../../components/halenn/Cinematic";
+import Cinematic from "./cinematic/Cinematic";
 import Editorial from "./Editorial";
 import Foundation from "./Foundation";
 
 export const metadata: Metadata = {
-  title: "Hero explorations",
+  title: { absolute: "Halenn | Websites & Connected Systems" },
+  icons: {
+    icon: [
+      { url: "/prototypes/halenn-ribbon-favicon.ico", sizes: "16x16 32x32 48x48 64x64", type: "image/x-icon" },
+      { url: "/prototypes/halenn-ribbon-icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/prototypes/halenn-ribbon-icon-64.png", sizes: "64x64", type: "image/png" },
+    ],
+    apple: { url: "/prototypes/halenn-ribbon-icon-180.png", sizes: "180x180", type: "image/png" },
+  },
   robots: { index: false, follow: false },
 };
 
