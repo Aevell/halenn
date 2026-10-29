@@ -1,4 +1,4 @@
 import type { MetadataRoute } from "next";
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [{ url: "https://halenn.com" }];
+  return [{ url: "https://halenn.com" }, { url: "https://halenn.com/pricing" }];
 }

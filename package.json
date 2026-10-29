@@ -8,10 +8,14 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "verify:hero": "node --test scripts/verify-hero.mjs"
+    "verify:hero": "node --test scripts/verify-hero.mjs",
+    "verify:pricing": "node --test scripts/verify-pricing.mjs",
+    "verify:pricing:pdf": "node --test scripts/verify-pricing-pdf.mjs"
   },
   "dependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
     "next": "16.4.3",
+    "pdf-lib": "^1.17.1",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },

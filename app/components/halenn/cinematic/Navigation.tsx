@@ -7,7 +7,7 @@ import s from "./controls.module.css";
 
 const destinations = [
   ["websites", "Websites"], ["commerce", "Commerce"],
-  ["automation", "Automation"], ["projects", "Work"], ["scope", "Pricing"],
+  ["automation", "Automation"], ["projects", "Work"], ["pricing", "Pricing"],
 ] as const;
 
 export default function Navigation() {
@@ -51,7 +51,7 @@ export default function Navigation() {
     };
   }, []);
 
-  const links = destinations.map(([id, label]) => <a key={id} href={`#${id}`} data-section-link>{label}</a>);
+  const links = destinations.map(([id, label]) => <a key={id} href={id === "pricing" ? "/pricing" : `#${id}`} data-section-link={id !== "pricing" || undefined}>{label}</a>);
   return <header ref={header} className={s.header} data-prototype-navigation>
     <a href="#hero-content" className={s.brand} aria-label="Halenn home"><Wordmark /><span>A company by Aevell</span></a>
     <nav className={s.quickNav} aria-label="Primary navigation">{links}</nav>
