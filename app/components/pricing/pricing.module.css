@@ -28,7 +28,7 @@
   margin: 0;
 }
 .page :is(h1, h2, h3) {
-  font-weight: 400;
+  font-weight: 300;
   line-height: 1.12;
   letter-spacing: -0.035em;
   text-wrap: balance;
@@ -1312,7 +1312,7 @@
 .appTable td:nth-child(2) { color: var(--muted); }
 .appTable th:last-child, .appTable td:last-child { text-align: right; padding-right: 0; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .appCareGuide { display: flex; gap: 32px; justify-content: space-between; align-items: baseline; padding: 30px 0 8px; }
-.appCareGuide h4 { margin: 0 0 8px; font-weight: 400; font-size: 21px; }
+.appCareGuide h4 { margin: 0 0 8px; font-weight: 300; font-size: 21px; }
 .appCareGuide > div > p { color: var(--muted); max-width: 700px; font-size: 16px; }
 .appCareGuide > p { white-space: nowrap; font-size: 22px; font-variant-numeric: tabular-nums; }
 .appCareGuide > p > span { color: var(--muted); font-size: 16px; }
@@ -1340,11 +1340,11 @@
 .guideNav a { min-height: 44px; display: inline-flex; align-items: center; text-underline-offset: 7px; }
 .webGuide, .aiGuide { position: relative; scroll-margin-top: 40px; }
 .serviceIntro { margin-bottom: 40px; }
-.serviceIntro h3, .appGuideIntro h3 { font-size: clamp(36px, 4vw, 54px); font-weight: 400; letter-spacing: -0.03em; margin: 0 0 16px; }
+.serviceIntro h3, .appGuideIntro h3 { font-size: clamp(36px, 4vw, 54px); font-weight: 300; letter-spacing: -0.03em; margin: 0 0 16px; }
 .serviceIntro p { color: var(--muted); max-width: 64ch; }
-.serviceBand h4 { font-size: clamp(28px, 3.2vw, 42px); font-weight: 400; letter-spacing: -0.025em; margin: 0 0 12px; }
+.serviceBand h4 { font-size: clamp(28px, 3.2vw, 42px); font-weight: 300; letter-spacing: -0.025em; margin: 0 0 12px; }
 .visibilityGuide { margin-top: 64px; }
-.visibilityGuide > h4, .pillarGuide h4, .customGuide h4 { font-size: clamp(25px, 2.7vw, 32px); font-weight: 400; letter-spacing: -0.02em; margin: 0 0 12px; }
+.visibilityGuide > h4, .pillarGuide h4, .customGuide h4 { font-size: clamp(25px, 2.7vw, 32px); font-weight: 300; letter-spacing: -0.02em; margin: 0 0 12px; }
 .visibilityGuide > p, .pillarGuide > div > p, .customGuide p { color: var(--muted); }
 .visibilityGuide > dl { display: grid; grid-template-columns: 1fr 1fr; column-gap: 52px; margin-top: 28px; }
 .aiGuide { margin-top: 96px; padding-top: 72px; border-top: 1px solid var(--line); }
@@ -1365,7 +1365,7 @@
 .packageGroup[data-expanded="true"] > summary > svg { transform: rotate(45deg); }
 .packageGroup .disclosureBody { padding-bottom: 24px; }
 .supportGroup + .supportGroup { margin-top: 36px; }
-.supportGroup h3 { font-size: 22px; font-weight: 400; margin-bottom: 18px; }
+.supportGroup h3 { font-size: 22px; font-weight: 300; margin-bottom: 18px; }
 @media (max-width: 700px) {
   .guideNav { gap: 8px 24px; margin-bottom: 36px; }
   .serviceIntro { margin-bottom: 24px; }

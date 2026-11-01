@@ -36,6 +36,19 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Match the Manrope Light headline in the Aevell preview. */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), var(--font-body), Arial, sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+:is(h1, h2, h3, h4, h5, h6) :is(em, strong, span) {
+  font-family: inherit;
+  font-weight: inherit;
+  font-style: normal;
+}
+
 a {
   color: inherit;
   text-decoration: none;

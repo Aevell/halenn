@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Syne } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 const bodyFont = Geist({
@@ -11,6 +12,14 @@ const bodyFont = Geist({
 const displayFont = Syne({
   subsets: ["latin"],
   variable: "--font-display",
+  display: "swap",
+});
+
+const headingFont = localFont({
+  src: "./fonts/Manrope-Light.ttf",
+  weight: "300",
+  style: "normal",
+  variable: "--font-heading",
   display: "swap",
 });
 
@@ -53,7 +62,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${bodyFont.variable} ${displayFont.variable}`}>
+      <body className={`${bodyFont.variable} ${displayFont.variable} ${headingFont.variable}`}>
         {children}
       </body>
     </html>

@@ -72,9 +72,9 @@
   align-self: start;
 }
 .scopeHeading h2 {
-  font-family: var(--font-cinematic), sans-serif;
+  font-family: var(--font-heading), var(--font-body), sans-serif;
   font-size: clamp(64px, 7vw, 112px);
-  font-weight: 500;
+  font-weight: 300;
   line-height: 0.93;
   letter-spacing: -0.015em;
   text-transform: uppercase;
@@ -101,7 +101,7 @@
 }
 .baseScope h3 {
   font-size: 30px;
-  font-weight: 400;
+  font-weight: 300;
   letter-spacing: -0.03em;
 }
 .baseScope p {
@@ -362,8 +362,8 @@
 .world :is(section, [data-service-chapter]) { scroll-margin-top: 96px; }
 .motionRoot[data-flow-motion] [data-service-chapter] { scroll-margin-top: 0; }
 .scope { background: #07090d; }
-.scopeHeading h2 { font-family: var(--font-body), sans-serif; text-transform: none; font-size: clamp(48px, 5.6vw, 88px); line-height: 1.04; letter-spacing: -.055em; font-weight: 400; }
-.scopeHeading h2 span { font-family: var(--font-editorial), serif; font-style: italic; letter-spacing: -.025em; }
+.scopeHeading h2 { font-family: var(--font-heading), var(--font-body), sans-serif; text-transform: none; font-size: clamp(48px, 5.6vw, 88px); line-height: 1.04; letter-spacing: -.055em; font-weight: 300; }
+.scopeHeading h2 span { font-family: var(--font-heading), var(--font-body), sans-serif; font-style: normal; letter-spacing: inherit; }
 .scopeSummary > button { min-height: 58px; }
 .world :is(textarea, details):focus-visible { outline: 2px solid #bddbff; outline-offset: 5px; }
 @media (max-width:600px) {

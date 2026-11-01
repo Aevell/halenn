@@ -21,9 +21,9 @@
 }
 .projects h2,
 .process h2 {
-  font-family: var(--font-body), sans-serif;
+  font-family: var(--font-heading), var(--font-body), sans-serif;
   font-size: clamp(48px, 6vw, 88px);
-  font-weight: 400;
+  font-weight: 300;
   letter-spacing: -0.04em;
   line-height: 1.06;
   margin: 30px 5% 38px;
@@ -175,7 +175,7 @@
 }
 .chapter h3 {
   font-size: clamp(44px, 5.5vw, 82px);
-  font-weight: 400;
+  font-weight: 300;
   letter-spacing: -0.04em;
   line-height: 1.08;
   margin: 0 0 26px;
@@ -204,7 +204,7 @@
 }
 .contact h2 {
   font-size: clamp(100px, 21vw, 330px);
-  font-weight: 400;
+  font-weight: 300;
   line-height: 0.9;
   letter-spacing: -0.04em;
   margin: 60px 0 70px;
@@ -285,7 +285,7 @@
 }
 .dialog h2 {
   font-size: clamp(32px, 5vw, 60px);
-  font-weight: 400;
+  font-weight: 300;
   letter-spacing: -0.035em;
   margin: 20px 0 28px;
 }
@@ -491,8 +491,8 @@
   background: #07090d;
 }
 .projects .projectStage > h2 {
-  font-family: var(--font-cinematic), sans-serif;
-  font-weight: 500;
+  font-family: var(--font-heading), var(--font-body), sans-serif;
+  font-weight: 300;
   text-transform: uppercase;
   font-size: clamp(64px, 8vw, 120px);
   line-height: 0.95;
@@ -523,8 +523,8 @@
   overflow: hidden;
 }
 .process h2 {
-  font-family: var(--font-cinematic), sans-serif;
-  font-weight: 500;
+  font-family: var(--font-heading), var(--font-body), sans-serif;
+  font-weight: 300;
   font-size: clamp(64px, 8vw, 120px);
   line-height: 0.94;
   letter-spacing: -0.015em;
@@ -557,9 +557,9 @@
   color: #24344b;
 }
 .chapter h3 {
-  font-family: var(--font-cinematic), sans-serif;
+  font-family: var(--font-heading), var(--font-body), sans-serif;
   font-size: clamp(64px, 7vw, 110px);
-  font-weight: 500;
+  font-weight: 300;
   text-transform: uppercase;
   letter-spacing: -0.015em;
   line-height: 0.95;
@@ -619,9 +619,9 @@
   justify-content: center;
 }
 .contact > h2 {
-  font-family: var(--font-cinematic), sans-serif;
-  font-size: clamp(72px, 23vw, 370px);
-  font-weight: 600;
+  font-family: var(--font-heading), var(--font-body), sans-serif;
+  font-size: clamp(72px, 16vw, 260px);
+  font-weight: 300;
   line-height: 0.9;
   letter-spacing: -0.02em;
   margin: 55px 0 60px;
@@ -643,7 +643,7 @@
   display: block;
 }
 .contact .dialog h2 {
-  font-family: var(--font-body), sans-serif;
+  font-family: var(--font-heading), var(--font-body), sans-serif;
   white-space: normal;
   text-transform: none;
 }
@@ -713,7 +713,7 @@
     padding: 80px 6% 70px;
   }
   .contact > h2 {
-    font-size: 23vw;
+    font-size: 16vw;
     margin: 40px 0;
     line-height: 1;
   }
@@ -816,13 +816,13 @@
 .processNav a[aria-current] > span { background: #d2e5f8; border-color: #d2e5f8; color: #182b40; box-shadow: 0 0 26px #b8d9fa26; }
 .processLine { position: absolute; top: 23px; left: 35px; right: 35px; height: 1px; background: #30465f; }
 .processLine span { display: block; height: 100%; background: #b3d6fa; transform: scaleX(0); transform-origin: left; }
-.process h2 { font-family: var(--font-body),sans-serif; text-transform: none; font-size: clamp(52px,6vw,92px); letter-spacing: -.055em; line-height: 1.06; margin-bottom: 40px; font-weight: 400; }
-.process h2 em { font-family: var(--font-editorial),serif; font-style: italic; letter-spacing: -.025em; }
+.process h2 { font-family: var(--font-heading), var(--font-body), sans-serif; text-transform: none; font-size: clamp(52px,6vw,92px); letter-spacing: -.055em; line-height: 1.06; margin-bottom: 40px; font-weight: 300; }
+.process h2 em { font-family: var(--font-heading), var(--font-body), sans-serif; font-style: normal; letter-spacing: inherit; }
 .process[data-process-motion] { height: 300svh; }
 .process[data-process-motion] .processRail { width: 400%; }
 .process[data-process-motion] .chapter { flex-basis: 25%; padding: 20px 2% 0 0; }
 .process[data-process-motion] .chapterNumber { font-size: 19vw; }
-.process[data-process-motion] .chapter h3 { font-family: var(--font-body),sans-serif; font-size: clamp(44px,5vw,78px); text-transform: none; letter-spacing: -.045em; font-weight: 400; }
+.process[data-process-motion] .chapter h3 { font-family: var(--font-heading), var(--font-body), sans-serif; font-size: clamp(44px,5vw,78px); text-transform: none; letter-spacing: -.045em; font-weight: 300; }
 .process[data-process-motion] .chapter > div { max-width: 520px; }
 .chapter { scroll-margin-top: 110px; }
 .contact { isolation: isolate; }
@@ -846,7 +846,7 @@
 }
 @media (prefers-reduced-motion:reduce) { .processNav a > span { transition: none; } }
 .contactLight { inset: 0 -15%; mask-image: linear-gradient(to bottom, transparent, #000 20%, #000 70%, transparent); }
-.chapter h3 { font-family: var(--font-body), sans-serif; text-transform: none; font-weight: 400; letter-spacing: -.045em; }
+.chapter h3 { font-family: var(--font-heading), var(--font-body), sans-serif; text-transform: none; font-weight: 300; letter-spacing: -.045em; }
 
 .processViewport { overflow: clip; }
 @media (min-width:1001px) and (max-height:799px) {
