@@ -1,7 +1,7 @@
 "use client";
 
 import { ActionArrow } from "./Action";
-import { useProjectScope } from "./Experience";
+import { useEnquiry } from "./Experience";
 import controls from "./controls.module.css";
 import s from "./process.module.css";
 
@@ -33,7 +33,7 @@ const steps = [
 ];
 
 export default function Process() {
-  const { setEnquiryGoal } = useProjectScope();
+  const { setEnquiryGoal } = useEnquiry();
 
   return (
     <section id="process" className={s.process} aria-labelledby="process-title">

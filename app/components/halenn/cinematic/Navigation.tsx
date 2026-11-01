@@ -6,8 +6,7 @@ import Wordmark from "./Wordmark";
 import s from "./controls.module.css";
 
 const destinations = [
-  ["websites", "Websites"], ["commerce", "Commerce"],
-  ["automation", "Automation"], ["process", "How we work"], ["projects", "Work"], ["pricing", "Pricing"],
+  ["services", "Services & examples"], ["process", "How we work"], ["pricing", "Pricing"],
 ] as const;
 
 export default function Navigation() {

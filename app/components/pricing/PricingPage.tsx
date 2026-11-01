@@ -214,7 +214,7 @@ export default function PricingPage({ initial, prototype = false, guideAnswers }
           <span>A company by Aevell</span>
         </a>
         <nav aria-label="Main navigation">
-          <a href={`${home}#projects`}>Work</a>
+          <a href={`${home}#services`}>Services</a>
           <a href="#builder" aria-current="page">
             Pricing
           </a>

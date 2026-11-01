@@ -8,348 +8,26 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import Concept from "../Concept";
-import { Arrow } from "../Brand";
 import { ActionArrow } from "./Action";
 import SilkEcho from "./SilkEcho";
 import controls from "./controls.module.css";
 import s from "./experience.module.css";
 
-const ScopeContext = createContext<{
-  selected: string[];
-  setSelected: React.Dispatch<React.SetStateAction<string[]>>;
+const EnquiryContext = createContext<{
   enquiryGoal: string;
   setEnquiryGoal: React.Dispatch<React.SetStateAction<string>>;
-}>({ selected: [], setSelected: () => {}, enquiryGoal: "", setEnquiryGoal: () => {} });
-export const useProjectScope = () => useContext(ScopeContext);
+}>({ enquiryGoal: "", setEnquiryGoal: () => {} });
+export const useEnquiry = () => useContext(EnquiryContext);
 export function ExperienceProvider({ children }: { children: ReactNode }) {
-  const [selected, setSelected] = useState<string[]>([]);
   const [enquiryGoal, setEnquiryGoal] = useState("");
   return (
-    <ScopeContext.Provider value={{ selected, setSelected, enquiryGoal, setEnquiryGoal }}>
+    <EnquiryContext.Provider value={{ enquiryGoal, setEnquiryGoal }}>
       {children}
-    </ScopeContext.Provider>
-  );
-}
-// Reading holds on phone: each complete composition has room to settle.
-const phoneStep = (p: number) =>
-  Math.max(0, Math.min(1, (p - 0.1) / 0.28)) +
-  Math.max(0, Math.min(1, (p - 0.58) / 0.28));
-
-const projects = [
-  {
-    name: "FORMA",
-    type: "Architecture / Website concept",
-    title: "Space to think.",
-    description:
-      "An editorial website for an imagined architecture studio. Large project imagery, considered typography and a simple enquiry journey.",
-    scope: [
-      "Art direction & responsive website",
-      "Project collection & CMS",
-      "Enquiry forms",
-    ],
-    theme: s.architecture,
-  },
-  {
-    name: "OBJECT",
-    type: "Design store / Commerce concept",
-    title: "Objects for living.",
-    description:
-      "A fictional design store exploring product discovery, a considered cart and a clear checkout journey.",
-    scope: [
-      "Product catalogue & collections",
-      "Cart & checkout integration",
-      "Order notifications",
-    ],
-    theme: s.commerce,
-  },
-  {
-    name: "CONNECTED",
-    type: "Operations / n8n concept",
-    title: "Less busywork.\nMore possibility.",
-    description:
-      "An illustrative workflow connecting an incoming enquiry to a CRM, a team notification and a follow-up task.",
-    scope: [
-      "Form-to-CRM integration",
-      "n8n workflow design",
-      "Error handling & handover",
-    ],
-    theme: s.workflow,
-  },
-];
-export function Projects() {
-  const section = useRef<HTMLElement>(null),
-    track = useRef<HTMLDivElement>(null),
-    dialog = useRef<HTMLDialogElement>(null);
-  const [active, setActive] = useState(0),
-    [opened, setOpened] = useState(0);
-  const current = useRef(0),
-    enhanced = useRef(false),
-    pocket = useRef(false),
-    step = useRef(1),
-    bounds = useRef({ top: 0, range: 1 });
-  const drag = useRef<{ x: number; y: number } | null>(null);
-  useEffect(() => {
-    const root = section.current!,
-      rail = track.current!;
-    const media = matchMedia(
-      "(min-width: 1001px) and (min-height: 681px) and (prefers-reduced-motion: no-preference)",
-    );
-    const phone = matchMedia(
-      "(max-width: 600px) and (min-height: 700px) and (prefers-reduced-motion: no-preference)",
-    );
-    const stage = root.querySelector<HTMLElement>("[data-project-stage]")!;
-    let raf = 0;
-    function paint() {
-      raf = 0;
-      if (!enhanced.current) return;
-      const p = Math.max(
-        0,
-        Math.min(1, (scrollY - bounds.current.top) / bounds.current.range),
-      );
-      const v = pocket.current ? phoneStep(p) : p * 2;
-      rail.style.transform = `translate3d(${-v * step.current}px,0,0)`;
-      Array.from(rail.children).forEach((node, i) => {
-        (node as HTMLElement).style.transform = pocket.current
-          ? `translate3d(0, ${Math.min(1, Math.abs(i - v)) * 16}px, 0)`
-          : `perspective(1600px) rotateY(${Math.max(-5, Math.min(5, (i - v) * -5))}deg) translateY(${Math.min(1, Math.abs(i - v)) * 24}px)`;
-      });
-      const next = Math.round(v);
-      if (next !== current.current) {
-        current.current = next;
-        setActive(next);
-      }
-    }
-    function schedule() {
-      if (!raf) raf = requestAnimationFrame(paint);
-    }
-    function measure() {
-      pocket.current = phone.matches;
-      enhanced.current = media.matches || pocket.current;
-      root.toggleAttribute("data-ribbon", enhanced.current);
-      root.toggleAttribute("data-pocket-ribbon", pocket.current);
-      // If text zoom/content cannot fit, preserve the native, flowing carousel.
-      if (
-        pocket.current &&
-        (stage.scrollHeight > stage.clientHeight + 1 ||
-          Array.from(rail.querySelectorAll<HTMLElement>("[data-concept]")).some(
-            (card) => card.scrollHeight > card.clientHeight + 1,
-          ))
-      ) {
-        pocket.current = false;
-        enhanced.current = false;
-        root.removeAttribute("data-ribbon");
-        root.removeAttribute("data-pocket-ribbon");
-      }
-      step.current =
-        (rail.children[0] as HTMLElement).offsetWidth +
-        parseFloat(getComputedStyle(rail).columnGap || "0");
-      rail.style.transform = "";
-      if (!enhanced.current) {
-        const n = Math.max(
-          0,
-          Math.min(
-            2,
-            Math.round(
-              rail.scrollLeft /
-                ((rail.children[0] as HTMLElement).offsetWidth + 24),
-            ),
-          ),
-        );
-        current.current = n;
-        setActive(n);
-      }
-      Array.from(rail.children).forEach(
-        (n) => ((n as HTMLElement).style.transform = ""),
-      );
-      bounds.current = {
-        top: root.getBoundingClientRect().top + scrollY,
-        range: Math.max(1, root.offsetHeight - stage.offsetHeight),
-      };
-      schedule();
-    }
-    measure();
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", measure);
-    media.addEventListener("change", measure);
-    phone.addEventListener("change", measure);
-    const resize = new ResizeObserver(measure);
-    if (root.parentElement) resize.observe(root.parentElement);
-    return () => {
-      resize.disconnect();
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", measure);
-      media.removeEventListener("change", measure);
-      phone.removeEventListener("change", measure);
-    };
-  }, []);
-  const go = (index: number) => {
-    const next = Math.max(0, Math.min(2, index));
-    setActive(next);
-    current.current = next;
-    if (enhanced.current)
-      window.scrollTo({
-        top: bounds.current.top + (bounds.current.range * next) / 2,
-        behavior: "instant",
-      });
-    else
-      track.current?.children[next]?.scrollIntoView({
-        behavior: "instant",
-        block: "nearest",
-        inline: "center",
-      });
-  };
-  return (
-    <section
-      ref={section}
-      id="projects"
-      className={s.projects}
-      aria-labelledby="projects-title"
-      data-local-keys
-    >
-      <div className={s.projectStage} data-project-stage>
-        <SilkEcho scene="projects" />
-        <div className={s.sectionTop}>
-          <span>Concept projects</span>
-          <span>Imagined businesses. Real possibilities.</span>
-        </div>
-        <h2 id="projects-title">
-          What we <br />
-          <em>could build.</em>
-        </h2>
-        <div
-          className={s.viewport}
-          data-project-viewport
-          onPointerDown={(e) => {
-            if (
-              enhanced.current &&
-              !pocket.current &&
-              e.pointerType === "mouse"
-            ) {
-              drag.current = { x: e.clientX, y: scrollY };
-              e.currentTarget.setPointerCapture(e.pointerId);
-            }
-          }}
-          onPointerMove={(e) => {
-            if (drag.current)
-              window.scrollTo({
-                top: drag.current.y + (drag.current.x - e.clientX) * 2,
-                behavior: "instant",
-              });
-          }}
-          onPointerUp={(e) => {
-            if (drag.current && Math.abs(drag.current.x - e.clientX) < 5) {
-              const target = document
-                .elementFromPoint(e.clientX, e.clientY)
-                ?.closest<HTMLButtonElement>("[data-project]");
-              if (target) {
-                setOpened(Number(target.dataset.project));
-                dialog.current?.showModal();
-              }
-            }
-            drag.current = null;
-          }}
-          onPointerCancel={() => {
-            drag.current = null;
-          }}
-        >
-          <div
-            ref={track}
-            className={s.track}
-            onScroll={(e) => {
-              if (!enhanced.current) {
-                const el = e.currentTarget;
-                const n = Math.round(
-                  el.scrollLeft / (el.children[0]?.clientWidth + 24),
-                );
-                setActive(Math.max(0, Math.min(2, n)));
-                current.current = n;
-              }
-            }}
-          >
-            {projects.map((p, i) => (
-              <button
-                data-project={i}
-                key={p.name}
-                className={s.project}
-                onClick={(e) => {
-                  if (!enhanced.current || pocket.current || e.detail === 0) {
-                    setOpened(i);
-                    dialog.current?.showModal();
-                  }
-                }}
-                onFocus={(e) => {
-                  if (
-                    enhanced.current &&
-                    e.currentTarget.matches(":focus-visible")
-                  )
-                    go(i);
-                }}
-                aria-label={`Open ${p.name} concept project`}
-              >
-                <Concept index={i} />
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className={s.projectControls}>
-          <p aria-live="polite">
-            <b>{projects[active].name}</b>
-            <span>{projects[active].type.replace(" / ", " · ")}</span>
-          </p>
-          <div>
-            <button
-              aria-label="Previous project"
-              disabled={active === 0}
-              onClick={() => go(active - 1)}
-            >
-              <span style={{ display: "flex", transform: "rotate(180deg)" }}><Arrow /></span>
-            </button>
-            <span>0{active + 1} / 03</span>
-            <button
-              aria-label="Next project"
-              disabled={active === 2}
-              onClick={() => go(active + 1)}
-            >
-              <Arrow />
-            </button>
-          </div>
-        </div>
-      </div>
-      <dialog
-        ref={dialog}
-        className={s.dialog}
-        aria-labelledby="project-dialog-title"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) dialog.current?.close();
-        }}
-      >
-        <button
-          className={s.close}
-          onClick={() => dialog.current?.close()}
-          aria-label="Close project preview"
-        >
-          Close ×
-        </button>
-        <p className={s.kicker}>Concept project / Example content</p>
-        <h2 id="project-dialog-title">{projects[opened].name}</h2>
-        <Concept index={opened} />
-        <p>{projects[opened].description}</p>
-        <ul>
-          {projects[opened].scope.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-        <p className={s.kicker}>
-          Illustrative scope. No client relationship or results implied.
-        </p>
-      </dialog>
-    </section>
+    </EnquiryContext.Provider>
   );
 }
 export function Contact({ email }: { email?: string }) {
-  const { selected, enquiryGoal, setEnquiryGoal } = useProjectScope();
+  const { enquiryGoal, setEnquiryGoal } = useEnquiry();
   const form = useRef<HTMLDialogElement>(null);
   const [saved, setSaved] = useState(false);
   useEffect(() => {
@@ -401,8 +79,7 @@ export function Contact({ email }: { email?: string }) {
             e.preventDefault();
             if (email) {
               const values = new FormData(e.currentTarget);
-              const scope = enquiryGoal ? "Enquiry started from a business goal." : `Selected scope: website${selected.length ? ` + ${selected.join(", ")}` : ""}.`;
-              const body = `Name: ${values.get("name")}\nEmail: ${values.get("email")}\n\n${values.get("project")}\n\n${scope}`;
+              const body = `Name: ${values.get("name")}\nEmail: ${values.get("email")}\n\n${values.get("project")}`;
               window.location.href = `mailto:${email}?subject=${encodeURIComponent("A new project for Halenn")}&body=${encodeURIComponent(body)}`;
             }
             setSaved(true);
@@ -421,7 +98,7 @@ export function Contact({ email }: { email?: string }) {
             <textarea key={enquiryGoal} name="project" required rows={4} defaultValue={enquiryGoal} />
           </label>
           <p>
-            {enquiryGoal ? "Tell us about the task or idea. You don’t need to choose a solution yet." : `Selected scope: website${selected.length ? ` + ${selected.join(", ")}` : ""}.`}
+            Tell us about the task or idea. You don’t need to choose a solution yet.
           </p>
           <button type="submit" className={controls.action}>
             {email ? "Open email draft" : "Preview enquiry"} <ActionArrow />

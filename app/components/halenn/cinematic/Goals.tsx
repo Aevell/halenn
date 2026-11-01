@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Arrow } from "../Brand";
-import { useProjectScope } from "./Experience";
+import { useEnquiry } from "./Experience";
 import {
   chooseGuideAnswer, guideBrief, guideComplete, guidePricingHref,
   guideQuestions, guideRecommendation, guideSummary, type GuideAnswers,
@@ -10,7 +10,7 @@ import {
 import s from "./goals.module.css";
 
 export default function Goals() {
-  const { setEnquiryGoal } = useProjectScope();
+  const { setEnquiryGoal } = useEnquiry();
   const [answers, setAnswers] = useState<GuideAnswers>({});
   const [step, setStep] = useState(0);
   const title = useRef<HTMLHeadingElement>(null);

@@ -2,8 +2,8 @@ import { Instrument_Serif } from "next/font/google";
 import localFont from "next/font/local";
 import { Arrow } from "../Brand";
 import CinematicMotion from "./CinematicMotion";
-import { ExperienceProvider, Projects, Contact } from "./Experience";
-import ProjectScope from "./ProjectScope";
+import { ExperienceProvider, Contact } from "./Experience";
+import { ActionLink } from "./Action";
 import Process from "./Process";
 import Navigation from "./Navigation";
 import Services from "./Services";
@@ -57,24 +57,14 @@ export default function Cinematic({ contactEmail }: { contactEmail?: string }) {
           </Refraction>
 
           <Process />
-          <Projects />
-          <section
-            id="scope"
-            className={styles.scope}
-            aria-labelledby="scope-title"
-          >
-            <div className={styles.scopeHeading} data-scope-heading>
-              <h2 id="scope-title">
-                Your idea.
-                <br />
-                <span>Our next move.</span>
-              </h2>
-              <p>
-                Project pricing starts with a clear scope. Choose your essentials
-                and we’ll put together a tailored quote, including any ongoing care.
-              </p>
+          <section id="pricing-intro" className={styles.pricingIntro} aria-labelledby="pricing-intro-title">
+            <span id="scope" className={styles.anchor} aria-hidden="true" />
+            <div>
+              <p className={styles.eyebrow}>A clearer idea of cost</p>
+              <h2 id="pricing-intro-title">Find your starting price.</h2>
+              <p>Explore packages and what’s included, or build an estimate around your needs. We’ll confirm the scope and final quote together.</p>
             </div>
-            <ProjectScope />
+            <ActionLink href="/pricing">Explore pricing</ActionLink>
           </section>
           <Contact email={contactEmail} />
           <footer className={styles.footer}>

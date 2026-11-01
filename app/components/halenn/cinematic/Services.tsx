@@ -1,61 +1,99 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import Concept from "../Concept";
 import { Arrow } from "../Brand";
-import { ActionLink } from "./Action";
+import { ActionArrow, ActionLink } from "./Action";
+import { useEnquiry } from "./Experience";
+import controls from "./controls.module.css";
+import dialogStyles from "./experience.module.css";
 import s from "./services.module.css";
 
-function WorkflowIcon({ type }: { type: "order" | "connect" | "complete" }) {
-  return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-    {type === "order" ? <path d="M5 19 19 5M5 5h14v14" /> : type === "complete" ? <path d="m5 12 4 4L19 6" /> : <><rect x="2" y="9" width="6" height="6" rx="2" /><rect x="16" y="2" width="6" height="6" rx="2" /><rect x="16" y="16" width="6" height="6" rx="2" /><path d="M8 12h3a2 2 0 0 0 2-2V7a2 2 0 0 1 2-2h1M8 12h3a2 2 0 0 1 2 2v3a2 2 0 0 0 2 2h1" /></>}
-  </svg>;
-}
-
 const services = [
-  { id: "websites", label: "01 / Websites", title: <>First, make<br /><em>an impression.</em></>, text: "A considered website makes your business feel as good online as it does in person. Every screen, every detail, every next step.", detail: "Custom design · Development · Content", action: "Explore your website" },
-  { id: "commerce", label: "02 / Commerce", title: <>Turn interest<br /><em>into an order.</em></>, text: "Give people a clear path from discovery to checkout. A beautiful webshop, a thoughtful cart and the right payment connections.", detail: "Webshops · Cart & checkout · Payments", action: "Plan your webshop" },
-  { id: "automation", label: "03 / Automation", title: <>Then, connect<br /><em>what’s next.</em></>, text: "Put the work behind the website in motion. Connect enquiries, orders and everyday tools with n8n workflows built around your business.", detail: "n8n workflows · Integrations · Website care", action: "Connect your systems" },
+  {
+    id: "websites", label: "01 / Websites", name: "FORMA", example: "Website concept",
+    title: <>First, make<br /><em>an impression.</em></>,
+    text: "Give people a clear picture of your business and an easy way to enquire or book. A website that looks considered and helps customers take the next step.",
+    features: ["Services and work, clearly presented", "Enquiry forms and booking connections", "Content you can update yourself"],
+    href: "/pricing?services=web&web=website#web-guide", action: "Explore website pricing",
+    description: "An imagined architecture studio with space for its projects, a clear introduction to its services and a simple enquiry journey.",
+    scope: ["Responsive website and project collection", "Editable content", "Enquiry forms"],
+  },
+  {
+    id: "commerce", label: "02 / Webshops", name: "OBJECT", example: "Webshop concept",
+    title: <>Turn interest<br /><em>into an order.</em></>,
+    text: "Help customers find the right product and buy with confidence. Bring your catalogue, checkout and order updates into one clear journey.",
+    features: ["Products and collections", "Cart, checkout and payments", "Order notifications and connected tools"],
+    href: "/pricing?services=web&web=webshop#web-guide", action: "Explore webshop pricing",
+    description: "A fictional design store showing how product collections and a focused shopping experience can work together. Its project scope could include checkout, payments and order notifications.",
+    scope: ["Product catalogue and collections", "Cart and payment-provider integration", "Order notifications"],
+  },
+  {
+    id: "automation", label: "03 / Automation & AI", name: "CONNECTED", example: "Workflow concept",
+    title: <>Make everyday<br /><em>work flow.</em></>,
+    text: "Respond to enquiries, send reminders and keep your tools in sync. We can also build AI assistants that answer questions, or agents that carry out agreed tasks.",
+    features: ["Follow-ups, reminders and integrations", "AI chat and phone assistants", "Custom agents and automation flows"],
+    href: "/pricing?services=automation#automation-guide", action: "Explore automation pricing",
+    description: "An illustrative enquiry workflow: capture a new enquiry, update the CRM and give the team a follow-up task. This example shows a defined workflow; AI assistants and agents are scoped around the job you need them to do.",
+    scope: ["Enquiry-to-CRM connection", "Team notifications and follow-up tasks", "Error handling and handover"],
+  },
 ];
 
 export default function Services() {
-  return <section id="services" className={s.services} aria-label="Websites, commerce and automation" data-services>
-    <div className={s.visualColumn} aria-hidden="true">
-      <div className={s.visualStage} data-service-stage>
-        <div className={s.light} data-service-light />
-        <div className={s.scene} data-service-camera>
-          <div className={s.website} data-website-visual>
-            <div className={s.browserBar}><span /><span /><span /><p>object.store / Concept preview</p></div>
-            <Concept index={1} />
-          </div>
-          <div className={s.checkout} data-checkout-visual>
-            <div className={s.checkoutTop}><span>Your collection</span><span>01</span></div>
-            <div className={s.product}><div className={s.object}><i /></div><div><strong>The Everyday Lamp</strong><p>Brushed aluminium</p><span>€240.00</span></div></div>
-            <div className={s.total}><span>Subtotal</span><strong>€240.00</strong></div>
-            <div className={s.checkoutAction}>Continue to checkout <Arrow /></div>
-            <p className={s.example}>Illustrative store & checkout</p>
-          </div>
-          <div className={s.workflow} data-workflow-visual>
-            <p className={s.workflowTitle}>One order. Everything connected.</p>
-            <div className={s.workflowNodes}>
-              <div><span className={s.nodeIcon}><WorkflowIcon type="order" /></span><strong>New order</strong><p>Website</p></div>
-              <i />
-              <div><span className={s.nodeIcon}><WorkflowIcon type="connect" /></span><strong>Connect</strong><p>n8n workflow</p></div>
-              <i />
-              <div><span className={s.nodeIcon}><WorkflowIcon type="complete" /></span><strong>All in sync</strong><p>CRM & team</p></div>
-            </div>
-            <div className={s.workflowResult}><span />Order received · Team notified · Follow-up ready</div>
-            <p className={s.example}>Example workflow</p>
-          </div>
-        </div>
-        <div className={s.sceneProgress}><span>From first impression to everyday operation</span><i><b data-service-progress /></i></div>
+  const { setEnquiryGoal } = useEnquiry();
+  const dialog = useRef<HTMLDialogElement>(null);
+  const [opened, setOpened] = useState<number | null>(null);
+  const project = opened === null ? null : services[opened];
+
+  useEffect(() => {
+    if (opened !== null) dialog.current?.showModal();
+  }, [opened]);
+
+  return <section id="services" className={s.services} aria-labelledby="services-title">
+    <span id="projects" className={s.anchor} aria-hidden="true" />
+    <header className={s.intro}>
+      <div>
+        <p className={s.eyebrow}>Services & examples</p>
+        <h2 id="services-title">What we could<br /><em>build for you.</em></h2>
       </div>
-    </div>
-    <div className={s.chapters}>
-      {services.map((service) => <article key={service.id} id={service.id} className={s.chapter} data-service-chapter tabIndex={-1}>
-        <p className={s.label}>{service.label}</p>
-        <h2>{service.title}</h2>
-        <p className={s.description}>{service.text}</p>
-        <p className={s.detail}>{service.detail}</p>
-        <ActionLink href="#scope" quiet>{service.action}</ActionLink>
+      <p>Explore what each solution could do for your business. The previews below are concept projects for imagined businesses.</p>
+    </header>
+    <div className={s.rows}>
+      {services.map((service, index) => <article key={service.id} id={service.id} className={s.service} aria-labelledby={`${service.id}-title`} data-service-chapter>
+        <div className={s.copy}>
+          <p className={s.eyebrow}>{service.label}</p>
+          <h3 id={`${service.id}-title`}>{service.title}</h3>
+          <p className={s.description}>{service.text}</p>
+          <ul className={s.features}>{service.features.map(feature => <li key={feature}>{feature}</li>)}</ul>
+          <ActionLink href={service.href} quiet>{service.action}</ActionLink>
+        </div>
+        <figure className={s.example}>
+          <button className={s.preview} onClick={() => setOpened(index)} aria-label={`Open ${service.name} ${service.example.toLowerCase()}`} aria-haspopup="dialog">
+            <Concept index={index} />
+            <span className={s.previewAction}>Explore example <Arrow /></span>
+          </button>
+          <figcaption><span>{service.name}</span><span>{service.example}</span></figcaption>
+        </figure>
       </article>)}
     </div>
+    <aside id="apps" className={s.apps} aria-labelledby="apps-intro-title">
+      <div>
+        <p className={s.eyebrow}>Apps & portals</p>
+        <h3 id="apps-intro-title">A tool of your own?</h3>
+        <p>Customer portals, staff tools and mobile apps, built around the people who use them. Tell us what they need to do, and we’ll help define the scope.</p>
+      </div>
+      <button className={`${controls.action} ${controls.quiet}`} onClick={() => setEnquiryGoal("I’d like to discuss an app or portal for my customers or team.\n\nWhat it needs to do:\n")}>Discuss an app idea <ActionArrow /></button>
+    </aside>
+    <dialog ref={dialog} className={`${dialogStyles.dialog} ${s.dialog}`} aria-labelledby="project-dialog-title" onClose={() => setOpened(null)} onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
+      <button className={dialogStyles.close} onClick={() => dialog.current?.close()} aria-label="Close project preview">Close ×</button>
+      {project && <>
+        <p className={dialogStyles.kicker}>Concept project · Imagined business</p>
+        <h2 id="project-dialog-title">{project.name}</h2>
+        <Concept index={opened!} />
+        <p>{project.description}</p>
+        <ul>{project.scope.map(item => <li key={item}>{item}</li>)}</ul>
+        <ActionLink href={project.href}>{project.action}</ActionLink>
+      </>}
+    </dialog>
   </section>;
 }
