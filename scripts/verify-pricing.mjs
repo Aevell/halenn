@@ -147,7 +147,7 @@ test(
     const html = await response.text();
     assert.match(html, /noindex, nofollow/);
     for (const text of [
-      "Simple pricing. Clear scope.",
+      "Service prices.",
       "Basic technical SEO",
       "Never miss a customer",
       "Keep customers coming back",
@@ -185,7 +185,14 @@ test(
     assert.ok(html.includes('name="robots" content="index, follow"'));
     assert.ok(html.includes("€7,980"));
     assert.ok(html.includes("€248"));
-    assert.ok(html.includes("Simple pricing. Clear scope."));
+    assert.ok(html.includes("Service prices."));
+    assert.ok(html.includes("Add to estimate"));
+    assert.ok(html.includes("Request a quote"));
+    assert.ok(!html.includes("Guided pricing walkthrough"));
+    assert.ok(!html.includes("Edit answers"));
+    const fresh = await (await fetch(`${prod}/pricing`)).text();
+    assert.ok(fresh.includes("No services selected yet"));
+    assert.ok(!fresh.includes("Question 1 of"));
     assert.ok(!html.includes("Prototype pricing"));
     assert.ok(!html.includes('href="/prototypes/'));
     assert.ok(!html.includes("\u2014"));

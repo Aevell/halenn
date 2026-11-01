@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import PricingPage from "../components/pricing/PricingPage";
-import { parseSelection } from "../components/pricing/catalog";
+import { parseBrowsingSelection } from "../components/pricing/estimate-selection";
 import { parseGuideAnswers } from "../components/halenn/solution-guide";
 
 const title = "Pricing for Web, App & AI Automation | Halenn";
@@ -22,5 +22,5 @@ export default async function PublicPricing({ searchParams }: {
 }) {
   const query = await searchParams;
   const guideAnswers = parseGuideAnswers(typeof query.guide === "string" ? query.guide : undefined);
-  return <PricingPage initial={parseSelection(query)} guideAnswers={guideAnswers} />;
+  return <PricingPage initial={parseBrowsingSelection(query)} guideAnswers={guideAnswers} />;
 }

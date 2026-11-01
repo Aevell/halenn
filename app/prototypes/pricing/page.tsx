@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import PricingPage from "../../components/pricing/PricingPage";
-import { parseSelection } from "../../components/pricing/catalog";
+import { parseBrowsingSelection } from "../../components/pricing/estimate-selection";
 
 export const metadata: Metadata = {
   title: { absolute: "Pricing preview | Halenn" },
@@ -12,5 +12,5 @@ export default async function PricingPrototype({ searchParams }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   if (process.env.NODE_ENV !== "development") notFound();
-  return <PricingPage initial={parseSelection(await searchParams)} prototype />;
+  return <PricingPage initial={parseBrowsingSelection(await searchParams)} prototype />;
 }
