@@ -20,6 +20,9 @@
 .brand svg { width: 174px; height: auto; max-width: 100%; }
 .footer .email { overflow-wrap: anywhere; }
 .footer .label {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
   margin: 0 0 16px;
   color: #e3edf8;
   font-size: 12px;
