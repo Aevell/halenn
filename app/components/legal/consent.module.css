@@ -19,7 +19,7 @@
 .equalActions { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 .equalActions button, .save, .reopen { min-height:54px; border-radius:100px; border:1px solid #afc1d2; background:transparent; padding:13px 20px; color:inherit; font:inherit; font-size:16px; cursor:pointer; transition:background 160ms, border-color 160ms, transform 160ms var(--ease); }
 .textButton { min-height:44px; padding:6px; border:0; background:none; font:inherit; font-size:15px; cursor:pointer; justify-self:center; }
-.reopen { position:fixed; z-index:101; left:24px; bottom:max(20px,env(safe-area-inset-bottom)); width:48px; height:48px; min-height:48px; display:grid; place-items:center; padding:0; color:var(--privacy-ink); background:#0b1119; border-color:#7f95ab; opacity:.55; transition:opacity 180ms ease-out, background 160ms, border-color 160ms, transform 160ms var(--ease); }
+.reopen { position:fixed; z-index:101; left:12px; bottom:max(20px,env(safe-area-inset-bottom)); width:48px; height:48px; min-height:48px; display:grid; place-items:center; padding:0; color:var(--privacy-ink); background:#0b1119; border-color:#7f95ab; opacity:.55; transition:opacity 180ms ease-out, background 160ms, border-color 160ms, transform 160ms var(--ease); }
 .reopen[data-docked=false] { visibility:hidden; opacity:0; pointer-events:none; }
 .reopen:focus-visible { opacity:1; }
 @media(hover:hover) and (pointer:fine) { .reopen:hover { opacity:1; } }
