@@ -74,7 +74,7 @@ export default function Goals() {
         event.preventDefault();
         if (answers[question.id]) move(step + 1);
       }}>
-        <h3 ref={title} id="guide-question-title" tabIndex={-1}>{question.title}</h3>
+        <h3 ref={title} id="guide-question-title" className={question.id === "goal" ? s.goalPrompt : undefined} tabIndex={-1}>{question.title}</h3>
         <p id="guide-question-hint" className={s.hint}>{question.hint}</p>
         <fieldset aria-labelledby="guide-question-title" aria-describedby="guide-question-hint">
           <div className={s.options}>

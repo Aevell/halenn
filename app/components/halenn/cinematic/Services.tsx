@@ -13,7 +13,7 @@ const services = [
   {
     id: "websites", label: "01 / Websites", name: "FORMA", example: "Website concept",
     title: <>First, make<br /><em>an impression.</em></>,
-    text: "Give people a clear picture of your business and an easy way to enquire or book. A website that looks considered and helps customers take the next step.",
+    text: "Help potential customers understand why they should choose your business and feel confident taking the next step.",
     features: ["Services and work, clearly presented", "Enquiry forms and booking connections", "Content you can update yourself"],
     href: "/pricing?services=web&web=website#web-guide", action: "Explore website pricing",
     description: "An imagined architecture studio with space for its projects, a clear introduction to its services and a simple enquiry journey.",
@@ -22,7 +22,7 @@ const services = [
   {
     id: "commerce", label: "02 / Webshops", name: "OBJECT", example: "Webshop concept",
     title: <>Turn interest<br /><em>into an order.</em></>,
-    text: "Help customers find the right product and buy with confidence. Bring your catalogue, checkout and order updates into one clear journey.",
+    text: "Give customers a straightforward way to buy, while your team spends less time managing each sale.",
     features: ["Products and collections", "Cart, checkout and payments", "Order notifications and connected tools"],
     href: "/pricing?services=web&web=webshop#web-guide", action: "Explore webshop pricing",
     description: "A fictional design store showing how product collections and a focused shopping experience can work together. Its project scope could include checkout, payments and order notifications.",
@@ -31,7 +31,7 @@ const services = [
   {
     id: "automation", label: "03 / Automation & AI", name: "CONNECTED", example: "Workflow concept",
     title: <>Make everyday<br /><em>work flow.</em></>,
-    text: "Respond to enquiries, send reminders and keep your tools in sync. We can also build AI assistants that answer questions, or agents that carry out agreed tasks.",
+    text: "Free up your team’s time and help customers get a quicker response, without adding more to your daily workload.",
     features: ["Follow-ups, reminders and integrations", "AI chat and phone assistants", "Custom agents and automation flows"],
     href: "/pricing?services=automation#automation-guide", action: "Explore automation pricing",
     description: "An illustrative enquiry workflow: capture a new enquiry, update the CRM and give the team a follow-up task. This example shows a defined workflow; AI assistants and agents are scoped around the job you need them to do.",

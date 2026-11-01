@@ -7,8 +7,8 @@ const unsure = option("unsure", "I’m not sure yet", "We can work this out toge
 
 const questions: Record<QuestionId, Omit<Question, "id">> = {
   goal: {
-    title: "What would make the biggest difference?",
-    hint: "Choose your main goal. Your solution can combine more than one service.",
+    title: "Choose your main goal",
+    hint: "Your solution can combine more than one service.",
     options: [
       option("leads", "Get more enquiries or bookings", "Help people find your business and take the next step."),
       option("sell", "Sell products or services online", "Give customers a clear way to browse, book or buy."),

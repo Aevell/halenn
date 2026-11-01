@@ -8,27 +8,19 @@ import s from "./process.module.css";
 const steps = [
   {
     title: "Tell us what you need.",
-    text: "Tell us about your business, what you want to improve and the tools you already use. You don’t need a technical brief. We’ll help you find the right approach.",
-    label: "You share",
-    detail: "Your goal, ideas and any existing website or tools.",
+    text: "Share what you want to improve and the tools you already use. We’ll help you find the right approach. No technical brief needed.",
   },
   {
     title: "Agree a clear plan.",
-    text: "We put together a proposal with the scope, price and expected timeline. Any ongoing platform costs are explained before you decide to go ahead.",
-    label: "You approve",
-    detail: "What we’ll build, what it costs and when to expect it.",
+    text: "Before you decide, we set out what we’ll build, the price, expected timing and any ongoing platform costs.",
   },
   {
     title: "See it take shape.",
-    text: "We build your website, webshop, app or automation and share a version for you to review. You give feedback, and we make the refinements agreed in your scope.",
-    label: "We work together",
-    detail: "You provide content and feedback. We handle the build.",
+    text: "We build a first version, then refine it with your feedback within the agreed scope. You provide any content it needs.",
   },
   {
     title: "Launch with confidence.",
-    text: "We test the important journeys, prepare for launch and show you how to use your solution. Ongoing care, support or new features can be arranged separately.",
-    label: "You receive",
-    detail: "A tested solution, a clear handover and your next steps.",
+    text: "We test the important journeys, launch and show you how to use your solution. Ongoing care and support can be arranged separately.",
   },
 ];
 
@@ -59,10 +51,6 @@ export default function Process() {
             <span className={s.number} aria-hidden="true">0{index + 1}</span>
             <h3>{step.title}</h3>
             <p className={s.description}>{step.text}</p>
-            <div className={s.expectation}>
-              <p className={s.label}>{step.label}</p>
-              <p>{step.detail}</p>
-            </div>
           </li>
         ))}
       </ol>

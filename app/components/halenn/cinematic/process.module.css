@@ -44,10 +44,7 @@
 
 .number { color: #a8bfd8; font-size: 14px; margin-bottom: 28px; }
 .step h3 { font-size: clamp(26px, 2.6vw, 38px); font-weight: 300; letter-spacing: -.035em; line-height: 1.18; }
-.description { color: #b8c7d9; font-size: 17px; line-height: 1.65; margin-top: 20px !important; margin-bottom: 28px !important; max-width: 48ch; }
-.expectation { width: 100%; margin-top: auto; padding-top: 20px; border-top: 1px solid #52657c44; }
-.expectation p { max-width: 46ch; color: #b8c7d9; font-size: 15px; line-height: 1.65; }
-.expectation .label { color: #e1ebf5; font-size: 13px; margin-bottom: 6px; }
+.description { color: #b8c7d9; font-size: 17px; line-height: 1.65; margin-top: 20px !important; max-width: 48ch; }
 
 .nextStep { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px 40px; margin-top: 36px; }
 .nextStep > p { max-width: 39ch; color: #b8c7d9; font-size: 18px; line-height: 1.6; }
