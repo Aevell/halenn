@@ -2,13 +2,14 @@
 
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import Disclosure from "./Disclosure";
+import EnquiryForm from "../EnquiryForm";
 import { PricingAtmosphere } from "./PricingAtmosphere";
 import {
   projects, services, serviceIds, webTypeIds, extras, extraIds,
   visibilityPackages, visibilityIds, automationPackages, packageIds, pillars, pillarIds,
   carePlans, careIds, estimate, money, toggleService, stagesFor, selectionError,
   parseSelection, serializeSelection, createBriefModel, investmentLabel, emptyNotes,
-  enquiryHref, examples, appPlatforms, appPlatformIds, appCarePlans, appCareIds,
+  buildBrief, examples, appPlatforms, appPlatformIds, appCarePlans, appCareIds,
   appLimitations, appPublishing, languageScope, translationTerms, automationExclusions,
   pagePrice, maxExtraPages, pageDescription, disclaimer,
   type Selection, type ServiceId, type ExtraId, type Stage, type CustomNotes,
@@ -146,7 +147,7 @@ export default function PricingBuilder({
   const [notice, setNotice] = useState("");
   const [shared, setShared] = useState("");
   const [shareFallback, setShareFallback] = useState("");
-  const [draftOpened, setDraftOpened] = useState(false);
+  const [formSession, setFormSession] = useState(0);
   const [pdfStatus, setPdfStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const exportPending = useRef(false);
   const panel = useRef<HTMLDivElement>(null);
@@ -324,7 +325,6 @@ export default function PricingBuilder({
   };
   const openEnquiry = () => {
     returnFocus.current = document.activeElement as HTMLElement;
-    setDraftOpened(false);
     dialog.current?.showModal();
   };
   const monthlyLabel = result.monthlyLines.length
@@ -733,7 +733,7 @@ export default function PricingBuilder({
       </section>
       <dialog
         ref={dialog}
-        onClose={() => returnFocus.current?.focus({ preventScroll: true })}
+        onClose={() => { setFormSession(value => value + 1); returnFocus.current?.focus({ preventScroll: true }); }}
         className={s.dialog}
         aria-labelledby="enquiry-title"
       >
@@ -758,7 +758,7 @@ export default function PricingBuilder({
           </svg>
         </button>
         <h2 id="enquiry-title">Tell us what’s next.</h2>
-        <p>Your estimate and any custom requirements will be included in an email draft.</p>
+        <p>Send your enquiry here. Your estimate and custom requirements will be included.</p>
         <div className={s.enquirySummary}>
           <strong>{investmentLabel(result)}{result.oneTime > 0 ? " one-time" : ""}</strong>
           <span>{monthlyLabel}</span>
@@ -766,53 +766,7 @@ export default function PricingBuilder({
             <span>Custom work requires an additional quote.</span>
           )}
         </div>
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            const data = new FormData(event.currentTarget);
-            window.location.href = enquiryHref(
-              selection,
-              String(data.get("name")),
-              String(data.get("email")),
-              String(data.get("message")),
-              customNotes,
-            );
-            setDraftOpened(true);
-          }}
-        >
-          <label>
-            Your name
-            <input name="name" autoComplete="name" required maxLength={100} />
-          </label>
-          <label>
-            Email
-            <input
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              maxLength={254}
-            />
-          </label>
-          <label>
-            What do you have in mind?
-            <textarea name="message" rows={3} required maxLength={1800} />
-          </label>
-          <button className={s.primary} type="submit">
-            Open email draft <Arrow />
-          </button>
-          <p className={s.help}>
-            Nothing is sent automatically. Send your enquiry from your email
-            app.
-          </p>
-          {draftOpened && (
-            <p role="status">
-              Complete your enquiry in your email app. If it did not open, email{" "}
-              <a href="mailto:contact@halenn.com">contact@halenn.com</a>{" "}
-              directly.
-            </p>
-          )}
-        </form>
+        <EnquiryForm key={formSession} context={buildBrief(selection, customNotes)} buttonClassName={s.primary} arrow={<Arrow />} />
       </dialog>
     </>
   );

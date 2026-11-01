@@ -49,7 +49,7 @@ test("public release renders the approved site and real contact without the pick
   const html = await (await fetch(production)).text();
   assert.match(html, /data-variant="Cinematic"/);
   assert.match(html, /mailto:contact@halenn\.com/);
-  assert.match(html, /Opens your email app/);
+  assert.match(html, /Send your enquiry here/);
   assert.match(html, /\/brand\/halenn-ribbon-2x\.webp/);
   assert.match(html, /<title>Halenn \| Websites &amp; Connected Systems<\/title>/);
   assert.match(html, /\/brand\/halenn-ribbon-favicon\.ico/);
