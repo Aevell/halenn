@@ -56,7 +56,7 @@ export default function CinematicMotion({ children }: { children: ReactNode }) {
     };
     measure();
     const anchor = location.hash.slice(1);
-    if (["hero-content", "services", "websites", "commerce", "automation", "apps", "projects", "process", "scope", "pricing-intro", "contact"].includes(anchor)) {
+    if (["hero-content", "services", "websites", "commerce", "automation", "apps", "projects", "process", "scope", "pricing-intro", "faq", "contact"].includes(anchor)) {
       hashFrame = requestAnimationFrame(() => {
         hashFrame = requestAnimationFrame(() => {
           if (location.hash.slice(1) !== anchor) return;

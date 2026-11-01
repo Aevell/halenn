@@ -9,6 +9,7 @@ import Navigation from "./Navigation";
 import Services from "./Services";
 import Hero from "./Hero";
 import Goals from "./Goals";
+import Faq from "./Faq";
 import Wordmark from "./Wordmark";
 import Refraction from "./Refraction";
 import styles from "./cinematic.module.css";
@@ -66,6 +67,7 @@ export default function Cinematic({ contactEmail }: { contactEmail?: string }) {
             </div>
             <ActionLink href="/pricing" quiet>Explore pricing</ActionLink>
           </section>
+          <Faq />
           <Contact email={contactEmail} />
           <footer className={styles.footer}>
             <Wordmark className={styles.footerWordmark} />
