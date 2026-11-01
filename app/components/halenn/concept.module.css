@@ -42,6 +42,7 @@
 }
 .architectureHero {
   position: relative;
+  overflow: hidden;
   flex: 1;
   min-height: 320px;
   background: #47504a;
@@ -259,6 +260,57 @@
 }
 .connected .bottom {
   border-top: 1px solid #d7d0e3;
+}
+
+/* Only homepage studies opt in; the default is the finished, readable state. */
+.site[data-concept-motion] {
+  --image-travel: 16px;
+  --product-travel: 18px;
+}
+.site[data-concept-motion] .architectureHero img {
+  transform-origin: center top;
+  transform: translate3d(0, calc((1 - var(--concept-progress, 1)) * var(--image-travel) * -1), 0)
+    scale(calc(1 + (1 - var(--concept-progress, 1)) * .05));
+}
+.site[data-concept-motion] .productImage img {
+  transform-origin: right center;
+  transform: translate3d(min(calc((1 - var(--concept-progress, 1)) * var(--product-travel)), calc((1 - var(--concept-progress, 1)) * 6%)), 0, 0)
+    scale(calc(1 + (1 - var(--concept-progress, 1)) * .06));
+}
+.site[data-concept-motion] .flowRow { position: relative; isolation: isolate; }
+.site[data-concept-motion] .flowRow::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -5px -7px;
+  border-radius: 10px;
+  background: #d8cbea;
+  opacity: calc(var(--step-progress, 1) * .32);
+  transform: scaleX(calc(.92 + var(--step-progress, 1) * .08));
+  transform-origin: left center;
+}
+.site[data-concept-motion] .flowCheck { opacity: calc(.3 + var(--step-progress, 1) * .7); }
+.site[data-concept-motion] .flowConnector { position: relative; }
+.site[data-concept-motion] .flowConnector::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #867098;
+  transform: scaleY(var(--step-progress, 1));
+  transform-origin: center top;
+}
+@media (max-width:1000px), (max-height:680px) {
+  .site[data-concept-motion] { --image-travel: 8px; --product-travel: 9px; }
+}
+:global([data-flow-preview]:has(:focus-visible)) .site[data-concept-motion] {
+  --concept-progress: 1 !important;
+}
+:global([data-flow-preview]:has(:focus-visible)) .site[data-concept-motion] :is(.flowRow, .flowConnector) {
+  --step-progress: 1 !important;
+}
+@media (prefers-reduced-motion:reduce) {
+  .site[data-concept-motion] { --concept-progress: 1 !important; }
+  .site[data-concept-motion] :is(.flowRow, .flowConnector) { --step-progress: 1 !important; }
 }
 @container (max-width:600px) {
   .menu {

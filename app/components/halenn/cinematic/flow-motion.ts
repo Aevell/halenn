@@ -3,13 +3,17 @@ export const smooth = (value: number) => {
   return p * p * (3 - 2 * p);
 };
 
-// The middle of the viewport is a quiet reading zone. Entry and exit are
-// symmetric, so reversing scroll retraces the same pose without a timer.
-export function previewPose(distance: number, compact: boolean) {
-  const entry = smooth((-distance - .28) / .72);
-  const exit = smooth((distance - .28) / .72);
+// Centre is expressed in viewport heights: arrive at 1.15, settle at .55.
+// A single scroll position owns frame and demonstration, with no delayed loop.
+export function previewPose(centre: number, compact: boolean) {
+  const progress = smooth((1.15 - centre) / .6);
+  const demo = smooth((.94 - centre) / .39);
   return {
-    y: (entry - exit) * (compact ? 12 : 24),
-    angle: (entry - exit) * (compact ? 2 : 5),
+    progress, demo,
+    y: (1 - progress) * (compact ? 24 : 48),
+    angle: (1 - progress) * (compact ? 3 : 8),
+    scale: 1 - (1 - progress) * (compact ? .04 : .08),
   };
 }
+
+export const sequenceProgress = (progress: number, index: number, count: number) => smooth(progress * count - index);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Concept from "../Concept";
 import { Arrow } from "../Brand";
 import { ActionArrow, ActionLink } from "./Action";
@@ -60,6 +61,9 @@ export default function Services() {
     </header>
     <div className={s.rows}>
       {services.map((service, index) => <article key={service.id} id={service.id} className={s.service} aria-labelledby={`${service.id}-title`} data-service-chapter>
+        <div className={s.atmosphere} aria-hidden="true">
+          <div data-flow-ambient><Image src="/brand/halenn-silk-v1.png" alt="" fill sizes="130vw" draggable={false} /></div>
+        </div>
         <div className={s.copy}>
           <p className={s.eyebrow}>{service.label}</p>
           <h3 id={`${service.id}-title`}>{service.title}</h3>
@@ -69,7 +73,7 @@ export default function Services() {
         </div>
         <figure className={s.example} data-flow-preview={index}>
           <button className={s.preview} onClick={() => setOpened(index)} aria-label={`Open ${service.name} ${service.example.toLowerCase()}`} aria-haspopup="dialog">
-            <Concept index={index} />
+            <Concept index={index} motion />
             <span className={s.previewAction}>Explore example <Arrow /></span>
           </button>
           <figcaption><span>{service.name}</span><span>{service.example}</span></figcaption>

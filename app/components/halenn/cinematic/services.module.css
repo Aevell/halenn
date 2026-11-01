@@ -5,7 +5,11 @@
 .intro h2 { font-size: clamp(40px, 5.2vw, 78px); font-weight: 300; letter-spacing: -.05em; line-height: 1.06; }
 .intro h2 em, .copy h3 em { font-style: normal; color: #afc4de; }
 .intro > p { color: #b8c7d9; font-size: 17px; line-height: 1.65; max-width: 43ch; padding-bottom: 4px; }
-.service { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--layout-gap); align-items: center; padding: 64px 0; border-top: 1px solid #52657c55; }
+.service { position: relative; isolation: isolate; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--layout-gap); align-items: center; padding: 64px 0; border-top: 1px solid #52657c55; }
+.atmosphere { position: absolute; z-index: -1; pointer-events: none; top: -130px; left: calc(-1 * var(--page-gutter)); width: calc(100% + 2 * var(--page-gutter)); height: 340px; opacity: .15; mask-image: radial-gradient(ellipse at 77% 42%, #000 4%, transparent 68%); overflow: clip; }
+.atmosphere > div { position: absolute; inset: -45px -10%; }
+.atmosphere img { object-fit: cover; object-position: center 55%; user-select: none; }
+.service:nth-child(even) .atmosphere img { transform: scaleX(-1); }
 .copy { min-width: 0; }
 .copy h3 { font-size: clamp(34px, 3.7vw, 58px); line-height: 1.08; letter-spacing: -.05em; font-weight: 300; }
 .description { font-size: 17px; line-height: 1.65; color: #b8c7d9; margin-top: 24px !important; max-width: 40ch; }
@@ -43,6 +47,7 @@
   .apps { flex-direction: column; align-items: flex-start; gap: 26px; }
 }
 @media (max-width: 600px) {
+  .atmosphere { height: 220px; top: -90px; mask-image: radial-gradient(ellipse at 90% 38%, #000, transparent 68%); }
   .services { padding: 60px var(--page-gutter); }
   .intro { padding-bottom: 32px; }
   .intro h2 { font-size: clamp(38px, 11vw, 56px); }

@@ -18,7 +18,9 @@
 .fold img { object-fit: fill; user-select: none; }
 .projects .fold { transform: scaleX(-1); }
 .contact .fold { top: -28%; left: -10%; }
+.contact { top: -140px; mask-image: linear-gradient(transparent, #000 30%, #000 72%, transparent); }
 @media (max-width:600px) {
   .fold { width: 240%; left: -85%; height: 125%; top: -10%; }
   .contact .fold { left: -90%; top: -22%; }
+  .contact { top: -80px; }
 }

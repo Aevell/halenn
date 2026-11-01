@@ -28,25 +28,31 @@
 .introduction { max-width: 44ch; color: #b8c7d9; font-size: 18px; line-height: 1.65; }
 
 .steps {
+  --step-gap: 32px;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 48px 32px;
+  gap: 48px var(--step-gap);
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
 .step {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   min-width: 0;
   padding: 28px 0 0;
-  border-top: 1px solid #b6cbe338;
+  border-top: 1px solid transparent;
   scroll-margin-top: 112px;
 }
 
 .number { color: #a8bfd8; font-family: var(--font-heading), sans-serif; font-weight: 300; font-size: 32px; line-height: 1; margin-bottom: 28px; }
+.step::before, .step::after { content: ""; position: absolute; top: 44px; left: 58px; width: calc(100% + var(--step-gap) - 74px); height: 1px; background: #b6cbe326; pointer-events: none; }
+.step::after { background: #a8bfd8; opacity: .65; transform: scaleX(var(--step-progress, 1)); transform-origin: left; }
+.step:last-child::before, .step:last-child::after { display: none; }
+.number { opacity: calc(.7 + var(--step-progress, 1) * .3); }
 .step h3 { font-size: clamp(24px, 2.2vw, 30px); font-weight: 300; letter-spacing: -.035em; line-height: 1.2; min-height: 2.4em; }
 .description { color: #b8c7d9; font-size: 16px; line-height: 1.7; margin-top: 20px !important; max-width: 48ch; }
 
@@ -55,7 +61,8 @@
 .action { max-width: 100%; white-space: normal; text-align: left; }
 
 @media (max-width: 1100px) {
-  .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--layout-gap); }
+  .steps { --step-gap: var(--layout-gap); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .step:nth-child(2n)::before, .step:nth-child(2n)::after { display: none; }
   .step h3 { min-height: 0; }
 }
 
@@ -70,9 +77,14 @@
   .introduction, .description { font-size: 16px; }
   .steps { grid-template-columns: 1fr; gap: 32px; }
   .step { padding: 24px 0 0; }
+  .step:not(:last-child)::before, .step:not(:last-child)::after { display: block; top: 38px; left: -12px; width: 1px; height: calc(100% + 32px); }
+  .step::after { transform: scaleY(var(--step-progress, 1)); transform-origin: top; }
   .number { font-size: 28px; margin-bottom: 24px; }
   .step h3 { font-size: 28px; }
   .nextStep { gap: 24px; margin-top: 40px; }
   .nextStep > p { font-size: 16px; }
   .action { width: 100%; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .step { --step-progress: 1 !important; }
 }

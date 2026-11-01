@@ -48,7 +48,7 @@ export default function Process() {
 
       <ol className={s.steps} role="list">
         {steps.map((step, index) => (
-          <li className={s.step} key={step.title} id={`process-step-${index}`}>
+          <li className={s.step} key={step.title} id={`process-step-${index}`} data-process-step={index}>
             <span className={s.number} aria-hidden="true">0{index + 1}</span>
             <h3>{step.title}</h3>
             <p className={s.description}>{step.text}</p>

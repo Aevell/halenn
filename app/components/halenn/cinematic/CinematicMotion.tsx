@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode, useEffect, useRef } from "react";
-import { previewPose, smooth } from "./flow-motion";
+import { previewPose, sequenceProgress, smooth } from "./flow-motion";
 import styles from "./cinematic.module.css";
 
 type Scene = { node: HTMLElement; anchor: HTMLElement; top: number; height: number };
@@ -19,6 +19,7 @@ export default function CinematicMotion({ children }: { children: ReactNode }) {
     const logo = find("[data-ribbon-art] img");
     const opening = find("[data-opening]");
     const passage = find("[data-silk-passage]");
+    const quiz = find("[data-solution-guide-interactive]");
     const contact = find("#contact");
     const light = find("[data-contact-light]");
     const words = Array.from(element.querySelectorAll<HTMLElement>("[data-contact-word]"));
@@ -26,24 +27,36 @@ export default function CinematicMotion({ children }: { children: ReactNode }) {
     const compactMedia = matchMedia("(max-width: 1000px), (max-height: 680px)");
     const collect = (selector: string, ambient = false): Scene[] =>
       Array.from(element.querySelectorAll<HTMLElement>(selector), node => ({
-        node, anchor: ambient ? node.closest<HTMLElement>("section, [data-silk-scene]") || node : node,
+        node, anchor: ambient ? node.closest<HTMLElement>("[data-service-chapter], section, [data-silk-scene]") || node : node,
         top: 0, height: 0,
       }));
-    const previews = collect("[data-flow-preview]");
+    const previews = collect("[data-flow-preview]").map(scene => ({
+      ...scene,
+      steps: Array.from(scene.node.querySelectorAll<HTMLElement>("[data-workflow-step]")),
+      links: Array.from(scene.node.querySelectorAll<HTMLElement>("[data-workflow-link]")),
+    }));
+    const processSteps = collect("[data-process-step]");
     const intros = collect("[data-flow-intro]");
     const ambience = collect("[data-flow-ambient]", true);
-    const scenes = [...previews, ...intros, ...ambience];
-    const targets = [light, ...words, ...scenes.map(scene => scene.node)];
+    const scenes = [...previews, ...intros, ...ambience, ...processSteps];
+    const targets = [light, ...words, ...scenes.map(scene => scene.node), ...previews.flatMap(scene => [...scene.steps, ...scene.links])];
     let pending = 0, measuring = 0, hashFrame = 0, disposed = false;
     let contactTop = 0, contactHeight = 0, height = innerHeight, compact = compactMedia.matches;
+    let processColumns = 4;
     const reset = () => {
       targets.forEach(target => {
         target.style.removeProperty("transform");
         target.style.removeProperty("opacity");
+        target.style.removeProperty("--concept-progress");
+        target.style.removeProperty("--step-progress");
       });
     };
     const set = (target: HTMLElement, property: "transform" | "opacity", value: string) => {
       if (target.style[property] !== value) target.style[property] = value;
+    };
+    const setProgress = (target: HTMLElement, property: string, progress: number) => {
+      const value = progress.toFixed(4);
+      if (target.style.getPropertyValue(property) !== value) target.style.setProperty(property, value);
     };
     const paint = (all = false) => {
       pending = 0;
@@ -53,12 +66,20 @@ export default function CinematicMotion({ children }: { children: ReactNode }) {
       const focused = document.activeElement;
       for (const scene of previews) {
         if (!visible(scene.top, scene.height)) continue;
-        const distance = (y + height / 2 - scene.top - scene.height / 2) / ((height + scene.height) / 2);
-        const pose = previewPose(distance, compact);
-        const direction = Number(scene.node.dataset.flowPreview) % 2 ? -1 : 1;
+        const centre = (scene.top + scene.height / 2 - y) / height;
         const focusWithin = !!focused?.matches(":focus-visible") && scene.node.contains(focused);
+        const pose = previewPose(focusWithin ? .55 : centre, compact);
+        const direction = Number(scene.node.dataset.flowPreview) % 2 ? -1 : 1;
         set(scene.node, "transform", focusWithin ? "none" :
-          `perspective(1600px) translate3d(0,${pose.y.toFixed(3)}px,0) rotateY(${(pose.angle * direction).toFixed(3)}deg)`);
+          `perspective(1600px) translate3d(0,${pose.y.toFixed(3)}px,0) rotateY(${(pose.angle * direction).toFixed(3)}deg) scale(${pose.scale.toFixed(4)})`);
+        setProgress(scene.node, "--concept-progress", pose.demo);
+        scene.steps.forEach((step, index) => setProgress(step, "--step-progress", sequenceProgress(pose.demo, index, 3)));
+        scene.links.forEach((link, index) => setProgress(link, "--step-progress", smooth(pose.demo * 3 - index - .55)));
+      }
+      for (const [index, scene] of processSteps.entries()) {
+        if (!visible(scene.top, scene.height)) continue;
+        const progress = smooth((y + height * .92 - scene.top) / (height * .55));
+        setProgress(scene.node, "--step-progress", sequenceProgress(progress, index % processColumns, processColumns));
       }
       for (const scene of intros) {
         if (!visible(scene.top, scene.height)) continue;
@@ -74,10 +95,13 @@ export default function CinematicMotion({ children }: { children: ReactNode }) {
       if (visible(contactTop, contactHeight)) {
         const progress = smooth((y - contactTop + height * .78) / (height * .65));
         words.forEach((word, index) => {
-          set(word, "transform", `translate3d(${(index ? 1 : -1) * (1 - progress) * (compact ? 1 : 3)}vw,${(1 - progress) * (compact ? 12 : 25)}px,0)`);
-          set(word, "opacity", String(.65 + .35 * progress));
+          const arrival = smooth((progress - index * .08) / .92);
+          const slide = (index ? 1 : -1) * (1 - arrival) * (compact ? 1 : 3);
+          set(word, "transform", `translate3d(${slide.toFixed(3)}vw,${((1 - arrival) * (compact ? 12 : 25)).toFixed(3)}px,0)`);
+          set(word, "opacity", String(.75 + .25 * arrival));
         });
         set(light, "opacity", String(.4 + .6 * progress));
+        set(light, "transform", `scale(${(.94 + .06 * progress).toFixed(4)})`);
       }
     };
     const schedule = () => {
@@ -89,6 +113,7 @@ export default function CinematicMotion({ children }: { children: ReactNode }) {
       reset();
       height = innerHeight;
       compact = compactMedia.matches;
+      processColumns = innerWidth > 1100 ? 4 : innerWidth > 600 ? 2 : 1;
       // Layout reads are batched here, never in the scroll handler. ResizeObserver
       // also catches quiz answers and FAQ expansion moving later sections.
       for (const scene of scenes) {
@@ -102,8 +127,12 @@ export default function CinematicMotion({ children }: { children: ReactNode }) {
       const logoBounds = logo.getBoundingClientRect();
       const passageBounds = passage.getBoundingClientRect();
       const openingHeight = `${opening.offsetHeight}px`;
+      const openingBounds = opening.getBoundingClientRect();
+      // Finish the cloth before the live question controls, even as text reflows.
+      const blend = `${Math.max(120, Math.min(520, quiz.getBoundingClientRect().top - openingBounds.bottom - 32))}px`;
       if (passage.style.getPropertyValue("--silk-opening-height") !== openingHeight)
         passage.style.setProperty("--silk-opening-height", openingHeight);
+      if (passage.style.getPropertyValue("--silk-blend") !== blend) passage.style.setProperty("--silk-blend", blend);
       exclusion.setAttribute("transform", `translate(${logoBounds.left - passageBounds.left} ${logoBounds.top - passageBounds.top})`);
       outlines.forEach(outline => outline.setAttribute("transform", `scale(${logoBounds.width / 1536} ${logoBounds.height / 1024})`));
       clearance.setAttribute("data-silk-clearance-ready", "");
@@ -158,6 +187,7 @@ export default function CinematicMotion({ children }: { children: ReactNode }) {
       document.fonts.removeEventListener("loadingdone", queueMeasure);
       clearance.removeAttribute("data-silk-clearance-ready");
       passage.style.removeProperty("--silk-opening-height");
+      passage.style.removeProperty("--silk-blend");
       reset();
     };
   }, []);

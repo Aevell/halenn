@@ -2,11 +2,12 @@ import Image from "next/image";
 import { Arrow } from "./Brand";
 import s from "./concept.module.css";
 
-/** Static website studies inside one accessible project-preview button. */
-export default function Concept({ index }: { index: number }) {
+/** Motion is opt-in for homepage previews; dialogs retain the complete still. */
+export default function Concept({ index, motion = false }: { index: number; motion?: boolean }) {
   return (
     <div
       data-concept
+      data-concept-motion={motion || undefined}
       className={`${s.site} ${[s.forma, s.object, s.connected][index]}`}
       aria-hidden="true"
     >
@@ -114,7 +115,7 @@ export default function Concept({ index }: { index: number }) {
                 <span>Enquiry workflow</span>
                 <span className={s.live}>Preview</span>
               </div>
-              <div className={s.flowRow}>
+              <div className={s.flowRow} data-workflow-step={motion ? 0 : undefined}>
                 <span className={s.flowIcon}>@</span>
                 <div>
                   <strong>New enquiry</strong>
@@ -122,8 +123,8 @@ export default function Concept({ index }: { index: number }) {
                 </div>
                 <span className={s.flowCheck}>✓</span>
               </div>
-              <div className={s.flowConnector} />
-              <div className={s.flowRow}>
+              <div className={s.flowConnector} data-workflow-link={motion ? 0 : undefined} />
+              <div className={s.flowRow} data-workflow-step={motion ? 1 : undefined}>
                 <span className={`${s.flowIcon} ${s.n8n}`}>n8n</span>
                 <div>
                   <strong>Find the right next step</strong>
@@ -131,8 +132,8 @@ export default function Concept({ index }: { index: number }) {
                 </div>
                 <span className={s.flowCheck}>✓</span>
               </div>
-              <div className={s.flowConnector} />
-              <div className={s.flowRow}>
+              <div className={s.flowConnector} data-workflow-link={motion ? 1 : undefined} />
+              <div className={s.flowRow} data-workflow-step={motion ? 2 : undefined}>
                 <span className={s.flowIcon}>
                   <Arrow />
                 </span>

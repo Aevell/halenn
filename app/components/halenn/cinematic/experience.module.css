@@ -825,7 +825,7 @@
 .process[data-process-motion] .chapter h3 { font-family: var(--font-heading), var(--font-body), sans-serif; font-size: clamp(44px,5vw,78px); text-transform: none; letter-spacing: -.045em; font-weight: 300; }
 .process[data-process-motion] .chapter > div { max-width: 520px; }
 .chapter { scroll-margin-top: 110px; }
-.contact { isolation: isolate; }
+.contact { isolation: isolate; overflow: visible; border-top-color: transparent; }
 .contactLight { position: absolute; pointer-events: none; z-index: -1; inset: -10% -15% -30%; background: radial-gradient(ellipse at 63% 65%, #486e9b60, #243d602b 33%, transparent 62%); }
 .contactBottom > button { min-width: 250px; }
 .contactBottom > span { text-align: right; }
