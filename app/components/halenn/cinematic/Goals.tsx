@@ -9,6 +9,7 @@ import {
 } from "../solution-guide";
 import { guideEnquiryBrief, guidePricingDetails } from "../guide-pricing";
 import { money } from "../../pricing/catalog";
+import useSmartTabTitle from "../../useSmartTabTitle";
 import s from "./goals.module.css";
 
 export default function Goals() {
@@ -24,6 +25,9 @@ export default function Goals() {
   const recommendation = finished ? guideRecommendation(answers) : undefined;
   const pricingHref = finished ? guidePricingHref(answers) : undefined;
   const pricing = finished ? guidePricingDetails(answers) : undefined;
+  useSmartTabTitle(recommendation ? pricing?.kind === "estimate"
+    ? `From ${money(pricing.estimate.oneTime)} · Your solution | Halenn`
+    : "Your suggested solution | Halenn" : undefined);
   const move = (next: number) => { moved.current = true; setStep(next); };
 
   useEffect(() => {

@@ -12,6 +12,7 @@
   transition: transform 280ms cubic-bezier(.2,.7,.2,1), background-color 220ms ease;
 }
 .header[data-scrolled] { background: #080c12f5; border-bottom: 1px solid #c5dcf015; }
+.header:not([data-page="home"]) { background: #080c12f5; border-bottom: 1px solid #c5dcf015; }
 .header[data-hidden]:not(:focus-within):not(:has(details[open])) { transform: translateY(-110%); }
 .brand { display: flex; flex-direction: column; justify-content: center; gap: 9px; min-height: 48px; flex-shrink: 0; }
 .brand > svg { width: 160px; height: auto; }

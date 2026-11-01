@@ -6,10 +6,14 @@ import Wordmark from "./Wordmark";
 import s from "./controls.module.css";
 
 const destinations = [
-  ["services", "Services & examples"], ["process", "How we work"], ["pricing", "Pricing"],
+  ["services", "Services"], ["goals", "Find your solution"], ["pricing", "Pricing"],
 ] as const;
 
-export default function Navigation() {
+export default function Navigation({ page = "home", homeHref = "/", pricingHref = "/pricing" }: {
+  page?: "home" | "pricing" | "about";
+  homeHref?: string;
+  pricingHref?: string;
+}) {
   const header = useRef<HTMLElement>(null);
   const disclosure = useRef<HTMLDetailsElement>(null);
 
@@ -25,7 +29,7 @@ export default function Navigation() {
       else if (accumulated > 32 && !element.contains(document.activeElement) && !disclosure.current?.open)
         element.setAttribute("data-hidden", "");
       element.toggleAttribute("data-scrolled", scrollY > 48);
-      if (scrollY < 100) element.querySelectorAll("[aria-current]").forEach((link) => link.removeAttribute("aria-current"));
+      if (scrollY < 100) element.querySelectorAll("[data-section-link][aria-current]").forEach((link) => link.removeAttribute("aria-current"));
       previous = scrollY;
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
@@ -38,7 +42,7 @@ export default function Navigation() {
         else link.removeAttribute("aria-current");
       });
     }, { rootMargin: "-15% 0px -65% 0px" });
-    destinations.forEach(([id]) => { const section = document.getElementById(id); if (section) observer.observe(section); });
+    if (page === "home") destinations.forEach(([id]) => { const section = document.getElementById(id); if (section) observer.observe(section); });
     update();
     window.addEventListener("scroll", schedule, { passive: true });
     element.addEventListener("focusin", show);
@@ -48,14 +52,19 @@ export default function Navigation() {
       window.removeEventListener("scroll", schedule);
       element.removeEventListener("focusin", show);
     };
-  }, []);
+  }, [page]);
 
-  const links = destinations.map(([id, label]) => <a key={id} href={id === "pricing" ? "/pricing" : `#${id}`} data-section-link={id !== "pricing" || undefined}>{label}</a>);
-  return <header ref={header} className={s.header} data-prototype-navigation>
-    <a href="#hero-content" className={s.brand} aria-label="Halenn home"><Wordmark /><span>A company by Aevell</span></a>
+  const homeAnchor = (id: string) => `${page === "home" ? "" : homeHref}#${id}`;
+  const contactHref = page === "pricing" ? "#contact" : homeAnchor("contact");
+  const links = destinations.map(([id, label]) => <a key={id}
+    href={id === "pricing" ? page === "pricing" ? "#guide" : pricingHref : homeAnchor(id)}
+    aria-current={id === "pricing" && page === "pricing" ? "page" : undefined}
+    data-section-link={page === "home" && id !== "pricing" || undefined}>{label}</a>);
+  return <header ref={header} className={s.header} data-prototype-navigation data-page={page}>
+    <a href={homeAnchor("hero-content")} className={s.brand} aria-label="Halenn home"><Wordmark /><span>A company by Aevell</span></a>
     <nav className={s.quickNav} aria-label="Primary navigation">{links}</nav>
     <div className={s.headerActions}>
-      <div className={s.headerBrief}><ActionLink href="#contact" quiet plainArrow>Let’s talk</ActionLink></div>
+      <div className={s.headerBrief}><ActionLink href={contactHref} quiet plainArrow>Let’s talk</ActionLink></div>
       <details ref={disclosure} className={s.menu} onKeyDown={(event) => {
         if (event.key === "Escape") {
           event.preventDefault();
@@ -68,7 +77,7 @@ export default function Navigation() {
           if ((event.target as HTMLElement).closest("a")) {
             disclosure.current?.removeAttribute("open");
           }
-        }}>{links}<a href="#contact">Contact</a></nav>
+        }}>{links}<a href={contactHref}>Let’s talk</a></nav>
       </details>
     </div>
   </header>;

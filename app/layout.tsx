@@ -33,11 +33,11 @@ export const metadata: Metadata = {
     "Halenn designs and builds websites, webshops and n8n workflows, with ongoing care after launch. A company by Aevell.",
   icons: {
     icon: [
-      { url: "/brand/halenn-ribbon-favicon.ico", sizes: "16x16 32x32 48x48 64x64", type: "image/x-icon" },
-      { url: "/brand/halenn-ribbon-icon-32.png", sizes: "32x32", type: "image/png" },
-      { url: "/brand/halenn-ribbon-icon-64.png", sizes: "64x64", type: "image/png" },
+      { url: "/brand/halenn-mark-v2.ico", sizes: "16x16 32x32 48x48 64x64", type: "image/x-icon" },
+      { url: "/brand/halenn-mark-v2-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/brand/halenn-mark-v2-64.png", sizes: "64x64", type: "image/png" },
     ],
-    apple: { url: "/brand/halenn-ribbon-icon-180.png", sizes: "180x180", type: "image/png" },
+    apple: { url: "/brand/halenn-mark-v2-180.png", sizes: "180x180", type: "image/png" },
   },
   openGraph: {
     title: "Halenn | Websites & Connected Systems",

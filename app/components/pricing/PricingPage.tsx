@@ -1,4 +1,4 @@
-import Wordmark from "../halenn/cinematic/Wordmark";
+import Navigation from "../halenn/cinematic/Navigation";
 import SiteFooter from "../SiteFooter";
 import PricingBuilder from "./PricingBuilder";
 import { EstimateToggle, EstimateRequirement, ExtraPages } from "./EstimateControls";
@@ -198,28 +198,13 @@ function Questions() {
 export default function PricingPage({ initial, prototype = false, guideAnswers }: { initial: Selection; prototype?: boolean; guideAnswers?: GuideAnswers }) {
   const home = prototype ? "/prototypes/hero?v=1" : "/";
   return (
+    <>
+    <Navigation page="pricing" homeHref={home} pricingHref={prototype ? "/prototypes/pricing" : "/pricing"} />
     <div className={s.page}>
       <PricingMotion />
       <a href="#guide" className={s.skip}>
         Skip to prices
       </a>
-      <header className={s.header}>
-        <a
-          className={s.brand}
-          href={`${home}#hero-content`}
-          aria-label="Halenn home"
-        >
-          <Wordmark />
-          <span>A company by Aevell</span>
-        </a>
-        <nav aria-label="Main navigation">
-          <a href={`${home}#services`}>Services</a>
-          <a href="#guide" aria-current="page">
-            Pricing
-          </a>
-          <a href="#contact">Contact</a>
-        </nav>
-      </header>
       <main>
         <section className={s.intro} aria-labelledby="pricing-title">
           <PricingAtmosphere scene="intro" />
@@ -245,5 +230,6 @@ export default function PricingPage({ initial, prototype = false, guideAnswers }
       </main>
       <SiteFooter contained />
     </div>
+    </>
   );
 }

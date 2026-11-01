@@ -10,7 +10,7 @@
   font-size: 17px;
   line-height: 1.55;
   min-height: 100svh;
-  padding: 0 var(--page-gutter);
+  padding: 112px var(--page-gutter) 0;
   overflow-x: clip;
   color-scheme: dark;
   scrollbar-color: #526272 #080b10;
@@ -51,7 +51,7 @@
   outline-offset: 5px;
 }
 .page :is(section, h2) {
-  scroll-margin-top: 28px;
+  scroll-margin-top: 132px;
 }
 .page fieldset {
   border: 0;
@@ -89,44 +89,6 @@
 }
 .skip:focus {
   transform: translateY(0);
-}
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 32px 0;
-}
-.brand {
-  display: grid;
-  gap: 8px;
-  min-height: 44px;
-}
-.brand svg {
-  width: 170px;
-  height: auto;
-}
-.brand span {
-  color: var(--muted);
-  font-size: 14px;
-}
-.header nav {
-  display: flex;
-  align-items: center;
-  gap: 36px;
-}
-.header nav a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  color: var(--muted);
-}
-.header nav a[aria-current] {
-  color: var(--ink);
-  text-decoration: underline;
-  text-decoration-color: #9fb9cf;
-  text-underline-offset: 12px;
-  text-decoration-thickness: 1px;
 }
 .intro {
   position: relative;
@@ -919,22 +881,6 @@
   }
 }
 @media (max-width: 700px) {
-  .header {
-    padding: 26px 0;
-    align-items: start;
-    flex-wrap: wrap;
-    gap: 18px;
-  }
-  .brand svg {
-    width: 138px;
-  }
-  .brand span {
-    font-size: 12px;
-  }
-  .header nav {
-    gap: 20px;
-    font-size: 15px;
-  }
   .intro {
     text-align: left;
     padding: 32px 0 30px;
@@ -1184,12 +1130,6 @@
     gap: 10px;
     width: fit-content;
   }
-  .header nav {
-    gap: 14px;
-  }
-  .brand svg {
-    width: 128px;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .page *,
@@ -1298,7 +1238,7 @@
 /* The same calm service menu, now organised around three combinable offerings. */
 .guideNav { display: flex; flex-wrap: wrap; gap: 12px 28px; margin: 32px 0 60px; }
 .guideNav a { min-height: 44px; display: inline-flex; align-items: center; text-underline-offset: 7px; }
-.webGuide, .aiGuide { position: relative; scroll-margin-top: 40px; }
+.webGuide, .aiGuide { position: relative; }
 .serviceIntro { margin-bottom: 40px; }
 .serviceIntro h3, .appGuideIntro h3 { font-size: clamp(36px, 4vw, 54px); font-weight: 300; letter-spacing: -0.03em; margin: 0 0 16px; }
 .serviceIntro p { color: var(--muted); max-width: 64ch; }
@@ -1408,3 +1348,8 @@
 .serviceIntro { margin-bottom: 24px; }
 .serviceBand { padding: 32px 0; }
 .serviceBand > .priceAction > .servicePrice { font-size: clamp(32px, 4vw, 50px); color: var(--ink); }
+
+@media (max-width: 1000px) {
+  .page { padding-top: 88px; }
+  .page :is(section, h2) { scroll-margin-top: 108px; }
+}

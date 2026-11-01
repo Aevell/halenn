@@ -6,7 +6,7 @@ import { PricingAtmosphere } from "./PricingAtmosphere";
 import { EstimateProvider } from "./EstimateControls";
 import {
   normalizeSelection, serializeSelection, createBriefModel, investmentLabel, emptyNotes,
-  enquiryHref, examples, estimate, money, disclaimer,
+  enquiryHref, examples, estimate, estimateTitle, money, disclaimer,
   type Selection, type CustomNotes, type EstimateLine,
 } from "./catalog";
 import {
@@ -15,6 +15,7 @@ import {
 } from "./estimate-selection";
 import { guideBrief, parseGuideAnswers, type GuideAnswers } from "../halenn/solution-guide";
 import s from "./pricing.module.css";
+import useSmartTabTitle from "../useSmartTabTitle";
 
 function Arrow() {
   return <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
@@ -43,6 +44,10 @@ export default function PricingBuilder({ initial, guideAnswers, guide, questions
   const baseResult = createBriefModel(selection, customNotes);
   const result = { ...baseResult, notes: guideText ? [...baseResult.notes, guideText] : baseResult.notes };
   const hasItems = result.lines.length > 0;
+  useSmartTabTitle(
+    estimateTitle(result),
+    hasItems ? "Your estimate is waiting | Halenn" : "Let’s plan your next step | Halenn",
+  );
   const count = result.lines.length + result.monthlyLines.length;
   const selectionQuery = selection.services.length || guideContext
     ? serializeSelection(selection) + (guideContext ? `&guide=${encodeURIComponent(JSON.stringify(guideContext))}` : "") : "";

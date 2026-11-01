@@ -184,6 +184,11 @@ export function estimate(value: Selection) {
 export function investmentLabel(value: ReturnType<typeof estimate>) {
   return value.oneTime > 0 ? `From ${money(value.oneTime)}` : value.quoteRequired ? "Quote required" : "Choose your services";
 }
+export const defaultPricingTitle = "Pricing for Web, App & AI Automation | Halenn";
+export function estimateTitle(value: ReturnType<typeof estimate>) {
+  return !value.lines.length ? defaultPricingTitle : value.quoteRequired
+    ? "Your tailored estimate | Halenn" : `${investmentLabel(value)} · Your estimate | Halenn`;
+}
 export function parseSelection(query: Record<string, string | string[] | undefined>): Selection {
   const get = (key: string) => typeof query[key] === "string" ? query[key] : "";
   const list = (key: string) => get(key).split(",");
