@@ -1,0 +1,62 @@
+.shell { --privacy-ink:#edf2f7; --privacy-muted:#b9c5d2; --privacy-line:#7f95ab; padding-bottom:max(76px, calc(var(--dock-space, 0px) + 32px)); }
+.dock, .dialog { color:var(--privacy-ink); background:#0a0e14; border:1px solid #65798e; border-radius:24px; isolation:isolate; }
+.dock { position:fixed; z-index:100; inset:auto 0 max(20px, env(safe-area-inset-bottom)); width:70vw; margin-inline:auto; padding:18px 22px; display:grid; grid-template-columns:minmax(0,1fr) 300px; align-items:center; gap:24px; max-height:calc(100svh - 32px); overflow:auto; animation:dockEnter 360ms var(--ease) both; }
+.fabric { position:absolute; z-index:-1; inset:0; overflow:hidden; border-radius:inherit; pointer-events:none; }
+.fabric::before { content:""; position:absolute; inset:-40% -10%; background:url('/brand/halenn-silk-v1.png') center 72% / cover no-repeat; opacity:.15; filter:brightness(2); mask-image:linear-gradient(#000 10%,transparent 90%); animation:foldEnter 650ms var(--ease) both; }
+.copy h2 { margin:0 0 6px; font-size:26px; line-height:1.15; letter-spacing:-.03em; }
+.copy > p { color:var(--privacy-muted); font-size:15px; line-height:1.5; margin:0; }
+.policyLinks { display:flex; flex-wrap:wrap; gap:24px; margin-top:12px; }
+.policyLinks a, .textButton { text-decoration:underline; text-underline-offset:5px; color:var(--privacy-muted); }
+.policyLinks a { min-height:44px; display:inline-flex; align-items:center; font-size:15px; }
+.explanation, .savedState { font-size:13px; line-height:1.5; color:var(--privacy-muted); margin:8px 0 0; }
+.actions { display:grid; gap:4px; }
+
+.dock .equalActions { gap:10px; }
+.dock .equalActions button { min-height:46px; padding:10px 12px; font-size:14px; }
+.dock .dockLinks { margin:0; justify-content:center; align-items:center; gap:20px; }
+.dockLinks a, .dockLinks .textButton { font-size:14px; }
+.dockLinks .textButton { padding-inline:0; }
+.equalActions { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.equalActions button, .save, .reopen { min-height:54px; border-radius:100px; border:1px solid #afc1d2; background:transparent; padding:13px 20px; color:inherit; font:inherit; font-size:16px; cursor:pointer; transition:background 160ms, border-color 160ms, transform 160ms var(--ease); }
+.textButton { min-height:44px; padding:6px; border:0; background:none; font:inherit; font-size:15px; cursor:pointer; justify-self:center; }
+.reopen { position:fixed; z-index:101; left:24px; bottom:max(20px,env(safe-area-inset-bottom)); width:48px; height:48px; min-height:48px; display:grid; place-items:center; padding:0; color:var(--privacy-ink); background:#0b1119; border-color:#7f95ab; opacity:.55; transition:opacity 180ms ease-out, background 160ms, border-color 160ms, transform 160ms var(--ease); }
+.reopen[data-docked=false] { visibility:hidden; opacity:0; pointer-events:none; }
+.reopen:focus-visible { opacity:1; }
+@media(hover:hover) and (pointer:fine) { .reopen:hover { opacity:1; } }
+@media(hover:none) { .reopen { opacity:.7; } }
+.dialog { width:min(1020px,calc(100vw - 48px)); max-height:calc(100svh - 48px); padding:64px 48px 36px; margin:auto; overflow:auto; }
+.dialog[open] { display:grid; grid-template-columns:.88fr 1.12fr; gap:40px; animation:dockEnter 300ms var(--ease) both; }
+.dialog::backdrop { background:#030508a8; animation:veilEnter 220ms ease-out; }
+.close { position:absolute; right:15px; top:12px; display:grid; place-items:center; width:44px; height:44px; color:var(--privacy-ink); background:transparent; border:0; cursor:pointer; border-radius:50%; }
+.introduction { display:flex; flex-direction:column; padding-right:30px; border-right:1px solid #63788d66; }
+.introduction h2 { margin:0 0 24px; font-size:clamp(32px,4vw,52px); line-height:1.08; letter-spacing:-.035em; text-wrap:balance; }
+.introduction p { margin:0; color:var(--privacy-muted); font-size:19px; line-height:1.5; }
+.introduction .policyLinks { margin-top:auto; padding-top:32px; }
+.settings { display:flex; flex-direction:column; gap:14px; }
+.setting { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:14px 0 24px; border-bottom:1px solid #63788d66; }
+.setting h3 { font-family:var(--font-body),sans-serif; font-size:20px; font-weight:400; margin:0 0 6px; }
+.setting p { margin:0; font-size:15px; line-height:1.5; color:var(--privacy-muted); }
+.setting > span { font-size:14px; color:var(--privacy-muted); white-space:nowrap; }
+.switch { width:60px; height:44px; padding:0 3px; flex:none; border:1px solid #7f95ab; background:#19212b; color:#e1edf7; border-radius:100px; cursor:pointer; transition:background 160ms; }
+.switch span { display:block; width:30px; height:30px; margin:0; background:currentColor; border-radius:50%; transform:translateX(0); transition:transform 200ms var(--ease); }
+.switch[aria-checked=true] { background:#435d74; }
+.switch[aria-checked=true] span { transform:translateX(22px); }
+.save { background:#dceaf5; color:#0c1520; }
+.settings .savedState { margin:0; text-align:center; }
+.settings .explanation { margin:0 0 6px; }
+:is(.dock,.dialog) :is(button,a):focus-visible, .reopen:focus-visible { outline:2px solid #e2f1ff; outline-offset:5px; }
+:is(.dock,.dialog) button:disabled { cursor:default; opacity:.65; }
+.equalActions button:active, .save:active, .reopen:active { transform:scale(.98); }
+.srOnly { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+@media(hover:hover) and (pointer:fine) { .equalActions button:hover, .reopen:hover { background:#263747; border-color:#edf5ff; } .save:hover { background:#f1f7fc; } .textButton:hover, .policyLinks a:hover { color:#fff; } .close:hover { background:#293644; } }
+@keyframes dockEnter { from { opacity:.65; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+@keyframes foldEnter { from { transform:translateY(14px) scale(1.015); } to { transform:none; } }
+@keyframes veilEnter { from { background:#03050800; } to { background:#030508a8; } }
+@media(max-width:1000px) { .dock { width:min(calc(100vw - 32px),max(70vw,320px)); grid-template-columns:1fr; gap:12px; padding:18px 20px 12px; bottom:max(16px,env(safe-area-inset-bottom)); } .desktopBreak { display:none; } }
+@media(max-width:800px) { .policyLinks { margin-top:4px; } .dialog[open] { grid-template-columns:1fr; gap:24px; } .dialog { padding:54px 28px 24px; width:calc(100vw - 32px); } .introduction { padding:0; border:0; } .introduction h2 { font-size:36px; max-width:14ch; margin-bottom:14px; } .introduction p { font-size:17px; } .introduction .policyLinks { margin:4px 0 0; padding:0; } }
+@media(max-width:600px) { .dock { padding:16px 16px 10px; border-radius:20px; gap:8px; } .copy h2 { font-size:24px; } .dock .equalActions { gap:8px; } .dock .equalActions button { padding:10px 8px; } }
+@media(max-width:440px) { .equalActions { gap:8px; } .equalActions button { padding:12px 8px; font-size:14px; min-height:48px; } .dialog { padding:52px 20px 24px; } .introduction h2 { font-size:34px; } .reopen { left:16px; } }
+
+@media(prefers-reduced-motion:reduce) { .dock, .dialog, .reopen, :is(.dock,.dialog) *, :is(.dock,.dialog) *::before, .dialog::backdrop { animation:none!important; transition:none!important; } }
+@media(prefers-reduced-motion:reduce) { :global(html) { scroll-behavior:auto; } }
+@media print { .dock, .dialog, .reopen, .srOnly { display:none!important; } .shell { padding:0; } }

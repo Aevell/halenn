@@ -1,4 +1,4 @@
 import type { MetadataRoute } from "next";
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [{ url: "https://halenn.com" }, { url: "https://halenn.com/pricing" }, { url: "https://halenn.com/about" }];
+  return ["", "/pricing", "/about", "/privacy", "/cookies", "/terms", "/business"].map(path => ({ url: `https://halenn.com${path}` }));
 }

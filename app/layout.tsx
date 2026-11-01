@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Syne } from "next/font/google";
 import localFont from "next/font/local";
+import CookieConsent from "./components/legal/CookieConsent";
 import "./globals.css";
 
 const bodyFont = Geist({
@@ -61,9 +62,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <body className={`${bodyFont.variable} ${displayFont.variable} ${headingFont.variable}`}>
-        {children}
+        <CookieConsent>{children}</CookieConsent>
       </body>
     </html>
   );

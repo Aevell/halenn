@@ -1,0 +1,49 @@
+.arrow { flex:none; }
+.page { background:#080b10; color:#e9eef4; min-height:100svh; }
+.header { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:32px var(--page-gutter); border-bottom:1px solid #63788d33; }
+.header > a { min-height:44px; display:flex; align-items:center; gap:14px; }
+.hero { position:relative; isolation:isolate; padding:86px var(--page-gutter) 0; overflow:hidden; }
+.hero::before, .contact::before { content:""; position:absolute; z-index:-1; inset:-120px -8% 0; background:url('/brand/halenn-silk-v1.png') center 20% / cover no-repeat; opacity:.15; mask-image:linear-gradient(#000,transparent 90%); pointer-events:none; animation:clothArrival 700ms var(--ease) both; }
+.hero h1 { max-width:16ch; font-size:clamp(44px,5.5vw,80px); letter-spacing:-.035em; line-height:1.06; text-wrap:balance; margin:0 0 24px; }
+.hero > p { max-width:64ch; font-size:21px; line-height:1.6; margin:0; color:#b9c5d2; }
+.hero .draft { font-size:15px; margin:28px 0 42px; color:#c4d4e4; max-width:72ch; }
+.draft strong { color:#e9eef4; font-weight:500; }
+.tabs { margin-top:42px; display:flex; flex-wrap:wrap; gap:12px 30px; border-bottom:1px solid #63788d66; }
+.tabs a { min-height:54px; padding:14px 0; font-size:16px; color:#b9c5d2; border-bottom:1px solid transparent; }
+.tabs a[aria-current=page] { color:#fff; border-bottom-color:#dceaf5; }
+.document { display:grid; grid-template-columns:220px minmax(0,760px); gap:clamp(48px,8vw,140px); max-width:1400px; padding:56px var(--page-gutter) 0; margin:auto; }
+.document aside { align-self:start; position:sticky; top:32px; font-size:15px; }
+.document aside nav { display:flex; flex-direction:column; align-items:flex-start; gap:0; }
+.document aside nav p { margin:0 0 16px; color:#e9eef4; }
+.document aside a { display:flex; align-items:center; min-height:44px; padding:7px 0; line-height:1.4; color:#b9c5d2; }
+.document aside button, .footer button { display:inline-flex; align-items:center; min-height:44px; font:inherit; padding:0; color:#e1ebf5; border:0; background:none; text-decoration:underline; text-underline-offset:5px; cursor:pointer; text-align:left; }
+.date { color:#b9c5d2; line-height:1.6; margin:30px 0 12px; }
+.section { padding:0 0 44px; margin:0 0 44px; border-bottom:1px solid #63788d44; scroll-margin-top:32px; }
+.section h2 { font-size:clamp(28px,2.5vw,36px); line-height:1.2; letter-spacing:-.025em; margin:0 0 24px; text-wrap:balance; }
+.section p, .section li { font-size:17px; line-height:1.8; color:#c5ced9; margin:0 0 18px; overflow-wrap:anywhere; }
+.section ul { padding-left:24px; margin:24px 0; list-style:disc; }
+.section li { padding-left:6px; margin-bottom:12px; }
+.pending { margin-top:28px; padding:22px 24px; background:#14202c; border-radius:12px; }
+.pending strong { font-size:15px; font-weight:500; color:#e3eef9; }
+.pending p { font-size:15px; line-height:1.7; color:#c0d0df; margin:10px 0 0; }
+.sources { display:flex; flex-direction:column; align-items:flex-start; gap:0; font-size:15px; }
+.sources p { margin:0 0 8px; }
+.sources a { min-height:44px; display:flex; align-items:center; color:#b9c5d2; text-decoration:underline; text-underline-offset:5px; }
+.contact { position:relative; isolation:isolate; overflow:hidden; padding:100px var(--page-gutter); margin-top:64px; }
+.contact::before { mask-image:linear-gradient(transparent,#000 45%,transparent); transform:scaleY(-1); animation:none; }
+.contact h2 { font-size:clamp(32px,4.5vw,60px); max-width:20ch; line-height:1.15; letter-spacing:-.03em; margin:0 0 32px; }
+.contact a { display:inline-flex; min-height:48px; align-items:center; gap:24px; font-size:20px; border-bottom:1px solid #afc1d2; }
+.footer { padding:48px var(--page-gutter) 88px; color:#c5ced9; background:#080b10; border-top:1px solid #63788d44; display:flex; justify-content:space-between; gap:48px; font-size:16px; }
+.footer p { margin:18px 0 10px; font-size:14px; }
+.footer nav { display:flex; flex-wrap:wrap; gap:12px 28px; justify-content:flex-end; max-width:640px; }
+.footer a { display:inline-flex; min-height:44px; align-items:center; }
+.footer > div { flex-shrink:0; }
+.page :is(a,button):focus-visible, .footer :is(a,button):focus-visible { outline:2px solid #e2f1ff; outline-offset:5px; border-radius:2px; }
+.skip { position:fixed; top:12px; left:20px; padding:14px; background:#dceaf5; color:#0b1119; z-index:120; transform:translateY(-160%); }
+.skip:focus { transform:none; }
+@media(hover:hover) and (pointer:fine) { .page a:hover, .footer a:hover, .footer button:hover { color:white; } }
+@keyframes clothArrival { from { transform:translateY(16px); } to { transform:none; } }
+@media(max-width:900px) { .document { grid-template-columns:1fr; gap:40px; } .document aside { position:static; } .document aside nav { display:grid; grid-template-columns:1fr 1fr; gap:0 20px; } .document aside nav p { grid-column:1/-1; } .date { display:none; } .footer { flex-direction:column; gap:24px; } .footer nav { justify-content:flex-start; } }
+@media(max-width:600px) { .header { padding-top:20px; padding-bottom:20px; gap:20px; } .header > a:first-child svg { width:130px; height:auto; } .header > a:last-child { font-size:14px; } .hero { padding-top:52px; } .hero h1 { font-size:44px; } .hero > p { font-size:18px; } .tabs { gap:4px 24px; } .tabs a { font-size:15px; } .document { padding-top:32px; } .document aside nav { grid-template-columns:1fr; } .section { padding-bottom:28px; margin-bottom:34px; } .section p, .section li { font-size:16px; line-height:1.75; } .pending { padding:18px; } .contact { padding-top:60px; padding-bottom:60px; } .footer nav { display:grid; grid-template-columns:1fr 1fr; } }
+@media(prefers-reduced-motion:reduce) { .hero::before { animation:none; } }
+@media print { .header, .tabs, .document aside, .footer, .contact, .skip { display:none; } .page { color:#111; background:white; } .hero { padding:0; } .hero::before { display:none; } .document { display:block; padding:24px 0; } .section h2, .section p, .section li, .hero > p, .hero .draft, .draft strong, .sources a { color:#111; } .pending { background:#eee; break-inside:avoid; } .pending strong, .pending p { color:#111; } .section { break-inside:avoid; } }

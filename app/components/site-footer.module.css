@@ -30,7 +30,7 @@
   text-transform: uppercase;
 }
 .footer ul { padding: 0; margin: 0; list-style: none; }
-.footer .pending { color: #8f9eaf; cursor: default; }
+.preferences { display:inline-flex; align-items:center; min-height:44px; padding:0; border:0; background:none; color:inherit; font:inherit; cursor:pointer; text-align:left; }
 .bottom {
   border-top: 1px solid #b6cbe326;
   padding-block: 18px 28px;
@@ -42,9 +42,9 @@
 }
 .footer .bottom p { margin: 0; }
 .bottom a { gap: 8px; }
-.footer a[href]:focus-visible { outline: 2px solid #b6d9ff; outline-offset: 5px; }
+.footer :is(a[href],button):focus-visible { outline: 2px solid #b6d9ff; outline-offset: 5px; }
 @media (hover: hover) and (pointer: fine) {
-  .footer a[href]:hover { color: #fff; text-decoration: underline; text-underline-offset: 5px; }
+  .footer :is(a[href],button):hover { color: #fff; text-decoration: underline; text-underline-offset: 5px; }
 }
 .srOnly {
   position: absolute;

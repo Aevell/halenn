@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { PrivacyButton } from "./legal/CookieConsent";
+import { legalLinks } from "./legal/documents";
 import Wordmark from "./halenn/cinematic/Wordmark";
 import styles from "./site-footer.module.css";
 
@@ -6,33 +9,27 @@ export default function SiteFooter({ contained = false }: { contained?: boolean 
     <footer id="footer" className={`${styles.footer} ${contained ? styles.contained : ""}`}>
       <div className={styles.main}>
         <div className={styles.identity}>
-          <a href="/#hero-content" className={styles.brand} aria-label="Halenn home">
+          <Link href="/#hero-content" className={styles.brand} aria-label="Halenn home">
             <Wordmark />
-          </a>
+          </Link>
           <a className={styles.email} href="mailto:contact@halenn.com">contact@halenn.com</a>
         </div>
         <nav className={styles.group} aria-label="Footer navigation">
           <p className={styles.label}>Explore</p>
           <ul>
-            <li><a href="/#services">Services</a></li>
-            <li><a href="/pricing">Pricing</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/#process">How we work</a></li>
-            <li><a href="/#faq">FAQ</a></li>
-            <li><a href="/#contact">Contact</a></li>
+            <li><Link href="/#services">Services</Link></li>
+            <li><Link href="/pricing">Pricing</Link></li>
+            <li><Link href="/about">About</Link></li>
+            <li><Link href="/#process">How we work</Link></li>
+            <li><Link href="/#faq">FAQ</Link></li>
+            <li><Link href="/#contact">Contact</Link></li>
           </ul>
         </nav>
         <div className={styles.group}>
           <p className={styles.label}>Information</p>
           <ul>
-            {/** Keep these inactive until real policies and business details are available. */}
-            {["Privacy policy", "Terms & conditions", "Business details"].map(label => (
-              <li key={label}>
-                <a role="link" aria-disabled="true" className={styles.pending} title="Coming soon">
-                  {label}<span className={styles.srOnly}> (coming soon)</span>
-                </a>
-              </li>
-            ))}
+            {legalLinks.map(([slug, label]) => <li key={slug}><Link href={`/${slug}`}>{label}</Link></li>)}
+            <li><PrivacyButton className={styles.preferences} /></li>
           </ul>
         </div>
       </div>
