@@ -13,6 +13,7 @@ import {
   pagePrice, maxExtraPages, pageDescription, disclaimer,
   type Selection, type ServiceId, type ExtraId, type Stage, type CustomNotes,
 } from "./catalog";
+import { guideBrief, parseGuideAnswers, type GuideAnswers } from "../halenn/solution-guide";
 import s from "./pricing.module.css";
 
 const titles: Record<Stage, string> = {
@@ -133,16 +134,19 @@ function LineItems({ selection }: { selection: Selection }) {
 }
 export default function PricingBuilder({
   initial,
+  guideAnswers,
   guide,
   questions,
 }: {
   initial: Selection;
+  guideAnswers?: GuideAnswers;
   guide: ReactNode;
   questions: ReactNode;
 }) {
   const [selection, setSelection] = useState(initial);
   const [customNotes, setCustomNotes] = useState<CustomNotes>(emptyNotes);
-  const [stage, setStage] = useState<Stage>("project");
+  const [stage, setStage] = useState<Stage>(guideAnswers ? "review" : "project");
+  const [guideContext, setGuideContext] = useState(guideAnswers);
   const [notice, setNotice] = useState("");
   const [shared, setShared] = useState("");
   const [shareFallback, setShareFallback] = useState("");
@@ -160,9 +164,12 @@ export default function PricingBuilder({
   const dialog = useRef<HTMLDialogElement>(null);
   const shareField = useRef<HTMLInputElement>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
-  const result = createBriefModel(selection, customNotes);
+  const guideText = guideContext ? guideBrief(guideContext) : "";
+  const baseResult = createBriefModel(selection, customNotes);
+  const result = { ...baseResult, notes: guideText ? [...baseResult.notes, guideText] : baseResult.notes };
   const selectionKey = serializeSelection(selection);
-  const activeQuery = useRef(selectionKey);
+  const selectionQuery = selectionKey + (guideContext ? `&guide=${encodeURIComponent(JSON.stringify(guideContext))}` : "");
+  const activeQuery = useRef(selectionQuery);
   const web = selection.services.includes("web");
   const app = selection.services.includes("app");
   const ai = selection.services.includes("automation");
@@ -171,13 +178,13 @@ export default function PricingBuilder({
   const questionCount = stages.length - 1;
 
   useEffect(() => {
-    activeQuery.current = selectionKey;
+    activeQuery.current = selectionQuery;
     history.replaceState(
       history.state,
       "",
-      `${location.pathname}?${selectionKey}${location.hash}`,
+      `${location.pathname}?${selectionQuery}${location.hash}`,
     );
-  }, [selectionKey]);
+  }, [selectionQuery]);
   useEffect(() => {
     const restore = () => {
       const params = new URLSearchParams(location.search);
@@ -187,14 +194,17 @@ export default function PricingBuilder({
         query[key] = values.length === 1 ? values[0] : values;
       });
       const restored = parseSelection(query);
-      if (serializeSelection(restored) === activeQuery.current) return;
+      const restoredGuide = parseGuideAnswers(params.get("guide") ?? undefined);
+      const restoredQuery = serializeSelection(restored) + (restoredGuide ? `&guide=${encodeURIComponent(JSON.stringify(restoredGuide))}` : "");
+      if (restoredQuery === activeQuery.current) return;
       setSelection(restored);
+      setGuideContext(restoredGuide);
       animations.current.forEach((animation) => animation.cancel());
       transitioning.current = false;
       shell.current?.style.removeProperty("overflow");
       if (panel.current) panel.current.inert = false;
       builder.current?.removeAttribute("aria-busy");
-      setStage("project");
+      setStage(restoredGuide ? "review" : "project");
       setNotice("");
       setShared("");
       setShareFallback("");
@@ -293,7 +303,7 @@ export default function PricingBuilder({
         : [...selection.extras, id],
     });
   const share = async () => {
-    const url = `${location.origin}${location.pathname}?${selectionKey}#builder`;
+    const url = `${location.origin}${location.pathname}?${selectionQuery}#builder`;
     setShareFallback(url);
     try {
       await navigator.clipboard.writeText(url);
@@ -310,7 +320,7 @@ export default function PricingBuilder({
   const download = async () => {
     if (exportPending.current) return;
     exportPending.current = true;
-    const snapshot = createBriefModel(selection, customNotes);
+    const snapshot = result;
     setPdfStatus("loading");
     try {
       const { downloadBriefPdf } = await import("./brief-pdf");
@@ -577,10 +587,11 @@ export default function PricingBuilder({
                 {result.lines.map(line => <p key={line.id}><strong>{line.name}:</strong> {line.scope.join(". ")}.</p>)}
                 {result.monthlyLines.map(line => <p key={line.id}><strong>{line.name}, {money(line.price ?? 0)}/month:</strong> {line.scope.join(". ")}.</p>)}
                 {Object.entries(result.customNotes).map(([key, note]) => note && <p key={key} className={s.customNote}><strong>Your {key === "web" ? "web" : "automation"} requirements:</strong> {note}</p>)}
-                {result.notes.filter(note => !note.startsWith("Ongoing automation")).map(note => <p key={note}>{note}</p>)}
+                {result.notes.filter(note => !note.startsWith("Ongoing automation")).map(note => <p key={note} className={note === guideText ? s.guideAnswers : undefined}>{note}</p>)}
                 <p>{result.exclusions}</p>
                 <p>{disclaimer}</p>
               </Disclosure>
+              {guideText && <p className={s.guideNotice}>Your guide answers are included in this starting point. You can adjust the estimate using Edit answers.</p>}
               <div className={s.reviewActions}>
                 <button className={s.primary} onClick={openEnquiry}>
                   Discuss this project <Arrow />
@@ -692,6 +703,7 @@ export default function PricingBuilder({
                     onClick={() => {
                       if (transitioning.current) return;
                       update(example.selection);
+                      setGuideContext(undefined);
                       setCustomNotes(emptyNotes);
                       navigate("review");
                       setNotice(
@@ -758,7 +770,7 @@ export default function PricingBuilder({
           </svg>
         </button>
         <h2 id="enquiry-title">Tell us what’s next.</h2>
-        <p>Your estimate and any custom requirements will be included in an email draft.</p>
+        <p>Your estimate{guideText ? ", guide answers" : ""} and any custom requirements will be included in an email draft.</p>
         <div className={s.enquirySummary}>
           <strong>{investmentLabel(result)}{result.oneTime > 0 ? " one-time" : ""}</strong>
           <span>{monthlyLabel}</span>
@@ -774,7 +786,7 @@ export default function PricingBuilder({
               selection,
               String(data.get("name")),
               String(data.get("email")),
-              String(data.get("message")),
+              [String(data.get("message") || "I’d like to discuss this starting point."), guideText].filter(Boolean).join("\n\n"),
               customNotes,
             );
             setDraftOpened(true);
@@ -795,8 +807,8 @@ export default function PricingBuilder({
             />
           </label>
           <label>
-            What do you have in mind?
-            <textarea name="message" rows={3} required maxLength={1800} />
+            {guideText ? "Anything else you’d like us to know? (optional)" : "What do you have in mind?"}
+            <textarea name="message" rows={3} required={!guideText} maxLength={1800} />
           </label>
           <button className={s.primary} type="submit">
             Open email draft <Arrow />

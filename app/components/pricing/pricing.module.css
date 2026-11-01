@@ -1378,3 +1378,6 @@
   .packageGroup small { font-size: 15px; }
 }
 @media (prefers-reduced-motion: reduce) { .packageGroup > summary > svg { transition: none; } }
+
+.guideNotice { margin: 24px 0 0 !important; padding: 18px 20px; border-left: 2px solid #abc9e0; background: #152433; color: #d3e2f0; font-size: 16px; line-height: 1.6; }
+.guideAnswers { white-space: pre-line; }

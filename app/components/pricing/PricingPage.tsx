@@ -1,5 +1,6 @@
 import Wordmark from "../halenn/cinematic/Wordmark";
 import PricingBuilder from "./PricingBuilder";
+import type { GuideAnswers } from "../halenn/solution-guide";
 import Disclosure from "./Disclosure";
 import { PricingAtmosphere, PricingMotion } from "./PricingAtmosphere";
 import {
@@ -195,7 +196,7 @@ function Questions() {
   );
 }
 
-export default function PricingPage({ initial, prototype = false }: { initial: Selection; prototype?: boolean }) {
+export default function PricingPage({ initial, prototype = false, guideAnswers }: { initial: Selection; prototype?: boolean; guideAnswers?: GuideAnswers }) {
   const home = prototype ? "/prototypes/hero?v=1" : "/";
   return (
     <div className={s.page}>
@@ -239,6 +240,7 @@ export default function PricingPage({ initial, prototype = false }: { initial: S
         </noscript>
         <PricingBuilder
           initial={initial}
+          guideAnswers={guideAnswers}
           guide={<PriceGuide />}
           questions={<Questions />}
         />
