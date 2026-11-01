@@ -18,12 +18,15 @@ import s from "./experience.module.css";
 const ScopeContext = createContext<{
   selected: string[];
   setSelected: React.Dispatch<React.SetStateAction<string[]>>;
-}>({ selected: [], setSelected: () => {} });
+  enquiryGoal: string;
+  setEnquiryGoal: React.Dispatch<React.SetStateAction<string>>;
+}>({ selected: [], setSelected: () => {}, enquiryGoal: "", setEnquiryGoal: () => {} });
 export const useProjectScope = () => useContext(ScopeContext);
 export function ExperienceProvider({ children }: { children: ReactNode }) {
   const [selected, setSelected] = useState<string[]>([]);
+  const [enquiryGoal, setEnquiryGoal] = useState("");
   return (
-    <ScopeContext.Provider value={{ selected, setSelected }}>
+    <ScopeContext.Provider value={{ selected, setSelected, enquiryGoal, setEnquiryGoal }}>
       {children}
     </ScopeContext.Provider>
   );
@@ -429,9 +432,12 @@ export function Process() {
   </section>;
 }
 export function Contact({ email }: { email?: string }) {
-  const { selected } = useProjectScope();
+  const { selected, enquiryGoal, setEnquiryGoal } = useProjectScope();
   const form = useRef<HTMLDialogElement>(null);
   const [saved, setSaved] = useState(false);
+  useEffect(() => {
+    if (enquiryGoal) form.current?.showModal();
+  }, [enquiryGoal]);
   return (
     <section id="contact" className={s.contact} aria-labelledby="contact-title">
       <div className={s.contactLight} data-contact-light aria-hidden="true" />
@@ -462,6 +468,7 @@ export function Contact({ email }: { email?: string }) {
         ref={form}
         className={s.dialog}
         aria-labelledby="contact-dialog-title"
+        onClose={() => { setEnquiryGoal(""); setSaved(false); }}
       >
         <button
           className={s.close}
@@ -477,7 +484,8 @@ export function Contact({ email }: { email?: string }) {
             e.preventDefault();
             if (email) {
               const values = new FormData(e.currentTarget);
-              const body = `Name: ${values.get("name")}\nEmail: ${values.get("email")}\n\n${values.get("project")}\n\nSelected scope: website${selected.length ? ` + ${selected.join(", ")}` : ""}.`;
+              const scope = enquiryGoal ? "Enquiry started from a business goal." : `Selected scope: website${selected.length ? ` + ${selected.join(", ")}` : ""}.`;
+              const body = `Name: ${values.get("name")}\nEmail: ${values.get("email")}\n\n${values.get("project")}\n\n${scope}`;
               window.location.href = `mailto:${email}?subject=${encodeURIComponent("A new project for Halenn")}&body=${encodeURIComponent(body)}`;
             }
             setSaved(true);
@@ -493,11 +501,10 @@ export function Contact({ email }: { email?: string }) {
           </label>
           <label>
             What are you planning?
-            <textarea name="project" required rows={4} />
+            <textarea key={enquiryGoal} name="project" required rows={4} defaultValue={enquiryGoal} />
           </label>
           <p>
-            Selected scope: website
-            {selected.length ? ` + ${selected.join(", ")}` : ""}.
+            {enquiryGoal ? "Tell us about the task or idea. You don’t need to choose a solution yet." : `Selected scope: website${selected.length ? ` + ${selected.join(", ")}` : ""}.`}
           </p>
           <button type="submit" className={controls.action}>
             {email ? "Open email draft" : "Preview enquiry"} <ActionArrow />
