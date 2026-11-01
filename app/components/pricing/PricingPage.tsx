@@ -1,4 +1,5 @@
 import Wordmark from "../halenn/cinematic/Wordmark";
+import SiteFooter from "../SiteFooter";
 import PricingBuilder from "./PricingBuilder";
 import { EstimateToggle, EstimateRequirement, ExtraPages } from "./EstimateControls";
 import type { GuideAnswers } from "../halenn/solution-guide";
@@ -242,14 +243,7 @@ export default function PricingPage({ initial, prototype = false, guideAnswers }
           questions={<Questions />}
         />
       </main>
-      <footer className={s.footer}>
-        <Wordmark />
-        <a href="https://aevell.com" target="_blank" rel="noreferrer">
-          A company by Aevell
-          <span className={s.srOnly}> (opens in a new tab)</span>
-        </a>
-        <a href="#builder">Back to your estimate</a>
-      </footer>
+      <SiteFooter contained />
     </div>
   );
 }

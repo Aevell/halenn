@@ -1,6 +1,6 @@
 import { Instrument_Serif } from "next/font/google";
 import localFont from "next/font/local";
-import { Arrow } from "../Brand";
+import SiteFooter from "../../SiteFooter";
 import CinematicMotion from "./CinematicMotion";
 import { ExperienceProvider, Contact } from "./Experience";
 import { ActionLink } from "./Action";
@@ -10,7 +10,6 @@ import Services from "./Services";
 import Hero from "./Hero";
 import Goals from "./Goals";
 import Faq from "./Faq";
-import Wordmark from "./Wordmark";
 import Refraction from "./Refraction";
 import styles from "./cinematic.module.css";
 
@@ -69,15 +68,7 @@ export default function Cinematic({ contactEmail }: { contactEmail?: string }) {
           </section>
           <Faq />
           <Contact email={contactEmail} />
-          <footer className={styles.footer}>
-            <Wordmark className={styles.footerWordmark} />
-            <p>Websites & systems, thoughtfully connected.</p>
-            <a href="https://aevell.com" target="_blank" rel="noreferrer">
-              Part of Aevell{" "}
-              <span className={styles.srOnly}>(opens in a new tab)</span>
-              <Arrow />
-            </a>
-          </footer>
+          <SiteFooter />
         </div>
       </CinematicMotion>
     </ExperienceProvider>

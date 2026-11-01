@@ -767,27 +767,6 @@
   color: var(--muted);
   padding: 12px 0;
 }
-.footer {
-  border-top: 1px solid var(--line);
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 24px 0 32px;
-  color: var(--muted);
-  font-size: 14px;
-}
-.footer svg {
-  width: 135px;
-  height: auto;
-}
-.footer a {
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-}
-.footer a:last-child {
-  margin-left: auto;
-}
 .dialog {
   color: var(--ink);
   background: #0c1118;
@@ -1178,16 +1157,6 @@
   .contact > div:last-child {
     gap: 16px;
     margin-top: 28px;
-  }
-  .footer {
-    flex-wrap: wrap;
-    gap: 8px 18px;
-  }
-  .footer svg {
-    width: 116px;
-  }
-  .footer a:last-child {
-    margin-left: 0;
   }
   .dialog {
     padding: 28px 22px;
