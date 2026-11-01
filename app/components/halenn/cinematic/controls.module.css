@@ -63,7 +63,7 @@
   .header { padding-inline: 5%; gap: 14px; }
   .quickNav a { padding-inline: 12px; font-size: 14px; }
 }
-@media (max-width:900px) {
+@media (max-width:1000px) {
   .header { height: 88px; }
   .brand > svg { width: 148px; }
   .quickNav { display: none; }

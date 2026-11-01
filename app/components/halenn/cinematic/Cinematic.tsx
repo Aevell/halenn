@@ -2,8 +2,9 @@ import { Instrument_Serif } from "next/font/google";
 import localFont from "next/font/local";
 import { Arrow } from "../Brand";
 import CinematicMotion from "./CinematicMotion";
-import { ExperienceProvider, Projects, Process, Contact } from "./Experience";
+import { ExperienceProvider, Projects, Contact } from "./Experience";
 import ProjectScope from "./ProjectScope";
+import Process from "./Process";
 import Navigation from "./Navigation";
 import Services from "./Services";
 import Hero from "./Hero";
@@ -55,8 +56,8 @@ export default function Cinematic({ contactEmail }: { contactEmail?: string }) {
             <Services />
           </Refraction>
 
-          <Projects />
           <Process />
+          <Projects />
           <section
             id="scope"
             className={styles.scope}

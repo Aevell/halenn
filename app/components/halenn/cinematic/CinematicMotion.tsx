@@ -26,13 +26,12 @@ export default function CinematicMotion({ children }: { children: ReactNode }) {
     const logo = find("[data-ribbon-art] img");
     const opening = find("[data-opening]");
     const gallery = find("[data-project-stage]");
-    const process = find("[data-process-stage]");
     const scope = find("[data-scope-heading]");
     const contactLight = find("[data-contact-light]");
     const words = Array.from(element.querySelectorAll<HTMLElement>("[data-contact-word]"));
     const chapters = Array.from(element.querySelectorAll<HTMLElement>("[data-service-chapter]"));
-    const sections = [services, find("#projects"), find("#process"), find("#scope"), find("#contact")];
-    const targets = [camera, website, checkout, workflow, progress, light, gallery, process, scope, contactLight, ...words, ...chapters];
+    const sections = [services, find("#process"), find("#projects"), find("#scope"), find("#contact")];
+    const targets = [camera, website, checkout, workflow, progress, light, gallery, scope, contactLight, ...words, ...chapters];
     const desktop = matchMedia("(min-width:1001px) and (min-height:681px) and (prefers-reduced-motion:no-preference)");
     const phone = matchMedia("(max-width:600px) and (min-height:740px) and (prefers-reduced-motion:no-preference)");
     let pending = 0, hashFrame = 0, active = false, pocket = false, height = innerHeight;
@@ -47,7 +46,7 @@ export default function CinematicMotion({ children }: { children: ReactNode }) {
     const paint = () => {
       pending = 0;
       const y = scrollY;
-      const [serviceTop, galleryTop, processTop, scopeTop, contactTop] = boundaries;
+      const [serviceTop, processTop, galleryTop, scopeTop, contactTop] = boundaries;
       if (!active) return;
       const arrival = (top: number) => smooth((y - top + height * .78) / (height * .65));
       const galleryIn = arrival(galleryTop), processIn = arrival(processTop);
@@ -72,14 +71,13 @@ export default function CinematicMotion({ children }: { children: ReactNode }) {
         target.style.transform = focusWithin ? "none" : transform;
         target.style.opacity = String(focusWithin ? 1 : opacity);
       };
-      pose(camera, `translate3d(0,${((1 - entrance) * 80 - galleryIn * 60) * travel}px,0) scale(${.88 + .12 * entrance - .08 * galleryIn})`, 1 - galleryIn * .6);
+      pose(camera, `translate3d(0,${((1 - entrance) * 80 - processIn * 60) * travel}px,0) scale(${.88 + .12 * entrance - .08 * processIn})`, 1 - processIn * .6);
       pose(website, `translate3d(${-order * 9 - connected * 4}%,${-order * 4 - connected * 5}%,0) rotateY(${-order * 7 - connected * 3}deg) scale(${1 - order * .12 - connected * .04})`, 1 - connected * .65);
       pose(checkout, `translate3d(${connected * -8}%,${(1 - order) * 25 - connected * 12}%,0) scale(${.92 + order * .08 - connected * .08})`, order * (1 - connected));
       pose(workflow, `translate3d(0,${(1 - connected) * 24}%,0) scale(${.92 + connected * .08})`, connected);
       progress.style.transform = `scaleX(${clamp(phase / 2)})`;
       light.style.opacity = String(.6 + order * .2 + connected * .2);
-      pose(gallery, `translate3d(0,${((1 - galleryIn) * 100 - processIn * 70) * travel}px,0) scale(${.94 + galleryIn * .06 - processIn * .04})`, 1 - processIn * .65);
-      pose(process, `translate3d(0,${((1 - processIn) * 90 - scopeIn * 55) * travel}px,0)`, 1 - scopeIn * .5);
+      pose(gallery, `translate3d(0,${((1 - galleryIn) * 100 - scopeIn * 70) * travel}px,0) scale(${.94 + galleryIn * .06 - scopeIn * .04})`, 1 - scopeIn * .65);
       pose(scope, `translate3d(0,${((1 - scopeIn) * 55 - contactIn * 40) * travel}px,0)`);
       words.forEach((word, i) => pose(word, `translate3d(${(i ? 1 : -1) * (1 - contactIn) * 8 * travel}vw,${(1 - contactIn) * 65 * travel}px,0)`, .45 + .55 * contactIn));
       pose(contactLight, `translate3d(0,${(1 - contactIn) * 18}%,0) scale(${.8 + contactIn * .2})`, .4 + contactIn * .6);

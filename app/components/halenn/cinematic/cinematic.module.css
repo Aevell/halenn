@@ -291,14 +291,12 @@
 }
 
 /* One camera language connects the existing scenes, without transforming the artwork. */
-.motionRoot[data-flow-motion] :global(#projects),
-.motionRoot[data-flow-motion] :global(#process) {
-  margin-top: -16svh;
+.motionRoot[data-flow-motion] :global(#projects) {
+  margin-top: 0;
   background: transparent;
   border-top: 0;
 }
-.motionRoot[data-flow-motion] :global([data-project-stage]),
-.motionRoot[data-flow-motion] :global([data-process-stage]) {
+.motionRoot[data-flow-motion] :global([data-project-stage]) {
   background: linear-gradient(
     to bottom,
     transparent,
@@ -316,13 +314,6 @@
   display: inline-block;
 }
 
-/* Transparent overlap must not intercept the outgoing gallery controls. */
-.motionRoot[data-flow-motion] :global(#process) {
-  pointer-events: none;
-}
-.motionRoot[data-flow-motion] :global([data-process-stage]) {
-  pointer-events: auto;
-}
 .motionRoot[data-flow-motion] :global(#contact) {
   border-top: 0;
   background: #07090d;
@@ -330,14 +321,12 @@
 /* Programmatic landmark focus transfers keyboard position; controls retain their rings. */
 
 /* Smaller travel and overlap preserve touch scrolling while joining the phone scenes. */
-.motionRoot[data-mobile-flow] :global(#projects[data-pocket-ribbon]),
-.motionRoot[data-mobile-flow] :global(#process[data-pocket-process]) {
-  margin-top: -8svh;
+.motionRoot[data-mobile-flow] :global(#projects[data-pocket-ribbon]) {
+  margin-top: 0;
   background: transparent;
   border-top: 0;
 }
-.motionRoot[data-mobile-flow] :global([data-project-stage]),
-.motionRoot[data-mobile-flow] :global([data-process-stage]) {
+.motionRoot[data-mobile-flow] :global([data-project-stage]) {
   background: linear-gradient(
     to bottom,
     transparent,
@@ -345,12 +334,6 @@
     #07090d 92%,
     transparent
   );
-}
-.motionRoot[data-mobile-flow] :global(#process) {
-  pointer-events: none;
-}
-.motionRoot[data-mobile-flow] :global([data-process-stage]) {
-  pointer-events: auto;
 }
 .motionRoot[data-mobile-flow] .scope,
 .motionRoot[data-mobile-flow] :global(#contact) {

@@ -7,7 +7,7 @@ import s from "./controls.module.css";
 
 const destinations = [
   ["websites", "Websites"], ["commerce", "Commerce"],
-  ["automation", "Automation"], ["projects", "Work"], ["pricing", "Pricing"],
+  ["automation", "Automation"], ["process", "How we work"], ["projects", "Work"], ["pricing", "Pricing"],
 ] as const;
 
 export default function Navigation() {
@@ -69,7 +69,7 @@ export default function Navigation() {
           if ((event.target as HTMLElement).closest("a")) {
             disclosure.current?.removeAttribute("open");
           }
-        }}>{links}<a href="#process">Our process</a><a href="#contact">Contact</a></nav>
+        }}>{links}<a href="#contact">Contact</a></nav>
       </details>
     </div>
   </header>;
