@@ -13,8 +13,8 @@ export default function Hero() {
         <div className={s.content}>
           <div className={s.heroAction} data-hero-aside><ActionLink href="#goals" plainArrow>Plan your project</ActionLink></div>
           <div className={s.description} data-hero-copy>
-            <h1>Websites. Commerce. Connected systems.</h1>
-            <p>Made to work beautifully.</p>
+            <h1>Websites. Apps. AI &amp; automation.</h1>
+            <p>For businesses ready for the next step.</p>
           </div>
         </div>
         <div className={s.artwork}>
