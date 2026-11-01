@@ -64,7 +64,7 @@ export default function Cinematic({ contactEmail }: { contactEmail?: string }) {
               <h2 id="pricing-intro-title">Find your starting price.</h2>
               <p>Explore packages and what’s included, or build an estimate around your needs. We’ll confirm the scope and final quote together.</p>
             </div>
-            <ActionLink href="/pricing">Explore pricing</ActionLink>
+            <ActionLink href="/pricing" quiet>Explore pricing</ActionLink>
           </section>
           <Contact email={contactEmail} />
           <footer className={styles.footer}>

@@ -59,7 +59,7 @@
   transform: none;
 }
 /* Short pricing signpost replaces the former scope builder. */
-.pricingIntro { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 40px; padding: 80px 5%; border-bottom: 1px solid #52657c44; }
+.pricingIntro { position: relative; display: flex; align-items: center; justify-content: space-between; gap: var(--layout-gap); padding: 80px var(--page-gutter); border-bottom: 1px solid #52657c44; }
 .pricingIntro > div { max-width: 640px; }
 .pricingIntro h2 { font-size: clamp(32px, 3.5vw, 50px); line-height: 1.15; letter-spacing: -.04em; font-weight: 300; }
 .pricingIntro p:not(.eyebrow) { margin-top: 20px; color: #b8c7d9; font-size: 17px; line-height: 1.65; max-width: 54ch; }
@@ -71,7 +71,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 24px;
-  margin: 0 5%;
+  margin: 0 var(--page-gutter);
   padding: 35px 0 105px;
   border-top: 1px solid #344156;
   color: #aabbd1;
@@ -97,7 +97,7 @@
 .world :is(section, [data-service-chapter]) { scroll-margin-top: 112px; }
 .world :is(textarea, details):focus-visible { outline: 2px solid #bddbff; outline-offset: 5px; }
 @media (max-width: 700px) {
-  .pricingIntro { flex-direction: column; align-items: flex-start; padding: 60px 6%; gap: 28px; }
+  .pricingIntro { flex-direction: column; align-items: flex-start; padding: 60px var(--page-gutter); gap: 28px; }
   .pricingIntro p:not(.eyebrow) { font-size: 16px; }
   .footer { font-size: 14px; }
 }

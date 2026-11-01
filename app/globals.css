@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 :root {
+  --page-gutter: max(24px, 5vw, calc((100vw - 1440px) / 2));
+  --layout-gap: clamp(28px, 4vw, 64px);
   --bg: #050607;
   --bg-soft: #080a0d;
   --surface: #0a0d11;

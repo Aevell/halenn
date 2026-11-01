@@ -10,7 +10,7 @@
   font-size: 17px;
   line-height: 1.55;
   min-height: 100svh;
-  padding: 0 max(32px, calc((100vw - 1200px) / 2));
+  padding: 0 var(--page-gutter);
   overflow-x: clip;
   color-scheme: dark;
   scrollbar-color: #526272 #080b10;
@@ -131,7 +131,7 @@
 .intro {
   position: relative;
   isolation: isolate;
-  text-align: center;
+  text-align: left;
   padding: 54px 0 36px;
 }
 /* Fabric carries depth while the reading surface remains steady. */
@@ -897,9 +897,6 @@
   }
 }
 @media (max-width: 1000px) {
-  .page {
-    padding-inline: 32px;
-  }
   .choice {
     padding: 22px 18px;
   }
@@ -943,9 +940,6 @@
   }
 }
 @media (max-width: 700px) {
-  .page {
-    padding-inline: 22px;
-  }
   .header {
     padding: 26px 0;
     align-items: start;
@@ -1203,9 +1197,6 @@
   }
 }
 @media (max-width: 420px) {
-  .page {
-    padding-inline: 20px;
-  }
   .projectChoices .choice {
     grid-template-columns: 1fr;
     gap: 8px;

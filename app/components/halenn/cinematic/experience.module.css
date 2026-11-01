@@ -190,7 +190,7 @@
 }
 .contact {
   position: relative;
-  padding: 70px 5% 90px;
+  padding: 70px var(--page-gutter) 90px;
   background:
     radial-gradient(ellipse at 75% 100%, #263d5b55, transparent 55%), #070b11;
   border-top: 1px solid #29394d;
@@ -447,7 +447,7 @@
     font-size: 17px;
   }
   .contact {
-    padding: 50px 6% 70px;
+    padding: 50px var(--page-gutter) 70px;
   }
   .contact h2 {
     font-size: 30vw;
@@ -612,7 +612,7 @@
 .contact {
   background:
     radial-gradient(ellipse at 70% 100%, #253e5c22, transparent 65%), #07090d;
-  padding: 100px 5% 80px;
+  padding: 100px var(--page-gutter) 80px;
   min-height: 75svh;
   display: flex;
   flex-direction: column;
@@ -710,7 +710,7 @@
   }
   .contact {
     min-height: 550px;
-    padding: 80px 6% 70px;
+    padding: 80px var(--page-gutter) 70px;
   }
   .contact > h2 {
     font-size: 16vw;

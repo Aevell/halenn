@@ -55,7 +55,7 @@ export default function Navigation() {
     <a href="#hero-content" className={s.brand} aria-label="Halenn home"><Wordmark /><span>A company by Aevell</span></a>
     <nav className={s.quickNav} aria-label="Primary navigation">{links}</nav>
     <div className={s.headerActions}>
-      <div className={s.headerBrief}><ActionLink href="#contact">Let’s talk</ActionLink></div>
+      <div className={s.headerBrief}><ActionLink href="#contact" quiet plainArrow>Let’s talk</ActionLink></div>
       <details ref={disclosure} className={s.menu} onKeyDown={(event) => {
         if (event.key === "Escape") {
           event.preventDefault();

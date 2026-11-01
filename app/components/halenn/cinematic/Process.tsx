@@ -58,7 +58,7 @@ export default function Process() {
       <div className={s.nextStep}>
         <p>Start with a conversation. We’ll work out the details together.</p>
         <button
-          className={`${controls.action} ${s.action}`}
+          className={`${controls.action} ${controls.quiet} ${s.action}`}
           onClick={() => setEnquiryGoal("I’d like to discuss a project.\n\nWhat I want to improve in my business is: ")}
         >
           <span>Tell us about your idea</span>
