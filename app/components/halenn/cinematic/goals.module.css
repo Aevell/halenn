@@ -31,8 +31,17 @@
 .textButton { padding: 8px 0; border: 0; background: transparent; color: #d6e6f8; text-decoration: underline; text-underline-offset: 5px; }
 .primary svg, .secondary svg, .textButton svg { width: 20px; height: 20px; flex-shrink: 0; }
 .resultDescription { max-width: 65ch; color: #c1d0e0; font-size: 18px; line-height: 1.65; margin-top: 20px !important; }
-.result .listLabel { color: #e1ecf7; font-size: 14px; margin-top: 28px !important; }
-.result ul { margin: 14px 0 24px; padding-left: 22px; color: #c1d0e0; font-size: 17px; line-height: 1.8; }
+.resultDetails { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: var(--layout-gap); margin-top: 32px; padding-block: 28px; border-block: 1px solid #b6cbe338; }
+.scope { min-width: 0; }
+.result .listLabel { color: #e1ecf7; font-size: 14px; }
+.estimate .amount { margin-top: 14px; color: #edf3fa; font-family: var(--font-heading), var(--font-body), sans-serif; font-size: clamp(34px, 4vw, 52px); font-weight: 300; letter-spacing: -.04em; line-height: 1.2; }
+.priceBasis { margin-top: 8px !important; color: #b8c7d9; font-size: 14px; }
+.estimate .customPrice { margin-top: 16px; max-width: 22ch; color: #edf3fa; font-family: var(--font-heading), var(--font-body), sans-serif; font-size: clamp(28px, 3vw, 36px); font-weight: 300; letter-spacing: -.03em; line-height: 1.2; }
+.estimate .note { margin-top: 18px; }
+.priceLines { margin: 22px 0 0; font-size: 15px; color: #c1d0e0; }
+.priceLines > div { display: flex; justify-content: space-between; gap: 16px; padding-block: 5px; }
+.priceLines dd { margin: 0; white-space: nowrap; }
+.result ul { margin: 14px 0 24px; padding-left: 22px; list-style: disc; color: #c1d0e0; font-size: 17px; line-height: 1.8; }
 .note { max-width: 75ch; color: #9fb4cc; font-size: 15px; line-height: 1.65; }
 .resultActions { justify-content: flex-start; }
 .answers { margin: 28px 0 12px; padding-top: 20px; border-top: 1px solid #52657c66; }
@@ -62,6 +71,7 @@
   .progress { margin-bottom: 20px; font-size: 13px; }
   .question h3, .result h3 { font-size: 28px; }
   .resultDescription, .result ul { font-size: 16px; }
+  .resultDetails { grid-template-columns: 1fr; gap: 28px; }
   .actions .primary { max-width: 80%; }
   .resultActions { gap: 12px; }
   .resultActions > * { width: 100%; }
