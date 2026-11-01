@@ -5,8 +5,10 @@ import s from "./silk-echo.module.css";
 // Each surface runs only while visible and honors reduced motion.
 export default function SilkEcho({ scene }: { scene: "projects" | "contact" }) {
   return <div className={`${s.echo} ${s[scene]}`} data-silk-echo={scene} data-silk-scene aria-hidden="true">
-    <div className={s.fold}>
-      <Silk sizes="(max-width:600px) 240vw, 140vw" />
+    <div className={s.drift} data-flow-ambient>
+      <div className={s.fold}>
+        <Silk sizes="(max-width:600px) 240vw, 140vw" />
+      </div>
     </div>
   </div>;
 }

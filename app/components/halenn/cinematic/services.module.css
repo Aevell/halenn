@@ -14,6 +14,7 @@
 .features li::before { content: ""; width: 4px; height: 4px; background: #93adc9; border-radius: 50%; flex: 0 0 4px; transform: translateY(-3px); }
 .copy > a { max-width: 100%; white-space: normal; }
 .example { margin: 0; min-width: 0; }
+.example:has(:focus-visible) { transform: none !important; }
 .preview { position: relative; display: block; width: 100%; padding: 0; border: 1px solid #a4bed338; border-radius: 18px; background: #131c27; color: inherit; text-align: left; font: inherit; cursor: pointer; box-shadow: 0 22px 70px #0004; overflow: hidden; }
 .preview [data-concept] { border-radius: 16px 16px 0 0; }
 .previewAction { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 17px 22px; font-size: 14px; color: #dce8f4; border-top: 1px solid #52657c55; }

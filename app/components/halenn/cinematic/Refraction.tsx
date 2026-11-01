@@ -7,7 +7,7 @@ import s from "./refraction.module.css";
 // One uninterrupted surface behind the hero and the services it introduces.
 // The artwork is a separate foreground layer and is never filtered or animated.
 export default function Refraction({ children }: { children: ReactNode }) {
-  return <div className={s.passage}>
+  return <div className={s.passage} data-silk-passage>
     <svg className={s.maskDefinitions} width="100%" height="100%" aria-hidden="true">
       <defs>
         <filter id="silk-clearance-feather" x="-30%" y="-30%" width="160%" height="160%">
@@ -31,9 +31,11 @@ export default function Refraction({ children }: { children: ReactNode }) {
             <div className={s.silkPlacement} data-silk-placement>
               <Silk eager />
             </div>
-            <div className={s.leftFold}>
-              <Image src="/brand/halenn-silk-v1.png" alt="" fill
-                sizes="(max-width:600px) 180vw, (max-width:1000px) 130vw, 100vw" loading="eager" draggable={false} />
+            <div className={s.distantFold} data-flow-ambient>
+              <div className={s.leftFold}>
+                <Image src="/brand/halenn-silk-v1.png" alt="" fill
+                  sizes="(max-width:600px) 180vw, (max-width:1000px) 130vw, 100vw" loading="eager" draggable={false} />
+              </div>
             </div>
           </div>
         </div>

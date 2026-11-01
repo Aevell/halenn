@@ -619,9 +619,9 @@
   justify-content: center;
 }
 .contact > h2 {
-  font-family: var(--font-heading), var(--font-body), sans-serif;
-  font-size: clamp(72px, 16vw, 260px);
-  font-weight: 300;
+  font-family: var(--font-cinematic), sans-serif;
+  font-size: clamp(72px, 23vw, 370px);
+  font-weight: 600;
   line-height: 0.9;
   letter-spacing: -0.02em;
   margin: 55px 0 60px;
@@ -713,7 +713,7 @@
     padding: 80px var(--page-gutter) 70px;
   }
   .contact > h2 {
-    font-size: 16vw;
+    font-size: 23vw;
     margin: 40px 0;
     line-height: 1;
   }

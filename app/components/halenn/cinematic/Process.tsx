@@ -29,7 +29,8 @@ export default function Process() {
 
   return (
     <section id="process" className={s.process} aria-labelledby="process-title">
-      <div className={s.intro}>
+      <div className={s.atmosphere} data-flow-ambient aria-hidden="true" />
+      <div className={s.intro} data-flow-intro>
         <div>
           <p className={s.eyebrow}>How we work</p>
           <h2 id="process-title">

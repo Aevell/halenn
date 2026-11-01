@@ -51,7 +51,7 @@ export default function Services() {
 
   return <section id="services" className={s.services} aria-labelledby="services-title">
     <span id="projects" className={s.anchor} aria-hidden="true" />
-    <header className={s.intro}>
+    <header className={s.intro} data-flow-intro>
       <div>
         <p className={s.eyebrow}>Services & examples</p>
         <h2 id="services-title">What we could<br /><em>build for you.</em></h2>
@@ -67,7 +67,7 @@ export default function Services() {
           <ul className={s.features}>{service.features.map(feature => <li key={feature}>{feature}</li>)}</ul>
           <ActionLink href={service.href} quiet>{service.action}</ActionLink>
         </div>
-        <figure className={s.example}>
+        <figure className={s.example} data-flow-preview={index}>
           <button className={s.preview} onClick={() => setOpened(index)} aria-label={`Open ${service.name} ${service.example.toLowerCase()}`} aria-haspopup="dialog">
             <Concept index={index} />
             <span className={s.previewAction}>Explore example <Arrow /></span>

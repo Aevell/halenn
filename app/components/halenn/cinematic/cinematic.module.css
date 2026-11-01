@@ -67,6 +67,12 @@
 .anchor { position: absolute; top: 0; scroll-margin-top: 112px; }
 .pricingIntro > a { flex-shrink: 0; }
 .motionRoot :global([data-contact-word]) { display: inline-block; }
+@media (prefers-reduced-motion: reduce) {
+  .motionRoot :is(:global([data-flow-preview]), :global([data-flow-intro]), :global([data-flow-ambient]), :global([data-contact-word]), :global([data-contact-light])) {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
 .world :is(section, [data-service-chapter]) { scroll-margin-top: 112px; }
 .world :is(textarea, details):focus-visible { outline: 2px solid #bddbff; outline-offset: 5px; }
 @media (max-width: 700px) {

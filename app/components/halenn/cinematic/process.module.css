@@ -1,10 +1,17 @@
 .process {
   position: relative;
+  isolation: isolate;
   z-index: 1;
   padding: 110px var(--page-gutter) 100px;
-  border-top: 1px solid #52657c44;
-  border-bottom: 1px solid #52657c44;
-  background: radial-gradient(ellipse at 100% 0%, #20355040, transparent 55%), #0a1018;
+}
+
+.atmosphere {
+  position: absolute;
+  z-index: -1;
+  inset: -48px 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 100% 25%, #20355040, transparent 65%), #0a1018;
+  mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent);
 }
 
 .intro {
