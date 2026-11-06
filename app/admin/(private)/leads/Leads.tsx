@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSelect from "../../WorkspaceSelect";
 import { useRef, useState, useEffect, useTransition } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Arrow } from "../../../components/halenn/Brand";
@@ -167,16 +168,14 @@ export default function Leads({ leads, now }: { leads: Lead[]; now: string }) {
             onChange={(e) => change({ q: e.target.value })}
           />
         </label>
-        <select
-          aria-label="Filter by status"
-          value={status}
-          onChange={(e) => change({ status: e.target.value })}
-        >
-          <option value="">All statuses</option>
-          {statuses.map((s) => (
-            <option key={s}>{s}</option>
-          ))}
-        </select>
+        <WorkspaceSelect
+          label="Filter by status"
+          value={status || "All statuses"}
+          options={["All statuses", ...statuses]}
+          onChange={(value) =>
+            change({ status: value === "All statuses" ? "" : value })
+          }
+        />
         <label className="hw-toggle">
           <input
             type="checkbox"

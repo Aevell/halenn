@@ -845,10 +845,209 @@
     grid-template-columns: 1fr;
   }
 }
-.hw-builder .hw-toggle i {flex-shrink:0}
-@media(max-width:380px) {
-  .hw-import {padding:16px;max-width:calc(100vw - 16px)}
-  .hw-switcher {display:grid;grid-template-columns:1fr 1fr;gap:0}
-  .hw-switcher button {font-size:14px;padding:9px 4px}
-  .hw-builder {gap:12px}
+.hw-builder .hw-toggle i {
+  flex-shrink: 0;
+}
+@media (max-width: 380px) {
+  .hw-import {
+    padding: 16px;
+    max-width: calc(100vw - 16px);
+  }
+  .hw-switcher {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  .hw-switcher button {
+    font-size: 14px;
+    padding: 9px 4px;
+  }
+  .hw-builder {
+    gap: 12px;
+  }
+}
+
+.hw-select {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+.hw-select-label {
+  color: var(--sub);
+  font-size: 14px;
+}
+.hw-select-trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 43px;
+  padding: 10px 13px;
+  background: #0a0e14;
+  color: var(--paper);
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+  text-align: left;
+  transition:
+    background 0.18s,
+    border-color 0.18s;
+}
+.hw-select-trigger:hover,
+.hw-select-trigger[data-state="open"] {
+  background: #111a24;
+  border-color: #5b7084;
+}
+.hw-select-trigger svg {
+  color: var(--sub);
+  transition: transform 0.2s var(--ease);
+}
+.hw-select-trigger[data-state="open"] svg {
+  transform: rotate(180deg);
+}
+.hw-filters .hw-select {
+  min-width: 150px;
+}
+.hw-select-menu {
+  min-width: var(--radix-select-trigger-width);
+  max-height: var(--radix-select-content-available-height);
+  overflow: hidden;
+  padding: 4px;
+  border: 1px solid #415161;
+  border-radius: 12px;
+  background: linear-gradient(130deg, #1b2631, #10161e 70%);
+  color: var(--paper);
+  box-shadow: 0 12px 34px #0005;
+  transform-origin: var(--radix-select-content-transform-origin);
+  z-index: 5;
+}
+.hw [data-radix-popper-content-wrapper] {
+  z-index: 5 !important;
+}
+.hw-select-menu[data-state="open"],
+.hw-account[open] > div {
+  animation: hw-unfold 0.17s var(--ease);
+}
+.hw-select-menu[data-state="closed"] {
+  animation: hw-fold 0.12s ease-in both;
+}
+.hw-select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 38px;
+  padding: 7px 10px;
+  font-size: 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  outline: 0;
+}
+.hw-select-option[data-highlighted] {
+  background: #2b3c4c;
+  color: white;
+}
+.hw-select-option[data-state="checked"] {
+  color: #dcebf8;
+}
+@keyframes hw-unfold {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(-3px);
+  }
+}
+@keyframes hw-fold {
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+.hw-account[open] summary {
+  box-shadow: 0 0 0 1px #75899d;
+}
+.hw-dialog-head {
+  position: relative;
+}
+.hw-dialog-head::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #a9c7e077 42%, transparent);
+  transform-origin: left;
+  animation: hw-ribbon-trace 0.55s var(--ease);
+}
+@keyframes hw-ribbon-trace {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+}
+.hw-workflow-panel:not([hidden]),
+.hw-flash:not(:empty) {
+  animation: hw-panel-in 0.22s var(--ease);
+}
+@keyframes hw-panel-in {
+  from {
+    opacity: 0.4;
+    transform: translateY(3px);
+  }
+}
+.hw-row {
+  position: relative;
+}
+.hw-row::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: min(360px, 70%);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #a9c7e0aa, transparent);
+  opacity: 0;
+  transform: scaleX(0.5);
+  transform-origin: left;
+  transition:
+    opacity 0.2s,
+    transform 0.32s var(--ease);
+}
+.hw-row:is(:focus-visible, :hover)::after {
+  opacity: 1;
+  transform: none;
+}
+@media (max-width: 680px) {
+  .hw-filters .hw-select {
+    min-width: 0;
+  }
+}
+@media (max-width: 440px) {
+  .hw-drawer .hw-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.hw-metrics a span,
+.hw-follow,
+.hw-follow svg,
+.hw-metrics a svg {
+  transition:
+    color 0.18s ease,
+    background 0.18s ease,
+    transform 0.24s var(--ease);
+}
+.hw-metrics a:is(:hover, :focus-visible) span {
+  color: var(--action);
+}
+.hw-metrics a:is(:hover, :focus-visible) svg,
+.hw-follow:is(:hover, :focus-visible) svg {
+  transform: translateX(3px);
+}
+.hw-services button {
+  transition:
+    background 0.16s,
+    border-color 0.16s,
+    color 0.16s;
 }

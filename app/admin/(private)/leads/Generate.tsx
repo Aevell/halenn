@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSelect from "../../WorkspaceSelect";
 import { useState, useRef } from "react";
 import { columns, type Lead } from "../../lib/leads";
 import { ImportForm } from "./Forms";
@@ -79,7 +80,7 @@ export default function Generate({
           Import results
         </button>
       </div>
-      <div hidden={view !== "build"}>
+      <div className="hw-workflow-panel" hidden={view !== "build"}>
         <div className="hw-form hw-builder">
           <div className="hw-pair">
             <label>
@@ -121,17 +122,13 @@ export default function Generate({
               ))}
             </div>
           </fieldset>
-          <label>
-            Lead count
-            <select
-              value={request.count}
-              onChange={(e) => change({ count: Number(e.target.value) })}
-            >
-              {[5, 10, 20].map((n) => (
-                <option key={n}>{n}</option>
-              ))}
-            </select>
-          </label>
+          <WorkspaceSelect
+            label="Lead count"
+            showLabel
+            value={String(request.count)}
+            options={["5", "10", "20"]}
+            onChange={(value) => change({ count: Number(value) })}
+          />
           <div className="hw-options">
             {(
               [
@@ -168,7 +165,7 @@ export default function Generate({
           </footer>
         </div>
       </div>
-      <div hidden={view !== "import"}>
+      <div className="hw-workflow-panel" hidden={view !== "import"}>
         <ImportForm leads={leads} done={done} cancel={cancel} />
       </div>
     </>

@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSelect from "../../WorkspaceSelect";
 import { useState, useTransition } from "react";
 import { saveLead, importBatch } from "../../actions";
 import {
@@ -76,17 +77,13 @@ export function Editor({
         </label>
       ))}
       <div className="hw-pair">
-        <label>
-          Status
-          <select
-            value={fields.status}
-            onChange={(e) => input("status", e.target.value)}
-          >
-            {statuses.map((s) => (
-              <option key={s}>{s}</option>
-            ))}
-          </select>
-        </label>
+        <WorkspaceSelect
+          label="Status"
+          showLabel
+          value={fields.status}
+          options={statuses}
+          onChange={(value) => input("status", value)}
+        />
         <label>
           Next follow-up
           <input
