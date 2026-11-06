@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { CONSENT_COOKIE, consentCookie, parseConsent, type Consent } from "./consent-model";
 import s from "./consent.module.css";
@@ -24,6 +25,12 @@ export function PrivacyButton({ className }: { className?: string }) {
 }
 
 export default function CookieConsent({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) return children;
+  return <PublicConsent>{children}</PublicConsent>;
+}
+
+function PublicConsent({ children }: { children: ReactNode }) {
   const enhanced = useSyncExternalStore(subscribe, client, server);
   const [choice, setChoice] = useState(readChoice);
   const [notice, setNotice] = useState(!choice);
