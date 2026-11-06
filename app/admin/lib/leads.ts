@@ -116,9 +116,39 @@ export function preview(text: string, existing: Fields[]) {
     .replace(/^\uFEFF/, "")
     .split(/\r?\n/)
     .filter((x) => x.trim());
+  const fence = (line: string) => /^ *```/.test(line);
+  if (lines.some(fence)) {
+    if (
+      !/^ *```[\w-]*\s*$/.test(lines[0]) ||
+      lines.at(-1)?.trim() !== "```" ||
+      lines.length < 2 ||
+      lines.slice(1, -1).some(fence)
+    )
+      return {
+        rows: [],
+        problem:
+          "Paste one complete code block or just its tab-separated contents.",
+      };
+    lines.shift();
+    lines.pop();
+  }
+  if (
+    lines.some(
+      (line) =>
+        !line.includes("\t") &&
+        (/^\s*\|/.test(line) ||
+          /\|\s*:?-{3,}/.test(line) ||
+          (line.match(/\|/g)?.length ?? 0) >= 2),
+    )
+  )
+    return {
+      rows: [],
+      problem:
+        "This looks like a Markdown table. Ask for tab-separated columns, then paste the result here.",
+    };
   if (lines[0]?.trim().toLowerCase() === columns.join("\t").toLowerCase())
     lines.shift();
-  return lines.map((line) => {
+  const rows = lines.map((line) => {
     const [
       company = "",
       website = "",
@@ -151,4 +181,5 @@ export function preview(text: string, existing: Fields[]) {
       };
     }
   });
+  return { rows, problem: "" };
 }

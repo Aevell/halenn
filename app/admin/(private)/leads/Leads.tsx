@@ -3,7 +3,8 @@ import { useRef, useState, useEffect, useTransition } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Arrow } from "../../../components/halenn/Brand";
 import { statuses, due, dateLabel, type Lead } from "../../lib/leads";
-import { Editor, ImportForm } from "./Forms";
+import { Editor } from "./Forms";
+import Generate, { defaultRequest } from "./Generate";
 function Dialog({
   title,
   drawer,
@@ -95,7 +96,8 @@ export default function Leads({ leads, now }: { leads: Lead[]; now: string }) {
   const router = useRouter();
   const [, refresh] = useTransition();
   const [flash, setFlash] = useState("");
-  const [mode, setMode] = useState<null | "add" | "paste">(null);
+  const [mode, setMode] = useState<null | "add" | "generate">(null);
+  const [request, setRequest] = useState(defaultRequest);
   const query = params.get("q") ?? "";
   const rawStatus = params.get("status");
   const status = statuses.find((s) => s === rawStatus) ?? "";
@@ -137,8 +139,8 @@ export default function Leads({ leads, now }: { leads: Lead[]; now: string }) {
       <div className="hw-titlebar">
         <h1>Leads</h1>
         <div className="hw-actions">
-          <button className="hw-quiet" onClick={() => setMode("paste")}>
-            Paste leads
+          <button className="hw-quiet" onClick={() => setMode("generate")}>
+            Generate leads
           </button>
           <button className="hw-primary" onClick={() => setMode("add")}>
             <span aria-hidden="true">+</span> Add lead
@@ -242,18 +244,24 @@ export default function Leads({ leads, now }: { leads: Lead[]; now: string }) {
       {modal && (
         <Dialog
           key={mode ?? selected?.id}
-          drawer={mode !== "paste"}
+          drawer={mode !== "generate"}
           title={
-            mode === "paste"
-              ? "Paste leads"
+            mode === "generate"
+              ? "Generate leads"
               : mode === "add"
                 ? "Add lead"
                 : selected!.company
           }
           onClose={close}
         >
-          {mode === "paste" ? (
-            <ImportForm leads={leads} done={done} cancel={close} />
+          {mode === "generate" ? (
+            <Generate
+              request={request}
+              setRequest={setRequest}
+              leads={leads}
+              done={done}
+              cancel={close}
+            />
           ) : (
             <Editor lead={selected} done={done} />
           )}

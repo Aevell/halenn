@@ -126,9 +126,8 @@ export function ImportForm({
 }) {
   const [text, setText] = useState("");
   const [error, setError] = useState("");
-  const [copied, setCopied] = useState(false);
   const [pending, start] = useTransition();
-  const rows = preview(text, leads);
+  const { rows, problem } = preview(text, leads);
   const ready = rows.filter((r) => r.label === "Ready").length;
   return (
     <div className="hw-form">
@@ -146,19 +145,7 @@ export function ImportForm({
           placeholder={columns.join("   ")}
         />
       </label>
-      <button
-        className="hw-text"
-        onClick={async () => {
-          try {
-            await navigator.clipboard.writeText(columns.join("\t"));
-            setCopied(true);
-          } catch {
-            setError("Copy these column names: " + columns.join(" · "));
-          }
-        }}
-      >
-        {copied ? "Template copied" : "Copy template"}
-      </button>
+      {problem && <p role="alert">{problem}</p>}
       {rows.length > 0 && (
         <>
           <h3>Import preview</h3>

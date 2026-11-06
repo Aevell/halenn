@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import Image from "next/image";
+import Wordmark from "../components/halenn/cinematic/Wordmark";
 import { usePathname } from "next/navigation";
 import { signOut } from "./actions";
 export default function Header({ email }: { email?: string }) {
@@ -13,13 +13,7 @@ export default function Header({ email }: { email?: string }) {
           href={email ? "/admin" : "/"}
           aria-label="Halenn home"
         >
-          <Image
-            src="/brand/halenn-mark-v2-64.png"
-            alt=""
-            width={32}
-            height={32}
-          />
-          Halenn
+          <Wordmark />
         </Link>
         {email && (
           <>

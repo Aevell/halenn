@@ -63,7 +63,8 @@ export async function importBatch(text: string) {
   const { db } = await leadAccess();
   if (typeof text !== "string" || text.length > 200000)
     return { error: "Paste a smaller batch." };
-  const rows = preview(text, await readLeads());
+  const { rows, problem } = preview(text, await readLeads());
+  if (problem) return { error: problem };
   if (rows.length > 200) return { error: "Import up to 200 rows at a time." };
   const ready = rows.filter((x) => x.label === "Ready").map((x) => x.fields);
   if (ready.length) {
