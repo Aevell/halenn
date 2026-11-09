@@ -15,12 +15,14 @@ import {
   previousPeriod,
   rate,
   shortDate,
+  shift,
   validDate,
   within,
   type Activity,
   type Filters,
 } from "../../lib/analytics";
 import { Bars, Empty, Panel, Stat, Trend } from "./Charts";
+import WebsiteAnalytics from "./WebsiteAnalytics";
 import RecordActivity, {
   AnalyticsDialog,
   CorrectRecord,
@@ -28,10 +30,10 @@ import RecordActivity, {
 
 const tabs = [
   ["overview", "Overview"],
-  ["acquisition", "Acquisition"],
-  ["sales", "Sales process"],
-  ["revenue", "Offers & revenue"],
-  ["growth", "Customer growth"],
+  ["acquisition", "Visitors & leads"],
+  ["sales", "Sales pipeline"],
+  ["revenue", "Revenue & costs"],
+  ["growth", "Customers & retention"],
 ] as const;
 const presets = [
   "Last 7 days",
@@ -95,6 +97,8 @@ export default function Analytics({
   }
   const selectedTab =
     tabs.find(([id]) => id === params.get("tab"))?.[0] ?? "overview";
+  const websiteView =
+    selectedTab === "acquisition" && params.get("view") !== "leads";
   const preset = presets.includes(params.get("period") ?? "")
     ? params.get("period")!
     : "Last 30 days";
@@ -103,7 +107,11 @@ export default function Analytics({
     ...activity.map((a) => day(a.occurred_at)),
     now,
   ].sort()[0];
-  const basePeriod = periodFor(preset, now, earliest);
+  const basePeriod = periodFor(
+    preset,
+    now,
+    websiteView ? shift(now, -89) : earliest,
+  );
   const customFrom = params.get("from") || basePeriod.from,
     customTo = params.get("to") || now;
   const customValid =
@@ -297,7 +305,9 @@ export default function Analytics({
           Design preview · Fictional sample records · Changes are not saved
         </p>
       )}
-      <div className="ha-toolbar">
+      <div
+        className={"ha-toolbar" + (websiteView ? " ha-toolbar-website" : "")}
+      >
         <label className="ha-field">
           <span>Period</span>
           <select
@@ -311,17 +321,19 @@ export default function Analytics({
             ))}
           </select>
         </label>
-        <label className="ha-field ha-currency">
-          <span>Financial currency</span>
-          <select
-            value={filters.currency}
-            onChange={(e) => change({ currency: e.target.value })}
-          >
-            {currencies.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
-        </label>
+        {!websiteView && (
+          <label className="ha-field ha-currency">
+            <span>Financial currency</span>
+            <select
+              value={filters.currency}
+              onChange={(e) => change({ currency: e.target.value })}
+            >
+              {currencies.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+          </label>
+        )}
         {selectedTab === "overview" && (
           <label className="ha-compare">
             <input
@@ -334,15 +346,17 @@ export default function Analytics({
             Compare previous period
           </label>
         )}
-        <button
-          className={"hw-quiet ha-more" + (more ? " is-open" : "")}
-          aria-expanded={more}
-          aria-controls="ha-more-filters"
-          onClick={() => setMore((v) => !v)}
-        >
-          More filters{filterCount ? ` · ${filterCount}` : ""}
-          <span aria-hidden="true">{more ? "−" : "+"}</span>
-        </button>
+        {!websiteView && (
+          <button
+            className={"hw-quiet ha-more" + (more ? " is-open" : "")}
+            aria-expanded={more}
+            aria-controls="ha-more-filters"
+            onClick={() => setMore((v) => !v)}
+          >
+            More filters{filterCount ? ` · ${filterCount}` : ""}
+            <span aria-hidden="true">{more ? "−" : "+"}</span>
+          </button>
+        )}
       </div>
       {preset === "Custom dates" && (
         <div className="ha-custom">
@@ -371,7 +385,11 @@ export default function Analytics({
           )}
         </div>
       )}
-      <div id="ha-more-filters" className="ha-filter-grid" hidden={!more}>
+      <div
+        id="ha-more-filters"
+        className="ha-filter-grid"
+        hidden={!more || websiteView}
+      >
         {[
           {
             key: "source",
@@ -600,9 +618,11 @@ export default function Analytics({
                 />
                 <button
                   className="ha-section-link"
-                  onClick={() => change({ tab: "acquisition" }, true)}
+                  onClick={() =>
+                    change({ tab: "acquisition", view: "leads" }, true)
+                  }
                 >
-                  Explore acquisition <span aria-hidden="true">↗</span>
+                  Explore lead sources <span aria-hidden="true">↗</span>
                 </button>
               </Panel>
               <Panel
@@ -662,90 +682,119 @@ export default function Analytics({
         )}
         {selectedTab === "acquisition" && (
           <>
-            <div className="ha-stats">
-              <Stat
-                label="Leads acquired"
-                value={model.cohort.length}
-                detail="Added in the selected period"
-              />
-              <Stat
-                label="Lead-to-customer"
-                value={rate(model.conversion)}
-                detail={`${model.cohortWon.length} of ${model.cohort.length} leads · to date`}
-              />
-              <Stat
-                label="Acquisition spend"
-                value={fmt(model.acquisition)}
-                detail="Recorded acquisition costs + commissions"
-              />
-              <Stat
-                label="Spend per customer won"
-                value={fmt(model.acquisitionPerWin)}
-                detail={`${model.wins.length} dated wins · period-based ratio`}
-              />
+            <div
+              className="ha-subviews"
+              role="group"
+              aria-label="Visitor and lead reports"
+            >
+              <button
+                type="button"
+                aria-pressed={websiteView}
+                onClick={() => change({ view: "website" }, true)}
+              >
+                Website traffic
+              </button>
+              <button
+                type="button"
+                aria-pressed={!websiteView}
+                onClick={() => change({ view: "leads" }, true)}
+              >
+                Sales leads
+              </button>
             </div>
-            <div className="ha-grid">
-              <Panel
-                title="Source performance"
-                description="Acquisition cohorts: leads added in this period, conversions to date."
-              >
-                {sourceGroups.length ? (
-                  tableRows("channel", "Source")
-                ) : (
-                  <Empty>Add a lead source to start comparing channels.</Empty>
-                )}
-              </Panel>
-              <Panel
-                title="Customer conversion by source"
-                description="Rates always include the number of leads behind them."
-              >
-                <Bars
-                  max={100}
-                  format={(n) => rate(n)}
-                  rows={sourceGroups.map((r) => ({
-                    label: r.label,
-                    value: r.rate || 0,
-                    detail: `${r.won} customers from ${r.leads} leads`,
-                    onClick: () => inspect(r.label, r.ids),
-                  }))}
-                />
-              </Panel>
-              <Panel
-                title="Which businesses respond"
-                description="Compare industries using the same acquisition period."
-              >
-                {model.groups("industry").length ? (
-                  tableRows("industry", "Business type")
-                ) : (
-                  <Empty>
-                    Record a business type in each lead’s sales details.
-                  </Empty>
-                )}
-              </Panel>
-              <Panel
-                title="Service interest"
-                description="What the leads in this acquisition period are interested in."
-              >
-                <Bars
-                  rows={model.groups("service").map((r) => ({
-                    label: r.label,
-                    value: r.leads,
-                    detail: `${r.won} customers · ${rate(r.rate)} conversion`,
-                    onClick: () => inspect(r.label, r.ids),
-                  }))}
-                />
-                <p className="ha-caption">
-                  Visitor sessions and website quiz drop-offs are not connected.
-                  These reports begin when a lead is added.
+            {websiteView ? (
+              <WebsiteAnalytics from={period.from} to={period.to} />
+            ) : (
+              <>
+                <div className="ha-stats">
+                  <Stat
+                    label="Leads acquired"
+                    value={model.cohort.length}
+                    detail="Added in the selected period"
+                  />
+                  <Stat
+                    label="Lead-to-customer"
+                    value={rate(model.conversion)}
+                    detail={`${model.cohortWon.length} of ${model.cohort.length} leads · to date`}
+                  />
+                  <Stat
+                    label="Acquisition spend"
+                    value={fmt(model.acquisition)}
+                    detail="Recorded acquisition costs + commissions"
+                  />
+                  <Stat
+                    label="Spend per customer won"
+                    value={fmt(model.acquisitionPerWin)}
+                    detail={`${model.wins.length} dated wins · period-based ratio`}
+                  />
+                </div>
+                <div className="ha-grid">
+                  <Panel
+                    title="Source performance"
+                    description="Acquisition cohorts: leads added in this period, conversions to date."
+                  >
+                    {sourceGroups.length ? (
+                      tableRows("channel", "Source")
+                    ) : (
+                      <Empty>
+                        Add a lead source to start comparing channels.
+                      </Empty>
+                    )}
+                  </Panel>
+                  <Panel
+                    title="Customer conversion by source"
+                    description="Rates always include the number of leads behind them."
+                  >
+                    <Bars
+                      max={100}
+                      format={(n) => rate(n)}
+                      rows={sourceGroups.map((r) => ({
+                        label: r.label,
+                        value: r.rate || 0,
+                        detail: `${r.won} customers from ${r.leads} leads`,
+                        onClick: () => inspect(r.label, r.ids),
+                      }))}
+                    />
+                  </Panel>
+                  <Panel
+                    title="Which businesses respond"
+                    description="Compare industries using the same acquisition period."
+                  >
+                    {model.groups("industry").length ? (
+                      tableRows("industry", "Business type")
+                    ) : (
+                      <Empty>
+                        Record a business type in each lead’s sales details.
+                      </Empty>
+                    )}
+                  </Panel>
+                  <Panel
+                    title="Service interest"
+                    description="What the leads in this acquisition period are interested in."
+                  >
+                    <Bars
+                      rows={model.groups("service").map((r) => ({
+                        label: r.label,
+                        value: r.leads,
+                        detail: `${r.won} customers · ${rate(r.rate)} conversion`,
+                        onClick: () => inspect(r.label, r.ids),
+                      }))}
+                    />
+                    <p className="ha-caption">
+                      These reports begin when a lead is added. Switch to
+                      Website traffic to explore visits and quiz drop-offs
+                      before an enquiry.
+                    </p>
+                  </Panel>
+                </div>
+                <p className="ha-footnote">
+                  Acquisition spend per win compares costs and first wins
+                  recorded in the same period. It is not a lifetime customer
+                  acquisition cost. Shared costs are excluded when filtering by
+                  service or offer.
                 </p>
-              </Panel>
-            </div>
-            <p className="ha-footnote">
-              Acquisition spend per win compares costs and first wins recorded
-              in the same period. It is not a lifetime customer acquisition
-              cost. Shared costs are excluded when filtering by service or
-              offer.
-            </p>
+              </>
+            )}
           </>
         )}
         {selectedTab === "sales" && (
@@ -1134,59 +1183,62 @@ export default function Analytics({
           </>
         )}
       </div>
-      <details className="ha-quality">
-        <summary>
-          <span>Data coverage & metric definitions</span>
-          <span>
-            {model.missingSource || model.missingService || model.legacyWins
-              ? "Some details are not recorded"
-              : "How these numbers are calculated"}
-          </span>
-        </summary>
-        <div className="ha-quality-grid">
-          <div>
-            <h3>Lead coverage</h3>
-            <p>
-              {model.missingSource} of {model.scoped.length} leads have no
-              recorded source. {model.missingService} have no recorded service.
-            </p>
-            <p>
-              {model.legacyWins
-                ? `${model.legacyWins} known customers have no dated first win and are excluded from period win totals.`
-                : "Dated wins are counted once per lead, at the first recorded win."}
-            </p>
-            <Link className="ha-text-button" href="/admin/leads">
-              Complete lead details ↗
-            </Link>
+      {!websiteView && (
+        <details className="ha-quality">
+          <summary>
+            <span>Data coverage & metric definitions</span>
+            <span>
+              {model.missingSource || model.missingService || model.legacyWins
+                ? "Some details are not recorded"
+                : "How these numbers are calculated"}
+            </span>
+          </summary>
+          <div className="ha-quality-grid">
+            <div>
+              <h3>Lead coverage</h3>
+              <p>
+                {model.missingSource} of {model.scoped.length} leads have no
+                recorded source. {model.missingService} have no recorded
+                service.
+              </p>
+              <p>
+                {model.legacyWins
+                  ? `${model.legacyWins} known customers have no dated first win and are excluded from period win totals.`
+                  : "Dated wins are counted once per lead, at the first recorded win."}
+              </p>
+              <Link className="ha-text-button" href="/admin/leads">
+                Complete lead details ↗
+              </Link>
+            </div>
+            <div>
+              <h3>Reading the reports</h3>
+              <p>
+                Acquisition comparisons use leads added in the selected period
+                and conversions to date. Activity and revenue use the date each
+                event happened. Current-pipeline and attention views show
+                today’s open leads.
+              </p>
+              <p>
+                Small samples are shown as counts alongside percentages. A dash
+                means the metric cannot yet be calculated.
+              </p>
+            </div>
+            <div>
+              <h3>Money & history</h3>
+              <p>
+                Financial figures use {filters.currency}. {model.otherCurrency}{" "}
+                monetary entries in other currencies are excluded; no exchange
+                rates are assumed.
+              </p>
+              <p>
+                Stage history starts when tracking was introduced. Earlier stage
+                dates are not reconstructed. Corrections remain in the activity
+                log but are excluded from calculations.
+              </p>
+            </div>
           </div>
-          <div>
-            <h3>Reading the reports</h3>
-            <p>
-              Acquisition comparisons use leads added in the selected period and
-              conversions to date. Activity and revenue use the date each event
-              happened. Current-pipeline and attention views show today’s open
-              leads.
-            </p>
-            <p>
-              Small samples are shown as counts alongside percentages. A dash
-              means the metric cannot yet be calculated.
-            </p>
-          </div>
-          <div>
-            <h3>Money & history</h3>
-            <p>
-              Financial figures use {filters.currency}. {model.otherCurrency}{" "}
-              monetary entries in other currencies are excluded; no exchange
-              rates are assumed.
-            </p>
-            <p>
-              Stage history starts when tracking was introduced. Earlier stage
-              dates are not reconstructed. Corrections remain in the activity
-              log but are excluded from calculations.
-            </p>
-          </div>
-        </div>
-      </details>
+        </details>
+      )}
       {record && (
         <AnalyticsDialog
           title="Record activity"
