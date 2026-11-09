@@ -912,3 +912,263 @@ button.ha-bar-row:hover .ha-bar-track > span {
     transition: none !important;
   }
 }
+
+/* Website reporting keeps detail behind goal-level disclosures. */
+.ha-subviews {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  background: #101821;
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  margin-bottom: 28px;
+}
+.ha-subviews button {
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: var(--sub);
+  padding: 11px 17px;
+  font-size: 13px;
+}
+.ha-subviews button[aria-pressed="true"] {
+  color: var(--paper);
+  background: #253342;
+}
+.ha-website-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 25px;
+}
+.ha-website-intro h2 {
+  font-size: 25px;
+  letter-spacing: -0.035em;
+}
+.ha-website-intro p {
+  color: var(--sub);
+  font-size: 13px;
+  line-height: 1.6;
+  margin-top: 8px;
+}
+.ha-website-filters {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.ha-website-filters .ha-field {
+  min-width: 150px;
+}
+.ha-website-filters .ha-text-button {
+  align-self: center;
+  font-size: 12px;
+}
+.ha-website-state {
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 16px;
+  border-top: 1px solid var(--edge);
+}
+.ha-website-state h3 {
+  font-size: 20px;
+}
+.ha-website-state p {
+  color: var(--sub);
+  font-size: 14px;
+  max-width: 500px;
+  line-height: 1.7;
+}
+.ha-loading-line {
+  display: block;
+  width: 88px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--ha-accent);
+  animation: ha-loading 1.4s ease-in-out infinite alternate;
+}
+@keyframes ha-loading {
+  from {
+    opacity: 0.25;
+    transform: scaleX(0.6);
+    transform-origin: left;
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+.ha-outcomes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-block: 1px solid var(--edge);
+  padding-block: 19px;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+.ha-outcomes > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ha-outcomes strong {
+  font-size: 29px;
+  font-weight: 450;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.ha-outcomes span {
+  color: var(--sub);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.ha-quiz-branches {
+  margin-top: 24px;
+}
+.ha-quiz-branch {
+  border-top: 1px solid var(--edge);
+}
+.ha-quiz-branch:last-child {
+  border-bottom: 1px solid var(--edge);
+}
+.ha-quiz-branch summary {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 0;
+  list-style: none;
+}
+.ha-quiz-branch summary::-webkit-details-marker {
+  display: none;
+}
+.ha-quiz-branch summary::after {
+  content: "+";
+  font-size: 18px;
+  color: var(--sub);
+}
+.ha-quiz-branch[open] summary::after {
+  content: "−";
+}
+.ha-quiz-branch summary > span:first-child {
+  flex: 1;
+  min-width: 0;
+}
+.ha-quiz-branch summary > span:nth-child(2) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-size: 20px;
+}
+.ha-quiz-branch summary b {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+}
+.ha-quiz-branch summary small {
+  display: block;
+  color: var(--sub);
+  font-size: 11px;
+  line-height: 1.6;
+  margin-top: 5px;
+}
+.ha-branch-content {
+  padding-bottom: 20px;
+}
+.ha-branch-content > p {
+  font-size: 12px;
+  color: var(--sub);
+  line-height: 1.7;
+  margin-bottom: 15px;
+}
+.ha-website .ha-website-table {
+  font-size: 13px;
+}
+.ha-website-table td {
+  font-variant-numeric: tabular-nums;
+}
+.ha-website-table th:first-child {
+  min-width: 150px;
+}
+.ha-website-table thead th {
+  white-space: normal;
+  min-width: 88px;
+}
+.ha-table-toggle {
+  margin-top: 19px;
+  font-size: 12px;
+}
+.ha-website-detail-body {
+  padding-top: 24px;
+}
+.ha-website .ha-caption {
+  line-height: 1.7;
+}
+@media (max-width: 1000px) {
+  .ha-website-controls {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 20px;
+  }
+}
+@media (max-width: 600px) {
+  .ha-toolbar-website {
+    display: flex;
+  }
+  .ha-toolbar-website > .ha-field {
+    min-width: 170px;
+  }
+  .ha-subviews {
+    display: flex;
+  }
+  .ha-subviews button {
+    flex: 1;
+    padding-inline: 10px;
+  }
+  .ha-website-intro h2 {
+    font-size: 23px;
+  }
+  .ha-website-filters {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ha-website-filters .ha-field {
+    min-width: 0;
+  }
+  .ha-outcomes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 22px;
+  }
+  .ha-quiz-branch summary {
+    gap: 12px;
+  }
+  .ha-quiz-branch summary b {
+    font-size: 13px;
+  }
+  .ha-quiz-branch summary > span:nth-child(2) {
+    font-size: 18px;
+  }
+  .ha-quiz-branch summary small {
+    font-size: 10px;
+  }
+  .ha-website .ha-website-table {
+    font-size: 12px;
+  }
+}
+
+.ha-website-updated {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 25px;
+  color: var(--ha-quiet);
+  font-size: 11px;
+}
+.ha-website-updated button {
+  font-size: 11px;
+}

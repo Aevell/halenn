@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
-import { CONSENT_COOKIE, consentCookie, parseConsent, type Consent } from "./consent-model";
+import WebsiteTracker from "../analytics/WebsiteTracker";
+import { CONSENT_VERSION, CONSENT_COOKIE, consentCookie, parseConsent, type Consent } from "./consent-model";
 import s from "./consent.module.css";
 
 const PrivacyContext = createContext<((source: HTMLElement) => void) | null>(null);
@@ -143,14 +144,15 @@ function PublicConsent({ children }: { children: ReactNode }) {
     if (lock.current) return;
     lock.current = true;
     setBusy(true);
-    const next: Consent = { version: 2, optional, updatedAt: Date.now() };
+    const next: Consent = { version: CONSENT_VERSION, optional, updatedAt: Date.now() };
     let remembered = false;
     try {
       document.cookie = consentCookie(next, location.protocol === "https:");
       remembered = document.cookie.split("; ").some(value => value === consentCookie(next, false).split(";")[0]);
     } catch { /* Storage restrictions must never prevent rejecting optional use. */ }
-    setChoice(next);
-    setDraft(optional);
+    // A choice that could not be persisted must never enable analytics.
+    setChoice({ ...next, optional: optional && remembered });
+    setDraft(optional && remembered);
     if (dialog.current?.open) {
       await leaveDialog();
       if (!mounted.current) return;
@@ -163,7 +165,9 @@ function PublicConsent({ children }: { children: ReactNode }) {
     lock.current = false;
     setBusy(false);
     setFocusRequest({ target: "reopen" });
-    setStatus(`Cookie preference saved. No optional tracking is active.${remembered ? "" : " Your browser could not save this choice; it applies for this visit."}`);
+    setStatus(remembered
+      ? `Cookie preference saved. Optional analytics ${optional ? "enabled" : "off"}.`
+      : "Optional analytics is off on this page. Your browser could not save the preference; clear this site’s cookies to remove any previous choice.");
   };
 
   return <PrivacyContext.Provider value={open}>
@@ -172,7 +176,7 @@ function PublicConsent({ children }: { children: ReactNode }) {
         <div className={s.fabric} aria-hidden="true" />
         <div className={s.copy}>
           <h2 id="consent-title">Your privacy. Your choice.</h2>
-          <p id="consent-copy">Only essential cookies are used today.<br className={s.desktopBreak} /> No optional tracking is active.</p>
+          <p id="consent-copy">With your permission, we use analytics to understand visits,<br className={s.desktopBreak} /> quiz progress and enquiries. Optional analytics stays off until you accept.</p>
         </div>
         <div className={s.actions}>
           <div className={s.equalActions}>
@@ -186,6 +190,7 @@ function PublicConsent({ children }: { children: ReactNode }) {
         </div>
       </section>}
       {children}
+      {enhanced && <WebsiteTracker consent={choice?.optional === true} />}
       <p className={s.srOnly} role="status" aria-live="polite">{status}</p>
       {enhanced && <button ref={reopen} type="button" onClick={event => open(event.currentTarget)} className={s.reopen} data-docked={!notice}
         aria-label="Cookie preferences" title="Cookie preferences" aria-hidden={notice} tabIndex={notice ? -1 : 0} disabled={busy || notice}>
@@ -209,21 +214,21 @@ function PublicConsent({ children }: { children: ReactNode }) {
         <div className={s.fabric} aria-hidden="true" />
         <div className={s.introduction}>
           <h2 id="preferences-title">Make yourself comfortable.</h2>
-          <p id="preferences-description">Your choice, at any time.<br />Nothing optional runs today.</p>
+          <p id="preferences-description">Your choice, at any time.<br />Help us understand what works on this website.</p>
           <div className={s.policyLinks}><Link href="/privacy" onClick={() => { dialog.current?.close(); unlockScroll(); }}>Privacy</Link><Link href="/cookies" onClick={() => { dialog.current?.close(); unlockScroll(); }}>Cookies</Link></div>
         </div>
         <div className={s.settings}>
           <div className={s.setting}><div><h3>Essential</h3><p>Remembers your privacy choice.</p></div><span>Always on</span></div>
-          <div className={s.setting}><div><h3 id="optional-label">Optional cookies</h3><p id="optional-description">No optional services are currently in use.</p></div>
+          <div className={s.setting}><div><h3 id="optional-label">Website analytics</h3><p id="optional-description">Understand page visits, referral sources, quiz progress and completed enquiries. Your form contents are not included in analytics events.</p></div>
             <button type="button" role="switch" aria-checked={draft} aria-labelledby="optional-label" aria-describedby="optional-description" className={s.switch} disabled={busy} onClick={() => setDraft(value => !value)}><span /></button>
           </div>
-          <p className={s.explanation}>We’ll ask again before introducing an optional service. Accepting now does not enable tracking.</p>
+          <p className={s.explanation}>Optional analytics uses a random visitor identifier for up to 30 days and visit information in this tab. Events are kept for 90 days in our private Supabase database. We do not use advertising pixels or record your screen. Rejecting does not affect the website or enquiry form.</p>
           <div className={s.equalActions}>
             <button type="button" disabled={busy} onClick={() => void save(false)}>Reject optional</button>
             <button type="button" disabled={busy} onClick={() => void save(true)}>Accept optional</button>
           </div>
           <button type="button" className={s.save} disabled={busy} onClick={() => void save(draft)}>Save preferences</button>
-          <p className={s.savedState}>{choice ? `Saved preference: optional cookies ${choice.optional ? "accepted" : "rejected"}.` : "No preference saved. Optional cookies stay off."}</p>
+          <p className={s.savedState}>{choice ? `Saved preference: website analytics ${choice.optional ? "accepted" : "rejected"}.` : "No preference saved. Optional analytics stays off."}</p>
         </div>
       </dialog>}
     </div>

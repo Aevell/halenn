@@ -1,13 +1,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { readFile } from 'node:fs/promises';
-import { CONSENT_COOKIE, CONSENT_PATH, CONSENT_MAX_AGE, consentCookie, parseConsent } from '../app/components/legal/consent-model.ts';
+import { CONSENT_VERSION, CONSENT_COOKIE, CONSENT_PATH, CONSENT_MAX_AGE, consentCookie, parseConsent } from '../app/components/legal/consent-model.ts';
 
-const now = Date.parse('2026-11-01T12:00:00Z');
+const now = Date.parse('2026-11-09T12:00:00Z');
 const encoded = value => encodeURIComponent(JSON.stringify(value));
 test('accept and reject persist only declared fields, with equal expiry and HTTPS protection', () => {
   for (const optional of [false, true]) {
-    const choice = { version:2, optional, updatedAt:now };
+    const choice = { version:CONSENT_VERSION, optional, updatedAt:now };
     const cookie = consentCookie({...choice, email:'must-not-be-saved@example.com'}, true);
     assert.deepEqual(parseConsent(cookie.split(';')[0].slice(CONSENT_COOKIE.length + 1), now), choice);
     assert.ok(!cookie.includes('email') && !cookie.includes('example.com'));
@@ -20,20 +19,21 @@ test('accept and reject persist only declared fields, with equal expiry and HTTP
 });
 test('demo, unknown, malformed, expired, future and non-boolean choices fail closed', () => {
   for (const raw of [undefined, '', '%broken', 'null', '[]', encoded({}), 'x'.repeat(301),
-    encoded({version:1, analytics:true, updatedAt:now}), encoded({version:3, optional:true, updatedAt:now}),
-    encoded({version:2, optional:'true', updatedAt:now}), encoded({version:2, optional:1, updatedAt:now}),
-    encoded({version:2, optional:true, updatedAt:now + 1}), encoded({version:2, optional:true, updatedAt:now - CONSENT_MAX_AGE * 1000}),
-    encoded({version:2, optional:true, updatedAt:-1}), encoded({version:2, optional:true, updatedAt:1.2})]) {
+    encoded({version:1, analytics:true, updatedAt:now}), encoded({version:4, optional:true, updatedAt:now}),
+    encoded({version:CONSENT_VERSION, optional:'true', updatedAt:now}), encoded({version:CONSENT_VERSION, optional:1, updatedAt:now}),
+    encoded({version:CONSENT_VERSION, optional:true, updatedAt:now + 1}), encoded({version:CONSENT_VERSION, optional:true, updatedAt:now - CONSENT_MAX_AGE * 1000}),
+    encoded({version:CONSENT_VERSION, optional:true, updatedAt:-1}), encoded({version:CONSENT_VERSION, optional:true, updatedAt:1.2})]) {
     assert.equal(parseConsent(raw, now), null, String(raw));
   }
-  assert.equal(parseConsent(encoded({version:2, optional:true, updatedAt:now - CONSENT_MAX_AGE * 1000 + 1}), now)?.optional, true);
+  assert.equal(parseConsent(encoded({version:CONSENT_VERSION, optional:true, updatedAt:now - CONSENT_MAX_AGE * 1000 + 1}), now)?.optional, true);
 });
-test('the privacy interface cannot activate third-party tracking or persist form details', async () => {
-  const ui = await readFile(new URL('../app/components/legal/CookieConsent.tsx', import.meta.url), 'utf8');
-  assert.ok(!/\bfetch\(|sendBeacon|<Script|<iframe|localStorage|sessionStorage/.test(ui));
-  const layout = await readFile(new URL('../app/layout.tsx',import.meta.url),'utf8');
-  assert.match(layout, /<CookieConsent>\{children\}<\/CookieConsent>/);
-  assert.ok(!layout.includes('next/headers'), 'keep homepage statically renderable');
+test('choices made before analytics was introduced require a fresh informed choice', () => {
+  assert.equal(CONSENT_VERSION, 3);
+  for (const optional of [false, true]) {
+    assert.equal(parseConsent(encoded({version:2, optional, updatedAt:now}), now), null);
+  }
+  assert.equal(parseConsent(encoded({version:CONSENT_VERSION, optional:false, updatedAt:now}), now)?.optional, false);
+  assert.equal(parseConsent(encoded({version:CONSENT_VERSION, optional:true, updatedAt:now}), now)?.optional, true);
 });
 const development = process.env.HALENN_LEGAL_DEV_URL;
 const production = process.env.HALENN_PRODUCTION_URL;

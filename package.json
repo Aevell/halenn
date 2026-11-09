@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "verify:analytics": "node --test scripts/verify-analytics.mjs",
+    "verify:website": "node --test scripts/verify-website-tracking.mjs scripts/verify-website-lifecycle.mjs",
     "verify:founder": "node --test scripts/verify-founder-leads.mjs",
     "verify:hero": "node --test scripts/verify-hero.mjs",
     "verify:pricing": "node --test scripts/verify-pricing.mjs",

@@ -128,7 +128,7 @@ export function clean(input: Fields): Fields {
     "source",
     "notes",
   ] as const) {
-    if (typeof input[k] !== "string" || input[k].length > 10000)
+    if (typeof input[k] !== "string" || input[k].length > (k === "notes" ? 20000 : 10000))
       throw new Error("Check the length of your fields.");
     fields[k] = input[k].trim();
   }
