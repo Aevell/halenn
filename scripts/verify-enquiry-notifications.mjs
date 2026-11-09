@@ -34,14 +34,20 @@ const worker = () => db.exec("select private.halenn_process_enquiry_notification
 const ready = async () => {
   await db.exec("update private.halenn_enquiry_notification_config set enabled=true;insert into vault.decrypted_secrets(name,decrypted_secret) values('halenn_resend_api_key','re_local_test_placeholder') on conflict(name) do nothing");
 };
+const switchRecipient = async (recipient) => {
+  await db.exec(`set local role authenticated;select set_config('request.jwt.claim.sub','${id(1)}',true)`);
+  const result = (await query("select public.halenn_set_enquiry_notification_recipient(recipient := $1) as recipient", [recipient]))[0].recipient;
+  await db.exec("reset role");
+  return result;
+};
 const due = (p) => query("update private.halenn_enquiry_notifications set next_attempt_at=clock_timestamp()-interval '1 second' where enquiry_id=$1", [p.id]);
 const respond = async (p, status = 200, content = JSON.stringify({ id: id(999) }), extras = {}) => {
   const n = await outbox(p);
   await query("insert into net._http_response(id,status_code,content,timed_out,error_msg) values($1,$2,$3,$4,$5)", [n.request_id, status, content, extras.timed_out ?? false, extras.error_msg ?? null]);
 };
-const denied = async (sql) => {
+const denied = async (sql, params = []) => {
   await db.exec("savepoint denial_check");
-  await assert.rejects(db.query(sql));
+  await assert.rejects(db.query(sql, params));
   await db.exec("rollback to savepoint denial_check;release savepoint denial_check");
 };
 const test = async (name, fn) => {
@@ -128,7 +134,7 @@ try {
     assert.equal(r.headers["Idempotency-Key"], "halenn-enquiry/" + p.id);
     assert.equal(r.headers.Authorization, "Bearer re_local_test_placeholder");
     assert.equal(r.body.from, "Halenn <enquiries@notifications.halenn.com>");
-    assert.deepEqual(r.body.to, ["contact@halenn.com"]);
+    assert.deepEqual(r.body.to, ["aevellgroup@gmail.com"]);
     assert.equal(r.body.reply_to, "client@example.test");
     assert.match(r.body.html, /A &amp; &lt;B&gt; &quot;C&quot; &#39;D&#39;/);
     assert.ok(!r.body.html.includes("<script>"));
@@ -311,24 +317,84 @@ try {
       await denied(`select private.halenn_dispatch_enquiry_notification('${pending.id}')`);
       await denied("select * from vault.decrypted_secrets");
       await denied("select public.halenn_enquiry_notification_status()");
+      await denied("select public.halenn_set_enquiry_notification_recipient('contact@halenn.com')");
       await db.exec("reset role");
     }
     await db.exec(`set local role authenticated;select set_config('request.jwt.claim.sub','${id(2)}',true)`);
     await denied("select public.halenn_enquiry_notification_status()");
+    await denied("select public.halenn_set_enquiry_notification_recipient('contact@halenn.com')");
     await db.exec(`select set_config('request.jwt.claim.sub','${id(1)}',true)`);
     const status = (await query("select public.halenn_enquiry_notification_status() as s"))[0].s;
     assert.deepEqual(Object.keys(status).sort(), ["enabled", "configured", "keyExists", "recipient", "pending", "accepted", "attention", "lastAcceptedAt"].sort());
     assert.equal(status.enabled, true); assert.equal(status.configured, true); assert.equal(status.keyExists, true);
-    assert.equal(status.recipient, "contact@halenn.com");
+    assert.equal(status.recipient, "aevellgroup@gmail.com");
     assert.equal(status.pending, 1); assert.equal(status.accepted, 1); assert.equal(status.attention, 1);
     assert.ok(status.lastAcceptedAt);
     assert.ok(!JSON.stringify(status).includes("re_local_test_placeholder"));
     assert.ok(!JSON.stringify(status).includes(pending.email));
     await db.exec("reset role;update private.halenn_founders set needs_password=true;set local role authenticated");
     await denied("select public.halenn_enquiry_notification_status()");
+    await denied("select public.halenn_set_enquiry_notification_recipient('contact@halenn.com')");
     await db.exec("reset role");
     const privateTables = await query("select relrowsecurity from pg_class where oid in ('private.halenn_enquiry_notifications'::regclass,'private.halenn_enquiry_notification_config'::regclass)");
     assert.ok(privateTables.every((t) => t.relrowsecurity));
+  });
+
+  await test("founder can switch between both approved recipients without enabling sending or changing other configuration", async () => {
+    const before = (await query("select * from private.halenn_enquiry_notification_config"))[0];
+    assert.equal(before.recipient, "aevellgroup@gmail.com");
+    assert.equal(await switchRecipient(" CONTACT@HALENN.COM "), "contact@halenn.com");
+    let after = (await query("select * from private.halenn_enquiry_notification_config"))[0];
+    assert.deepEqual(after, { ...before, recipient: "contact@halenn.com" });
+    assert.equal(await switchRecipient(" AEVELLGROUP@GMAIL.COM "), "aevellgroup@gmail.com");
+    after = (await query("select * from private.halenn_enquiry_notification_config"))[0];
+    assert.deepEqual(after, before);
+    assert.equal((await query("select count(*)::int as n from vault.decrypted_secrets"))[0].n, 0);
+    await db.exec(`set local role authenticated;select set_config('request.jwt.claim.sub','${id(1)}',true)`);
+    const status = (await query("select public.halenn_enquiry_notification_status() as s"))[0].s;
+    assert.equal(status.recipient, "aevellgroup@gmail.com");
+    assert.equal(status.enabled, false);
+    assert.equal(status.keyExists, false);
+  });
+
+  await test("recipient RPC rejects unsupported, multiple, array and null inputs without modifying configuration", async () => {
+    await ready();
+    const before = (await query("select * from private.halenn_enquiry_notification_config"))[0];
+    await db.exec(`set local role authenticated;select set_config('request.jwt.claim.sub','${id(1)}',true)`);
+    for (const invalid of [null, "", "   ", "other@example.test", "contact@halenn.com.evil.test",
+      "aevellgroup@gmail.com,contact@halenn.com", '["aevellgroup@gmail.com"]', '{"recipient":"contact@halenn.com"}'])
+      await denied("select public.halenn_set_enquiry_notification_recipient(recipient := $1)", [invalid]);
+    await denied("select public.halenn_set_enquiry_notification_recipient(array['aevellgroup@gmail.com'])");
+    await db.exec("reset role");
+    assert.deepEqual((await query("select * from private.halenn_enquiry_notification_config"))[0], before);
+    assert.deepEqual(await query("select * from vault.decrypted_secrets"), [{ name: "halenn_resend_api_key", decrypted_secret: "re_local_test_placeholder" }]);
+    await denied("update private.halenn_enquiry_notification_config set recipient='unapproved@example.test'");
+  });
+
+  await test("recipient changes affect new payloads while queued retries retain their original approved recipient", async () => {
+    await ready();
+    const existing = enquiry(); await submit(existing);
+    const frozen = await outbox(existing);
+    assert.deepEqual(frozen.payload.to, ["aevellgroup@gmail.com"]);
+    assert.equal(await switchRecipient("contact@halenn.com"), "contact@halenn.com");
+    assert.deepEqual((await outbox(existing)).payload, frozen.payload);
+    assert.equal((await query("select enabled from private.halenn_enquiry_notification_config"))[0].enabled, true);
+    assert.deepEqual(await query("select * from vault.decrypted_secrets"), [{ name: "halenn_resend_api_key", decrypted_secret: "re_local_test_placeholder" }]);
+    await respond(existing, 503, '{}'); await worker(); await due(existing); await worker();
+    assert.deepEqual((await request(existing)).body, frozen.payload);
+    assert.deepEqual((await outbox(existing)).first_attempt_at, frozen.first_attempt_at);
+    const next = enquiry(); await submit(next);
+    assert.deepEqual((await request(next)).body.to, ["contact@halenn.com"]);
+    await db.exec(`set local role authenticated;select set_config('request.jwt.claim.sub','${id(1)}',true)`);
+    assert.equal((await query("select public.halenn_enquiry_notification_status() as s"))[0].s.recipient, "contact@halenn.com");
+  });
+
+  await test("an enquiry not yet dispatched uses the approved recipient selected before its first attempt", async () => {
+    const p = enquiry(); await submit(p);
+    assert.equal((await outbox(p)).payload, null);
+    await switchRecipient("contact@halenn.com");
+    await ready(); await due(p); await worker();
+    assert.deepEqual((await request(p)).body.to, ["contact@halenn.com"]);
   });
 
   await test("missing or blank Vault key is reported only as a setup boolean", async () => {

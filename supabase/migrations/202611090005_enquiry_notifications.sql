@@ -14,10 +14,11 @@ create table private.halenn_enquiry_notification_config (
   singleton boolean primary key default true check (singleton),
   enabled boolean not null default false,
   sender text not null check (sender = 'Halenn <enquiries@notifications.halenn.com>'),
-  recipient text not null check (recipient = 'contact@halenn.com')
+  recipient text not null default 'aevellgroup@gmail.com'
+    check (recipient in ('aevellgroup@gmail.com', 'contact@halenn.com'))
 );
 insert into private.halenn_enquiry_notification_config(singleton, sender, recipient)
-values (true, 'Halenn <enquiries@notifications.halenn.com>', 'contact@halenn.com');
+values (true, 'Halenn <enquiries@notifications.halenn.com>', 'aevellgroup@gmail.com');
 
 create table private.halenn_enquiry_notifications (
   enquiry_id uuid primary key references public.halenn_website_enquiries(id) on delete cascade,
@@ -288,11 +289,33 @@ begin
 end;
 $$;
 
+create function public.halenn_set_enquiry_notification_recipient(recipient text) returns text
+language plpgsql security definer set search_path = '' as $$
+declare
+  normalized_recipient text;
+begin
+  if not public.halenn_is_founder() or public.halenn_needs_password() then
+    raise exception 'Founder access required' using errcode = '42501';
+  end if;
+  normalized_recipient := lower(trim(recipient));
+  if normalized_recipient is null or normalized_recipient not in ('aevellgroup@gmail.com', 'contact@halenn.com') then
+    raise exception 'Choose an approved enquiry email address' using errcode = '22023';
+  end if;
+  -- This changes future payloads only. Retrying a previously dispatched enquiry
+  -- must keep the original recipient to preserve Resend's idempotency guarantee.
+  update private.halenn_enquiry_notification_config c set recipient = normalized_recipient
+    where c.singleton;
+  return normalized_recipient;
+end;
+$$;
+
 revoke all on function private.halenn_notification_escape(text),
   private.halenn_notification_backoff(integer), private.halenn_notification_payload(uuid),
   private.halenn_dispatch_enquiry_notification(uuid), private.halenn_process_enquiry_notifications(),
-  private.halenn_queue_enquiry_notification(), public.halenn_enquiry_notification_status()
+  private.halenn_queue_enquiry_notification(), public.halenn_enquiry_notification_status(),
+  public.halenn_set_enquiry_notification_recipient(text)
   from public, anon, authenticated;
 grant execute on function public.halenn_enquiry_notification_status() to authenticated;
+grant execute on function public.halenn_set_enquiry_notification_recipient(text) to authenticated;
 notify pgrst, 'reload schema';
 commit;

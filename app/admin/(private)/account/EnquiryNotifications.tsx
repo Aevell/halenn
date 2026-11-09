@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { leadAccess } from "../../lib/db";
+import NotificationRecipient from "./NotificationRecipient";
 
 type NotificationStatus = {
   enabled: boolean;
@@ -50,6 +51,7 @@ export default async function EnquiryNotifications() {
         ? <>Website enquiry notifications go to <strong>{status.recipient}</strong>.</>
         : "Email status could not be loaded. Check Leads for new website enquiries."}</p>
       {status && <>
+        <NotificationRecipient recipient={status.recipient} />
         <dl className="hw-notification-counts">
           <div><dt>Queued</dt><dd>{status.pending.toLocaleString("en-GB")}</dd></div>
           <div><dt>Accepted</dt><dd>{status.accepted.toLocaleString("en-GB")}</dd></div>

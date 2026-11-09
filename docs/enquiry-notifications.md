@@ -4,10 +4,11 @@ Website enquiries are saved in the private Leads workspace before any email is s
 
 ## Current setup
 
-- Intended recipient: `contact@halenn.com`.
+- Current approved recipient: `aevellgroup@gmail.com`.
+- Future approved recipient: `contact@halenn.com`, once that mailbox is working.
 - Sender: `Halenn <enquiries@notifications.halenn.com>`.
 - Provider: Resend, with a verified sending subdomain and a sending-only API key restricted to that domain.
-- Sending defaults to **disabled**. A receiving mailbox is being deferred; keep sending disabled until it exists and has been tested.
+- Sending defaults to **disabled**. Enable it only after the sending domain, restricted key and selected receiving inbox have been tested; a new Halenn mailbox is not required to use the approved Gmail inbox.
 - Existing enquiries are not backfilled when the integration is installed.
 - **Account → Enquiry emails** shows enabled/paused/setup status, queued requests, provider acceptances and requests needing review. Accepted does not mean delivered to the inbox.
 
@@ -36,9 +37,9 @@ from private.halenn_enquiry_notifications
 group by status, last_error;
 ```
 
-## Activating once the mailbox exists
+## Activating enquiry emails
 
-1. Verify that `contact@halenn.com` can receive normal email, and that Resend shows the sending domain as verified.
+1. Verify that the selected recipient can receive normal email, and that Resend shows the sending domain as verified. Start with `aevellgroup@gmail.com`; use `contact@halenn.com` only after its mailbox is ready.
 2. Review any queued enquiries accumulated while sending was disabled. Activating processes those entries as well as new submissions. Do not send a historical backlog without deciding which notifications are still useful.
 3. Enable sending and run one recovery pass:
 
@@ -53,6 +54,14 @@ select private.halenn_process_enquiry_notifications();
 
 To pause sending, set `enabled = false`. Already queued HTTP requests can still finish; new dispatches wait. The website continues saving enquiries in Leads.
 
+## Changing the receiving inbox
+
+In **Account → Enquiry emails**, a signed-in founder who has completed the initial password change can select either approved address. The default is `aevellgroup@gmail.com`; switch to `contact@halenn.com` after confirming that the mailbox receives email. Other addresses are rejected by both the recipient-setting function and the database constraint.
+
+`public.halenn_set_enquiry_notification_recipient(recipient text)` accepts one approved address, normalizes surrounding spaces and letter case, and returns the saved address. It changes only the recipient setting. It does not enable sending, change the sender or key, or resend accepted notifications.
+
+The selected inbox applies when a notification is first dispatched. Enquiries waiting without a frozen payload use the new selection. A notification already attempted keeps its original inbox and complete frozen payload for every retry, even after the selection changes. This preserves the provider's duplicate-send protection; changing the recipient does not reroute or resend those notifications.
+
 ## Reliability and review
 
 Each new enquiry creates one durable outbox record keyed by its enquiry UUID. The insert trigger queues an immediate asynchronous request; `pg_net` sends it after the transaction commits. The five-minute job reconciles provider responses and retries temporary failures in small batches. The private outbox remains the source of truth even if the transient `pg_net` queue or responses disappear.
@@ -61,10 +70,10 @@ The first actual dispatch freezes the recipient, sender, Reply-To, subject and m
 
 `Needs review` covers provider configuration/validation problems, idempotency conflicts, exhausted retry windows and unexpected local dispatch failures. Check the matching request in Resend before any manual retry, especially after a timeout or expired window. Never reset accepted records or blanket-reset all attention records: an ambiguous request may already have been sent. Fix the cause and recover individual records only after checking their delivery history.
 
-Secrets and outbox contents are not exposed to browser clients. The status RPC returns aggregate counts only and requires an authenticated founder who has completed the initial password change. Database administrators can inspect `pg_net`'s temporary request queue, including queued authorization headers, so the Resend key must remain sending-only and restricted to the one domain.
+Secrets and outbox contents are not exposed to browser clients. The status RPC returns aggregate counts and non-secret configuration only. Both the status and recipient-setting RPCs require an authenticated founder who has completed the initial password change. Database administrators can inspect `pg_net`'s temporary request queue, including queued authorization headers, so the Resend key must remain sending-only and restricted to the one domain.
 
 ## Verification
 
-`scripts/verify-enquiry-notifications.mjs` runs isolated PostgreSQL checks using PGlite and local stubs for Vault, `pg_net` and scheduling. These exercise database permissions, transactional enquiry preservation, duplicate submissions, frozen/escaped payloads, retry cutoffs, late success and job scheduling. They do not prove live extension compatibility or actual email delivery; those require the installation checks above.
+`scripts/verify-enquiry-notifications.mjs` runs isolated PostgreSQL checks using PGlite and local stubs for Vault, `pg_net` and scheduling. These exercise database permissions, transactional enquiry preservation, duplicate submissions, frozen/escaped payloads, retry cutoffs, late success, approved recipient switching and job scheduling. They do not prove live extension compatibility or actual email delivery; those require the installation checks above.
 
 Run with `HALENN_PGLITE_MODULE` pointing to an installed PGlite module, followed by the normal typecheck, lint and production build. No production email is sent by these tests.

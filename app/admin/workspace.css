@@ -791,6 +791,32 @@
   text-underline-offset: 4px;
   text-decoration: underline;
 }
+.hw-notification-settings {
+  margin-top: 24px;
+}
+.hw-notification-settings select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--edge);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--paper);
+  font-size: 13px;
+}
+.hw-notification-settings .hw-notification-confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.hw-notification-settings .hw-notification-confirm input {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  margin: 2px 0 0;
+  accent-color: #c9deee;
+}
 .hw {
   position: relative;
   isolation: isolate;
