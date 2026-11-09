@@ -1,6 +1,6 @@
 # Website enquiry emails
 
-Website enquiries are saved in the private Leads workspace before any email is sent. Email delivery is a separate, recoverable notification. The homepage, quiz and pricing forms all use the same path, including enquiries submitted without analytics consent.
+Website enquiries are saved in the private Leads workspace before any email is sent. Email delivery is a separate, recoverable notification. The homepage, quiz and pricing forms all use the same path, including enquiries submitted without analytics consent. Founder alerts and customer confirmations have independent delivery records; a problem sending either does not discard the enquiry.
 
 ## Current setup
 
@@ -10,7 +10,7 @@ Website enquiries are saved in the private Leads workspace before any email is s
 - Provider: Resend, with a verified sending subdomain and a sending-only API key restricted to that domain.
 - Sending defaults to **disabled**. Enable it only after the sending domain, restricted key and selected receiving inbox have been tested; a new Halenn mailbox is not required to use the approved Gmail inbox.
 - Existing enquiries are not backfilled when the integration is installed.
-- **Account → Enquiry emails** shows enabled/paused/setup status, queued requests, provider acceptances and requests needing review. Accepted does not mean delivered to the inbox.
+- **Account → Enquiry emails** shows separate founder-alert and customer-confirmation counts, including queued requests, provider acceptances, requests needing review and intentionally skipped confirmations. Accepted does not mean delivered to the inbox.
 
 ## Installation
 
@@ -77,3 +77,47 @@ Secrets and outbox contents are not exposed to browser clients. The status RPC r
 `scripts/verify-enquiry-notifications.mjs` runs isolated PostgreSQL checks using PGlite and local stubs for Vault, `pg_net` and scheduling. These exercise database permissions, transactional enquiry preservation, duplicate submissions, frozen/escaped payloads, retry cutoffs, late success, approved recipient switching and job scheduling. They do not prove live extension compatibility or actual email delivery; those require the installation checks above.
 
 Run with `HALENN_PGLITE_MODULE` pointing to an installed PGlite module, followed by the normal typecheck, lint and production build. No production email is sent by these tests.
+
+
+## Customer confirmations
+
+`202611100001_customer_confirmations.sql` adds a separate private `halenn_customer_confirmations` outbox and `customer_confirmations_enabled` rollout flag, initially false. It preserves the existing founder configuration, accepted records, frozen payloads, verified sender, restricted Vault key and five-minute cron job. Apply it once after migrations 005 and 006. There is no historical backfill. Enquiries submitted while confirmations are paused are recorded as skipped and are never sent later merely because sending is enabled.
+
+The customer receives a concise branded acknowledgement from `Halenn <enquiries@notifications.halenn.com>`, with subject **We’ve received your enquiry | Halenn**. It confirms receipt, explains that Halenn will review the enquiry and get in touch about next steps, and invites replies. It makes no response-time promise. The body contains only fixed copy, a timestamp and the enquiry UUID; visitor-supplied names, business names, messages, links and admin links are deliberately omitted because the submitted address has not been verified. Both HTML and plain text are included, with automatic-response suppression headers.
+
+Delivery uses one normalized address saved with the enquiry. A strict single-address check rejects malformed mailbox syntax for customer sending without discarding the enquiry or its founder alert. The customer email's Reply-To is the approved founder inbox selected in Account (`aevellgroup@gmail.com` now); it is frozen with the whole payload at the first dispatch. Switching the founder inbox later affects new first sends, not retries already in progress. The customer idempotency namespace is `halenn-customer-confirmation/<enquiry UUID>` and is separate from founder alerts.
+
+### Sending limits and recovery
+
+Customer first-send attempts are reserved under a database transaction advisory lock, including requests waiting for a response or failing to enter the network queue. Limits are **one per recipient per rolling hour**, **three per recipient per rolling 24 hours**, and **40 customer confirmations across all recipients per rolling 24 hours**. The shared cap leaves some of the free Resend plan's daily capacity for founder alerts; it does not guarantee founder delivery if total account usage exceeds the provider allowance. Limits apply even when the public database intake is called directly. The throttle key strips plus suffixes and treats Gmail/Googlemail dot aliases as the same mailbox; the actual delivery address is unchanged. Other providers' less common alias schemes are not resolved.
+
+Extra enquiries remain saved and continue generating founder alerts, while their customer confirmation is marked `skipped` with a fixed reason (`recipient_limit`, `daily_limit`, `invalid_recipient` or `confirmations_disabled`). First sends delayed more than 24 hours are also skipped (`confirmation_expired`). These are not retroactively sent. Automatic retries use the same reserved slot and frozen payload, stopping at 20 attempts or 23 hours after the first attempt. Late provider acceptance is reconciled before retry limits, so a previously accepted email is never resent.
+
+The existing cron entry point now calls the preserved founder worker and customer worker in separate exception blocks. Non-secret worker-health flags contribute to the respective Needs review count and clear after a healthy worker pass. A customer dispatch exception retains an attention row. A failure to create the customer queue row sets a separate sticky `customer_queue_error` flag; it remains visible after healthy passes and needs operator investigation. Only clear that flag after identifying the affected enquiry and deciding whether a confirmation is still appropriate. Never blanket-requeue accepted, skipped or old records, and never expose Vault values or raw provider response contents.
+
+### Activation and live check
+
+After deploying the status panel, applying the migration, reviewing the customer copy and checking the verified domain and existing key, activate only the new flag:
+
+```sql
+update private.halenn_enquiry_notification_config
+set customer_confirmations_enabled = true
+where singleton and enabled
+returning enabled, customer_confirmations_enabled, recipient;
+```
+
+Submit one clearly labelled test using a working inbox you control. Confirm one saved enquiry, one founder alert and one customer confirmation with their distinct subjects, Resend delivery and actual inbox receipt. Check that Reply-To is the selected founder inbox and that the customer email contains no private admin link. Reconcile with `select private.halenn_process_enquiry_notifications();` or wait for the five-minute job, then confirm both accepted counts in Account. A browser retry with the same enquiry ID must not create another email.
+
+To pause only customer confirmations, set `customer_confirmations_enabled = false`. Setting the existing `enabled = false` pauses both paths. Already queued HTTP requests may finish. The website keeps saving enquiries, and disabled customer confirmations are not sent as a backlog after resuming.
+
+The founder-only status RPC retains its original fields and adds:
+
+```text
+customer: { enabled, pending, accepted, attention, skipped, lastAcceptedAt }
+```
+
+`customer.enabled` reports the customer flag combined with the main sending switch; the panel also checks the existing configured status. No recipient list, enquiry contents or secret is exposed by this RPC.
+
+### Customer verification
+
+`scripts/verify-customer-confirmations.mjs` applies the real migrations to an isolated PGlite database with local Vault, pg_net and cron stubs. It checks preservation of the previous setup, all three enquiry origins, deduplication, strict recipients, alias and global rate limits, independent failures, durable warnings, frozen replies, bounded retries, permissions and no historical or paused backfill. It does not make network calls. Set `HALENN_PGLITE_MODULE` as for the existing notification suite. Optionally set `HALENN_CONFIRMATION_PREVIEW` to a local HTML output path to export a synthetic customer email for visual review. The existing founder notification suite remains unchanged and should also pass.

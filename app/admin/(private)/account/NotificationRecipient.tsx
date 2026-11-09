@@ -18,7 +18,7 @@ export default function NotificationRecipient({ recipient }: { recipient: string
         <input type="checkbox" name="inboxReady" value="yes" required disabled={pending} />
         <span>I can receive emails at this address.</span>
       </label>
-      <p className="hw-notification-note">Change to contact@halenn.com once its mailbox is ready. Emails already submitted for sending keep their original address.</p>
+      <p className="hw-notification-note">Change to contact@halenn.com once its mailbox is ready. This also sets the reply address for new customer confirmations. Emails already submitted for sending keep their original addresses.</p>
       <button className="hw-primary" disabled={pending}>{pending ? "Saving…" : "Save notification address"}</button>
       <p role="status">{message}</p>
     </form>

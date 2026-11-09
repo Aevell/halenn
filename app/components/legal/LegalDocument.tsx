@@ -10,6 +10,9 @@ function LinkArrow() {
 }
 
 export default function LegalDocument({ document, slug }: { document: Document; slug: string }) {
+  const updated = slug === "privacy" ? ["2026-11-10", "10 November 2026"]
+    : slug === "cookies" ? ["2026-11-09", "9 November 2026"]
+    : ["2026-11-01", "1 November 2026"];
   return <div className={s.page}>
     <a href="#legal-content" className={s.skip}>Skip to document</a>
     <header className={s.header}><Link href="/" aria-label="Halenn home"><Wordmark /></Link><Link href="/">Back to Halenn <LinkArrow /></Link></header>
@@ -19,7 +22,7 @@ export default function LegalDocument({ document, slug }: { document: Document; 
         <nav aria-label="Legal documents" className={s.tabs}>{legalLinks.map(([id, label]) => <Link key={id} href={`/${id}`} aria-current={id === slug ? "page" : undefined}>{label}</Link>)}</nav>
       </div>
       <div className={s.document}>
-        <aside><nav aria-label="On this page"><p>On this page</p>{document.sections.map(section => <a key={section.id} href={`#${section.id}`}>{section.title}</a>)}</nav><p className={s.date}>Updated<br /><time dateTime={slug === "privacy" || slug === "cookies" ? "2026-11-09" : "2026-11-01"}>{slug === "privacy" || slug === "cookies" ? "9 November 2026" : "1 November 2026"}</time></p><PrivacyButton /></aside>
+        <aside><nav aria-label="On this page"><p>On this page</p>{document.sections.map(section => <a key={section.id} href={`#${section.id}`}>{section.title}</a>)}</nav><p className={s.date}>Updated<br /><time dateTime={updated[0]}>{updated[1]}</time></p><PrivacyButton /></aside>
         <article>{document.sections.map(section => <section key={section.id} id={section.id} className={s.section}>
           <h2>{section.title}</h2>{section.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
           {section.items && <ul>{section.items.map(item => <li key={item}>{item}</li>)}</ul>}

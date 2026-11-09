@@ -739,6 +739,19 @@
 .hw-notifications h2 {
   font-size: 25px;
 }
+.hw-notification-subtitle,
+.hw-customer-confirmations h3 {
+  font-size: 16px;
+  font-weight: 500;
+}
+.hw-notification-subtitle {
+  margin-top: 28px;
+}
+.hw-customer-confirmations {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--edge);
+}
 .hw-notification-state {
   border: 1px solid #66543a;
   border-radius: 6px;
