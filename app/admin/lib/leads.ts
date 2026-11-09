@@ -1,4 +1,40 @@
-export const statuses = ["New", "Contacted", "Won", "Closed"] as const;
+export const statuses = [
+  "New",
+  "Contacted",
+  "Qualified",
+  "Meeting booked",
+  "Proposal",
+  "Won",
+  "Closed",
+] as const;
+export const channels = [
+  "Not recorded",
+  "Cold calling",
+  "Cold email",
+  "Instagram",
+  "Google",
+  "Referral",
+  "Website",
+  "Other",
+] as const;
+export const services = [
+  "Not recorded",
+  "Website",
+  "Webshop",
+  "App",
+  "AI & automation",
+  "Multiple services",
+] as const;
+export const lostReasons = [
+  "Not recorded",
+  "Price",
+  "Timing",
+  "No response",
+  "Competitor",
+  "Not a fit",
+  "No longer needed",
+  "Other",
+] as const;
 export type Status = (typeof statuses)[number];
 export type Fields = {
   company: string;
@@ -9,6 +45,12 @@ export type Fields = {
   notes: string;
   status: Status;
   follow_up: string | null;
+  channel?: string;
+  service?: string;
+  owner?: string;
+  industry?: string;
+  offer?: string;
+  lost_reason?: string;
 };
 export type Lead = Fields & {
   id: string;
@@ -24,6 +66,12 @@ export const empty: Fields = {
   notes: "",
   status: "New",
   follow_up: null,
+  channel: "Not recorded",
+  service: "Not recorded",
+  owner: "",
+  industry: "",
+  offer: "",
+  lost_reason: "Not recorded",
 };
 export const columns = [
   "Company",
@@ -91,6 +139,22 @@ export function clean(input: Fields): Fields {
   if (!statuses.includes(input.status))
     throw new Error("Choose a valid status.");
   fields.status = input.status;
+  for (const [key, options] of [
+    ["channel", channels],
+    ["service", services],
+    ["lost_reason", lostReasons],
+  ] as const) {
+    const value = input[key] ?? "Not recorded";
+    if (!(options as readonly string[]).includes(value))
+      throw new Error("Choose a valid " + key.replace("_", " ") + ".");
+    fields[key] = value;
+  }
+  for (const key of ["owner", "industry", "offer"] as const) {
+    const value = input[key] ?? "";
+    if (typeof value !== "string" || value.length > 120)
+      throw new Error("Keep " + key + " under 120 characters.");
+    fields[key] = value.trim();
+  }
   fields.follow_up = input.follow_up || null;
   if (
     fields.follow_up &&

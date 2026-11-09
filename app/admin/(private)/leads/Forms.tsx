@@ -6,6 +6,9 @@ import {
   empty,
   columns,
   statuses,
+  channels,
+  services,
+  lostReasons,
   preview,
   type Fields,
   type Lead,
@@ -103,6 +106,60 @@ export function Editor({
           onChange={(e) => input("notes", e.target.value)}
         />
       </label>
+      <details className="hw-sales-details">
+        <summary>Sales details & analytics</summary>
+        <div className="hw-sales-fields">
+          <p>
+            These details let you compare lead quality, offers and conversion.
+            Keep the source URL above as your research reference.
+          </p>
+          <WorkspaceSelect
+            label="Lead source"
+            showLabel
+            value={fields.channel || "Not recorded"}
+            options={channels}
+            onChange={(value) => input("channel", value)}
+          />
+          <WorkspaceSelect
+            label="Service"
+            showLabel
+            value={fields.service || "Not recorded"}
+            options={services}
+            onChange={(value) => input("service", value)}
+          />
+          {(
+            [
+              ["owner", "Lead owner"],
+              ["industry", "Business type"],
+              ["offer", "Offer or package"],
+            ] as const
+          ).map(([key, label]) => (
+            <label key={key}>
+              {label}
+              <input
+                maxLength={120}
+                value={fields[key] || ""}
+                onChange={(e) => input(key, e.target.value)}
+                placeholder={
+                  key === "offer" ? "e.g. Website + lead response" : "Optional"
+                }
+              />
+            </label>
+          ))}
+          <WorkspaceSelect
+            label="Lost reason"
+            showLabel
+            value={fields.lost_reason || "Not recorded"}
+            options={lostReasons}
+            onChange={(value) => input("lost_reason", value)}
+          />
+          {lead && (
+            <a className="hw-visit" href={"/admin/analytics?record=" + lead.id}>
+              Record a call, meeting or payment ↗
+            </a>
+          )}
+        </div>
+      </details>
       {error && <p role="alert">{error}</p>}
       <footer>
         <button className="hw-primary" disabled={pending}>

@@ -209,7 +209,7 @@ export default function Leads({ leads, now }: { leads: Lead[]; now: string }) {
                     {l.website && <small>{new URL(l.website).hostname}</small>}
                   </span>
                   <span className="hw-opp">{l.opportunity || "—"}</span>
-                  <span className={"hw-status s-" + l.status}>{l.status}</span>
+                  <span className={"hw-status s-" + l.status.replaceAll(" ", "-")}>{l.status}</span>
                   <time className={due(l, now) ? "hw-due" : ""}>
                     {dateLabel(l.follow_up, now)}
                   </time>

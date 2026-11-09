@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./workspace.css";
+import "./(private)/analytics/analytics.css";
 export const metadata: Metadata = {
   title: "Founder workspace",
   robots: { index: false, follow: false },
