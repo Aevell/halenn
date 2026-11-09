@@ -34,6 +34,7 @@ export default function Header({ email }: { email?: string }) {
               {[
                 ["/admin", "Overview"],
                 ["/admin/leads", "Leads"],
+                ["/admin/analytics", "Analytics"],
               ].map(([href, label]) => (
                 <Link
                   aria-current={path === href ? "page" : undefined}

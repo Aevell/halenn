@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "verify:analytics": "node --test scripts/verify-analytics.mjs",
+    "verify:founder": "node --test scripts/verify-founder-leads.mjs",
     "verify:hero": "node --test scripts/verify-hero.mjs",
     "verify:pricing": "node --test scripts/verify-pricing.mjs",
     "verify:pricing:pdf": "node --test scripts/verify-pricing-pdf.mjs"
