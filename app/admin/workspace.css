@@ -724,6 +724,99 @@
   margin: 12px 0 28px;
   color: var(--sub);
 }
+.hw-notifications {
+  margin-top: 44px;
+  padding-top: 28px;
+  border-top: 1px solid var(--edge);
+}
+.hw-notifications header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.hw-notifications h2 {
+  font-size: 25px;
+}
+.hw-notification-state {
+  border: 1px solid #66543a;
+  border-radius: 6px;
+  color: #e7c58e;
+  font-size: 11px;
+  padding: 4px 7px;
+}
+.hw-notification-state.is-active {
+  border-color: #35584b;
+  color: #b7dfc9;
+}
+.hw-notifications p {
+  color: var(--sub);
+  font-size: 13px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.hw-notifications strong {
+  color: var(--paper);
+  font-weight: 500;
+}
+.hw-notification-counts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 24px 0;
+}
+.hw-notification-counts dt {
+  color: var(--sub);
+  font-size: 11px;
+}
+.hw-notification-counts dd {
+  margin: 6px 0 0;
+  font-size: 28px;
+  font-variant-numeric: tabular-nums;
+}
+.hw-notifications .hw-notification-note {
+  margin-top: 10px;
+  font-size: 12px;
+}
+.hw-notifications nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-top: 20px;
+  color: var(--action);
+  font-size: 12px;
+}
+.hw-notifications nav a {
+  text-underline-offset: 4px;
+  text-decoration: underline;
+}
+.hw-notification-settings {
+  margin-top: 24px;
+}
+.hw-notification-settings select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--edge);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--paper);
+  font-size: 13px;
+}
+.hw-notification-settings .hw-notification-confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.hw-notification-settings .hw-notification-confirm input {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  margin: 2px 0 0;
+  accent-color: #c9deee;
+}
 .hw {
   position: relative;
   isolation: isolate;

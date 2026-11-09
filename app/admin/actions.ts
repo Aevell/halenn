@@ -100,3 +100,17 @@ export async function changePassword(_message: string, form: FormData) {
   if (error) return "Password could not be changed. Try again.";
   redirect("/admin");
 }
+
+export async function changeNotificationRecipient(_message: string, form: FormData) {
+  const { db } = await leadAccess();
+  const value = form.get("recipient");
+  const recipient = typeof value === "string" ? value.trim().toLowerCase() : "";
+  if (!["aevellgroup@gmail.com", "contact@halenn.com"].includes(recipient))
+    return "Choose one of Halenn’s notification addresses.";
+  if (form.get("inboxReady") !== "yes")
+    return "Confirm that this inbox can receive emails before saving.";
+  const { error } = await db.rpc("halenn_set_enquiry_notification_recipient", { recipient });
+  if (error) return "The notification address could not be saved. Please try again.";
+  revalidatePath("/admin/account");
+  return `Notification address saved: ${recipient}.`;
+}
