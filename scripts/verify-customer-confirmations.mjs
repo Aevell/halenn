@@ -84,6 +84,62 @@ try {
   await db.exec(schedule.replace("create extension if not exists pg_cron with schema pg_catalog;", "-- cron stubbed locally."));
   await db.exec(await migration("202611100001_customer_confirmations.sql"));
 
+  const brandedSql = await migration("202611100002_branded_customer_confirmation.sql");
+  assert.ok(brandedSql.startsWith("begin;\n") && /commit;\s*$/.test(brandedSql));
+  const brandedInTransaction = brandedSql.replace(/^begin;\n/, "").replace(/commit;\s*$/, "");
+  await test("brand upgrade changes only new HTML and preserves configuration, accepted records and frozen retry payloads", async () => {
+    await ready();
+    const pending = enquiry(); const accepted = enquiry();
+    await submit(pending); await submit(accepted); await respond(accepted); await worker();
+    const originalPending = await outbox(pending); const originalAccepted = await outbox(accepted);
+    const originalConfig = (await query("select * from private.halenn_enquiry_notification_config"))[0];
+    assert.ok(originalPending.payload.html.includes("#f4f1eb"));
+    assert.equal(originalAccepted.status, "accepted");
+    await db.exec(brandedInTransaction);
+    assert.deepEqual(await outbox(pending), originalPending);
+    assert.deepEqual(await outbox(accepted), originalAccepted);
+    assert.deepEqual((await query("select * from private.halenn_enquiry_notification_config"))[0], originalConfig);
+    assert.equal((await query("select count(*)::int as n from private.halenn_customer_confirmations"))[0].n, 2);
+    const refreshedPayload = (await query("select private.halenn_customer_confirmation_payload($1) as p", [pending.id]))[0].p;
+    assert.notEqual(refreshedPayload.html, originalPending.payload.html);
+    const omitHtml = (payload) => Object.fromEntries(Object.entries(payload).filter(([key]) => key !== "html"));
+    assert.deepEqual(omitHtml(refreshedPayload), omitHtml(originalPending.payload), "Envelope, safe copy and plain text are unchanged");
+    await respond(pending, 503, '{}'); await worker(); await due(pending); await worker();
+    assert.deepEqual((await request(pending)).body, originalPending.payload);
+    assert.equal(await requestCount(accepted), 1);
+    const next = enquiry(); await submit(next);
+    assert.ok((await request(next)).body.html.includes("#07090d"));
+    for (const role of ["anon", "authenticated"])
+      assert.equal((await query("select has_function_privilege($1, 'private.halenn_customer_confirmation_payload(uuid)', 'execute') as allowed", [role]))[0].allowed, false);
+  });
+  await db.exec(brandedSql);
+
+  await test("branded email provides real text, accessible fluid tables, licensed font references and small-screen fallbacks", async () => {
+    await ready(); const p = enquiry(); await submit(p);
+    const html = (await request(p)).body.html;
+    assert.ok(Buffer.byteLength(html, "utf8") < 20000);
+    assert.match(html, /<html lang="en">/);
+    assert.match(html, /<h1[^>]*>We’ve received<br>your enquiry\.<\/h1>/);
+    assert.ok(!/<script|javascript:|display\s*:\s*(?:flex|grid)|border-radius/i.test(html));
+    const tables = html.match(/<table\b[^>]*>/g);
+    assert.ok(tables.length >= 3 && tables.every((table) => table.includes('role="presentation"')));
+    assert.match(html, /src="https:\/\/halenn\.com\/brand\/email\/halenn-wordmark-v1\.png" alt="Halenn" width="167" height="24"/);
+    assert.match(html, /src="https:\/\/halenn\.com\/brand\/halenn-mark-v2-180\.png" alt="" width="48" height="48"/);
+    for (const font of ["Manrope-Light.ttf", "Geist-Regular.ttf"])
+      assert.ok(html.includes("https://halenn.com/brand/email/" + font));
+    assert.ok(html.includes("<!--[if !mso]><!-->") && html.includes("<!--[if mso]><style>"));
+    assert.match(html, /font-family:Arial,sans-serif !important/);
+    assert.ok(html.includes("font-family:'Helvetica Neue',Helvetica,Arial,sans-serif"));
+    assert.match(html, /width:100%;max-width:600px;table-layout:fixed/);
+    assert.match(html, /max-width:480px/);
+    assert.match(html, /font-size:32px !important/);
+    assert.match(html, /padding:32px 24px !important/);
+    assert.ok(html.includes("word-break:break-all;overflow-wrap:anywhere;"));
+    assert.ok(html.includes('aria-hidden="true"') && html.includes("mso-hide:all"));
+    for (const colour of ["#07090d", "#0a1018", "#f2f1ed", "#b8c7d9", "#263347"])
+      assert.ok(html.includes(colour));
+  });
+
   await test("migration preserves active founder configuration, accepted payloads and the existing cron without backfill", async () => {
     const config = (await query("select * from private.halenn_enquiry_notification_config"))[0];
     assert.equal(config.enabled, true); assert.equal(config.customer_confirmations_enabled, false);

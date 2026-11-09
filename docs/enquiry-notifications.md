@@ -121,3 +121,17 @@ customer: { enabled, pending, accepted, attention, skipped, lastAcceptedAt }
 ### Customer verification
 
 `scripts/verify-customer-confirmations.mjs` applies the real migrations to an isolated PGlite database with local Vault, pg_net and cron stubs. It checks preservation of the previous setup, all three enquiry origins, deduplication, strict recipients, alias and global rate limits, independent failures, durable warnings, frozen replies, bounded retries, permissions and no historical or paused backfill. It does not make network calls. Set `HALENN_PGLITE_MODULE` as for the existing notification suite. Optionally set `HALENN_CONFIRMATION_PREVIEW` to a local HTML output path to export a synthetic customer email for visual review. The existing founder notification suite remains unchanged and should also pass.
+
+### Website-aligned customer email design
+
+`202611100002_branded_customer_confirmation.sql` replaces only the customer payload function's HTML template. It uses Halenn's dark website palette, wordmark and oval mark, thin rules, generous spacing, and a Manrope heading with Geist body text. The envelope, subject, Reply-To, automatic-response headers, plain text, receipt wording and delivery behaviour are unchanged. Previously frozen payloads are never updated: accepted mail stays accepted and in-flight retries keep their original body and idempotency key. New first sends use the revised design.
+
+Deploy the public assets before applying this migration:
+
+- `https://halenn.com/brand/email/halenn-wordmark-v1.png` — rendered at 167 × 24 pixels.
+- `https://halenn.com/brand/halenn-mark-v2-180.png` — decorative oval mark rendered at 48 × 48 pixels.
+- `https://halenn.com/brand/email/Manrope-Light.ttf` and `https://halenn.com/brand/email/Geist-Regular.ttf`, with the corresponding font licences included in the deployed asset directory.
+
+The email uses fluid presentation tables with a 600-pixel maximum width and mobile spacing/headline overrides. The message, heading, reference and next steps remain real selectable text. A blocked logo still has an accessible Halenn alternative. External font support varies across mail clients: compatible clients use the website fonts, while other clients fall back to Helvetica Neue, Helvetica or Arial. Outlook's Word renderer explicitly uses Arial and a 600-pixel conditional table. A browser preview verifies layout but cannot guarantee every inbox's font loading or dark-mode transformations.
+
+The customer verification suite now applies the branding migration between an original first send and its retry, proving that frozen pending/accepted rows and non-HTML fields remain unchanged. It also checks table accessibility, versioned asset/font references, safe narrow-screen rules and an HTML size below 20 KB. Existing delivery and permission scenarios run against the upgraded template.
