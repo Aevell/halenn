@@ -22,7 +22,7 @@ Open `/admin/analytics` after signing in with an existing founder account.
 
 ## Website visitors and the quiz
 
-In **Visitors & leads**, choose **Website** to see the journey before an enquiry or **Leads** to see sales records. Website charts use the report dates plus their own visitor-source and device filters. Lead source, service, owner and offer filters describe the sales records, not anonymous website activity.
+In **Visitors & leads**, choose **Website traffic** to see the journey before an enquiry or **Sales leads** to see sales records. Website charts use the report dates plus their own visitor-source and device filters. Lead source, service, owner and offer filters describe the sales records, not anonymous website activity.
 
 Website reporting covers only visitors who accept optional analytics. A declined choice records no visitor or quiz analytics, and an enquiry can still be submitted. Consent accepted halfway through a visit gives a partial history; nothing before consent is reconstructed. Browser blocking, network failures and traffic limits can also reduce coverage. These are observed numbers for the consented subset, not estimates of all traffic.
 
@@ -34,7 +34,7 @@ Website reporting covers only visitors who accept optional analytics. A declined
 | Visitor source           | A safe `utm_source` label takes precedence over an external referring hostname. Known platforms are grouped; an absent or unavailable source is Direct. Direct does not prove that someone typed the address. |
 | Device                   | A desktop, tablet or mobile category based on the browser width when the visit starts. It is not a precise hardware identification.                                                                           |
 | Enquiries received       | Enquiries durably saved on the server and linked to a tracked visit. Clicking Send or opening an email app is not a completed enquiry.                                                                        |
-| Source/device conversion | Visits with at least one received enquiry divided by visits in that row. Multiple enquiries in one visit do not inflate this conversion rate.                                                                 |
+| Source-to-sale conversion | Customers won to date divided by consented enquiries linked to visits starting in the selected period. Device details still show enquiring visits / visits.                                                                 |
 | Entry page               | The first allowed page recorded for the visit.                                                                                                                                                                |
 | Last page / exit         | The last observed page in a visit with no recorded activity for at least 30 minutes. It is not a confirmed browser-close event.                                                                               |
 
@@ -91,4 +91,20 @@ Apply website migrations in order before deploying visitor tracking and on-site 
 
 Admin reads and sales activity writes use the existing signed-in founder session and require the initial password change. Database RLS also enforces those restrictions. Public forms and tracking use narrow write-only intake functions; they cannot read visitor data, enquiries or leads. Manual events and enquiries use client-generated UUIDs for safe retries; a reused enquiry UUID with a different payload is rejected. No service role key is used by the app.
 
-Validation: `npm run typecheck`, `npm run lint`, `npm run verify:analytics`, `npm run verify:website`, `npm run verify:founder`, `npm run build`. The sales migration was additionally executed against a temporary PostgreSQL-compatible database to verify preservation, stage triggers, corrections, invalid writes and founder/anonymous isolation. Website validation must also cover consent on/off, source capture, every quiz branch, direct and pricing enquiries, retry/error handling, and receipt persistence before success is shown.
+Validation: `npm run typecheck`, `npm run verify:analytics`, `npm run verify:website`, `npm run verify:founder`, `npm run build`. The sales migration was additionally executed against a temporary PostgreSQL-compatible database to verify preservation, stage triggers, corrections, invalid writes and founder/anonymous isolation. Website validation must also cover consent on/off, source capture, every quiz branch, direct and pricing enquiries, retry/error handling, and receipt persistence before success is shown.
+
+
+## Clean reporting and source-to-sale attribution
+
+Apply `202611100004_analytics_clarity.sql` before deploying the updated dashboard. It is additive and preserves lead records, activity history, email outboxes and founder-only permissions. The original report function remains a compatibility wrapper; the new endpoint calls `halenn_website_report_v2`.
+
+- Analytics excludes test leads, their linked activities, and internal visits by default. **Include test data** reveals them again. Leads remain available and show a **Test** badge; the lead editor’s checkbox changes their classification without deleting records.
+- Only the two identified email setup submissions are backfilled as tests. Related visits are marked internal only when the same browser has no genuine submitted enquiries. Names containing “test” are not used as a classification rule.
+- New public visits and enquiries made while signed in as a verified founder are automatically classified as internal tests. Signed-out browsing, another browser, or incognito cannot be reliably recognised as internal. A manually marked test enquiry excludes its whole visit only when that visit has no genuine enquiries; mixed visits retain genuine conversions.
+- Source, medium and campaign come from the consented visit associated with a server-confirmed enquiry. The intake channel stays **Website**; sales reports use the captured source when available. A deliberate manual channel override takes precedence. No source is guessed when consent or a valid visit link is missing.
+- Attribution is **the source of the enquiry’s visit**, not first-ever touch, multi-touch attribution or cross-device identity. Source/campaign labels remain on the lead after the 90-day visit history expires. No visitor/session identifier is copied onto the lead. Use Sales leads for older source-to-customer comparisons.
+- **Visitor sources → sales** selects visits by start date, then follows their enquiries to recorded customer wins to date. Several submissions by the same business can create several leads; this is enquiry/lead conversion, not deduplicated company conversion. Mark duplicates as test only when they really are tests; otherwise correct your lead records deliberately.
+- A customer means a current Won lead or a non-void historical Won stage/baseline, matching the sales model. It does not imply that payment has been collected. Receipts and payment totals still require recorded activities.
+- **During this period**, **Current position**, and **Leads added in this period · results to date** distinguish different date bases. The limited-data note appears below 20 leads/visits as a reading aid, not a statistical confidence threshold.
+
+Additional checks: `node scripts/verify-analytics-attribution.mjs` with `HALENN_PGLITE_MODULE` set to an installed PGlite module. This covers exact setup backfill, authenticated internal detection, consented snapshots, source-to-sale reporting, mixed test/genuine visits, reversible exclusions, retention, and read/write isolation. `/prototypes/analytics` provides fictional populated/empty views in development only; production returns 404.

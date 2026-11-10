@@ -157,6 +157,7 @@ export type Filters = Period & {
   owner: string;
   offer: string;
   currency: Currency;
+  includeTests?: boolean;
 };
 export function periodFor(
   preset: string,
@@ -222,6 +223,19 @@ export function duration(value: number | null) {
           value,
         ) + (value === 1 ? " day" : " days");
 }
+export function contactDuration(days: number | null) {
+  if (days === null) return "—";
+  if (days < 1 / 1440) return "< 1 min";
+  if (days < 1 / 24) return `${Math.floor(days * 1440)} min`;
+  if (days < 1) return `${Number((days * 24).toFixed(1))} hr`;
+  return duration(days);
+}
+// Keep the intake channel separate from the consented acquisition source.
+export function leadSource(lead: Lead) {
+  return lead.channel === "Website" && lead.acquisition_source
+    ? lead.acquisition_source
+    : lead.channel || "Not recorded";
+}
 export function shortDate(value: string) {
   return new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
@@ -234,7 +248,7 @@ export function leadMatches(
   f: Pick<Filters, "channel" | "service" | "owner" | "offer">,
 ) {
   return (
-    (!f.channel || (l.channel || "Not recorded") === f.channel) &&
+    (!f.channel || leadSource(l) === f.channel) &&
     (!f.service || (l.service || "Not recorded") === f.service) &&
     (!f.owner || (l.owner || "Unassigned") === f.owner) &&
     (!f.offer || (l.offer || "Not recorded") === f.offer)
@@ -253,7 +267,9 @@ export function buildAnalytics(
   filters: Filters,
   now: string,
 ) {
-  const scoped = leads.filter((l) => leadMatches(l, filters));
+  const scoped = leads.filter((l) =>
+    (filters.includeTests || !l.is_test) && leadMatches(l, filters),
+  );
   const ids = new Set(scoped.map((l) => l.id));
   const events = activity
     .filter(
@@ -404,7 +420,7 @@ export function buildAnalytics(
     const names = [
       ...new Set(
         cohort.map(
-          (l) => l[key] || (key === "owner" ? "Unassigned" : "Not recorded"),
+          (l) => key === "channel" ? leadSource(l) : l[key] || (key === "owner" ? "Unassigned" : "Not recorded"),
         ),
       ),
     ];
@@ -412,7 +428,7 @@ export function buildAnalytics(
       .map((label) => {
         const rows = cohort.filter(
           (l) =>
-            (l[key] || (key === "owner" ? "Unassigned" : "Not recorded")) ===
+            (key === "channel" ? leadSource(l) : l[key] || (key === "owner" ? "Unassigned" : "Not recorded")) ===
             label,
         );
         const won = rows.filter(converted);

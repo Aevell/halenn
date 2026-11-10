@@ -205,7 +205,7 @@ export default function Leads({ leads, now }: { leads: Lead[]; now: string }) {
                   onClick={() => change({ lead: l.id })}
                 >
                   <span className="hw-company">
-                    <b>{l.company}</b>
+                    <b>{l.company}{l.is_test && <span className="hw-test-badge">Test</span>}</b>
                     {l.website && <small>{new URL(l.website).hostname}</small>}
                   </span>
                   <span className="hw-opp">{l.opportunity || "—"}</span>

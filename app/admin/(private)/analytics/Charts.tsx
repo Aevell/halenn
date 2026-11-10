@@ -7,14 +7,19 @@ export function Panel({
   children,
   wide = false,
   action,
+  basis,
+  when = true,
 }: {
   title: string;
   description?: string;
   children: ReactNode;
   wide?: boolean;
   action?: ReactNode;
+  basis?: string;
+  when?: boolean;
 }) {
   const id = useId();
+  if (!when) return null;
   return (
     <section
       className={"ha-panel" + (wide ? " ha-wide" : "")}
@@ -22,6 +27,7 @@ export function Panel({
     >
       <header className="ha-panel-head">
         <div>
+          {basis && <span className="ha-basis">{basis}</span>}
           <h2 id={id}>{title}</h2>
           {description && <p>{description}</p>}
         </div>

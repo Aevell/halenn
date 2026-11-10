@@ -218,3 +218,40 @@ test("entry validation rejects invalid amounts, timestamps, unsafe kinds and mis
     0,
   );
 });
+
+test("test leads and their sales, payments and subscriptions are excluded by default", () => {
+  const real = lead(80, { channel: "Website", acquisition_source: "Instagram", status: "Won" });
+  const internal = lead(81, { is_test: true, status: "Won", channel: "Website", acquisition_source: "Direct" });
+  const entries = [event(real, "payment", "2026-10-02", { amount_cents: 65000 }), event(internal, "payment", "2026-10-02", { amount_cents: 99900 }), event(internal, "subscription_started", "2026-10-02", { amount_cents: 4700 }), event(internal, "stage", "2026-10-02", { to_stage: "Won" })];
+  const normal = model([real, internal], entries);
+  assert.equal(normal.cohort.length, 1);
+  assert.equal(normal.revenue, 65000);
+  assert.equal(normal.activeSubscriptions, 0);
+  assert.equal(normal.wins.length, 0);
+  assert.deepEqual(normal.groups("channel").map((g) => g.label), ["Instagram"]);
+  const all = model([real, internal], entries, { includeTests: true });
+  assert.equal(all.cohort.length, 2);
+  assert.equal(all.revenue, 164900);
+  assert.equal(all.activeSubscriptions, 1);
+  assert.equal(all.wins.length, 1);
+});
+
+test("visitor acquisition source follows leads into sales and source filters", () => {
+  const captured = lead(82, { channel: "Website", acquisition_source: "Google", status: "Won" });
+  const unknown = lead(83, { channel: "Website" });
+  const overridden = lead(84, { channel: "Referral", acquisition_source: "Google" });
+  const result = model([captured, unknown, overridden], [], { channel: "Google" });
+  assert.deepEqual(result.cohort.map((l) => l.id), [captured.id]);
+  assert.equal(result.groups("channel")[0].won, 1);
+  assert.equal(model([unknown], []).groups("channel")[0].label, "Website");
+  assert.equal(model([overridden], []).groups("channel")[0].label, "Referral");
+});
+
+test("first contact timing distinguishes minutes, hours and unknown values", async () => {
+  const { contactDuration } = await import("../app/admin/lib/analytics.ts");
+  assert.equal(contactDuration(null), "—");
+  assert.equal(contactDuration(0), "< 1 min");
+  assert.equal(contactDuration(15 / 1440), "15 min");
+  assert.equal(contactDuration(6 / 24), "6 hr");
+  assert.equal(contactDuration(2), "2 days");
+});

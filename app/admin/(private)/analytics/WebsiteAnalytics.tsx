@@ -16,6 +16,7 @@ export type WebsiteReport = {
     quizStarts: number;
     quizCompletions: number;
     enquiries: number;
+    quizEnquiries: number;
     formOpens: number;
     formStarts: number;
   };
@@ -26,6 +27,8 @@ export type WebsiteReport = {
     visitors: number;
     quizStarts: number;
     enquiries: number;
+    leads: number;
+    customers: number;
   }[];
   devices: { device: string; visits: number; enquiries: number }[];
   pages: { path: string; views: number; entrances: number; exits: number }[];
@@ -62,7 +65,7 @@ export type WebsiteReport = {
     pending: number;
     abandoned: number;
   }[];
-  coverage: { retentionDays: number; consentOnly: boolean };
+  coverage: { retentionDays: number; consentOnly: boolean; includesTests: boolean; excludedVisits: number };
 };
 
 type Result = { key: string; report?: WebsiteReport; error?: string };
@@ -125,10 +128,12 @@ export default function WebsiteAnalytics({
   from,
   to,
   previewData,
+  includeTests = false,
 }: {
   from: string;
   to: string;
   previewData?: WebsiteReport;
+  includeTests?: boolean;
 }) {
   const [source, setSource] = useState("");
   const [device, setDevice] = useState("");
@@ -136,8 +141,8 @@ export default function WebsiteAnalytics({
   const [result, setResult] = useState<Result | null>(null);
   const [knownSources, setKnownSources] = useState<string[]>([]);
   const query = useMemo(
-    () => new URLSearchParams({ from, to, source, device }).toString(),
-    [from, to, source, device],
+    () => new URLSearchParams({ from, to, source, device, tests: includeTests ? "include" : "" }).toString(),
+    [from, to, source, device, includeTests],
   );
   const requestKey = query + "&refresh=" + retry;
   useEffect(() => {
@@ -211,8 +216,8 @@ export default function WebsiteAnalytics({
     <div className="ha-website">
       <div className="ha-website-controls">
         <div className="ha-website-intro">
-          <h2>Before the enquiry.</h2>
-          <p>See how people find Halenn and where their journey stops.</p>
+          <h2>From visit to customer.</h2>
+          <p>See where visitors come from and which enquiries become sales.</p>
         </div>
         <div className="ha-website-filters">
           <label className="ha-field">
@@ -283,6 +288,11 @@ export default function WebsiteAnalytics({
         </div>
       ) : (
         <>
+          <div className="ha-reading-key">
+            <span>Consented visits · {shortDate(data.from)} – {shortDate(data.to)}</span>
+            <span>{data.coverage.includesTests ? "Test data included" : `${number(data.coverage.excludedVisits)} internal or test visits excluded`}</span>
+            {data.totals.visits > 0 && data.totals.visits < 20 && <span className="ha-sample-note">Limited data · compare counts alongside rates</span>}
+          </div>
           <div className="ha-stats">
             <Stat
               label="Visitors"
@@ -300,9 +310,9 @@ export default function WebsiteAnalytics({
               detail={`${number(data.quiz.completed)} of ${number(data.quiz.started)} quiz attempts finished`}
             />
             <Stat
-              label="Enquiries received"
+              label="All tracked enquiries"
               value={number(data.totals.enquiries)}
-              detail="Confirmed submissions from tracked visits"
+              detail={`${number(data.totals.quizEnquiries)} from quiz forms · ${number(data.totals.enquiries - data.totals.quizEnquiries)} from other forms`}
             />
           </div>
           {!data.totals.visits && (
@@ -321,8 +331,12 @@ export default function WebsiteAnalytics({
               </div>
             </div>
           )}
+          {data.totals.visits > 0 && (!data.quiz.started || !data.forms.length) && (
+            <p className="ha-footnote">{!data.quiz.started && "Quiz drop-off details appear once someone starts the quiz. "}{!data.forms.length && "Form details appear after the first tracked enquiry form is opened."}</p>
+          )}
           <div className="ha-grid ha-overview-grid">
             <Panel
+              when={data.totals.visits > 0}
               title="Visits & enquiries"
               description="Daily activity from visits that began in the selected period."
             >
@@ -338,8 +352,9 @@ export default function WebsiteAnalytics({
               />
             </Panel>
             <Panel
-              title="The quiz journey"
-              description="Distinct visits reaching each set of milestones. Direct enquiries are counted separately from this quiz path."
+              when={data.journey.some((row, i) => i > 0 && row.count > 0)}
+              title="Enquiries through the quiz"
+              description="Distinct visits with each preceding quiz milestone recorded. The last step counts enquiries after a recommendation."
             >
               <Bars
                 max={data.totals.visits}
@@ -355,14 +370,16 @@ export default function WebsiteAnalytics({
                 empty="The journey will show where visits progress from the homepage quiz to an enquiry."
               />
               <p className="ha-caption">
-                A visit can include more than one quiz attempt. The attempt
-                detail below explains individual drop-offs.
+                Enquiries sent before completion or with a partial tracked history
+                appear in All tracked enquiries, but not at the end of this full path.
               </p>
             </Panel>
             <Panel
               wide
-              title="Where visitors come from"
-              description="The source recorded when a visit begins. Enquiry rates use tracked visits as the denominator."
+              when={data.totals.visits > 0}
+              basis="Visits started in this period · customer wins to date"
+              title="Visitor sources → sales"
+              description="Each consented enquiry keeps the source of its visit. Customers are those enquiries marked won, even when the sale happens later."
             >
               {sortedSources.length ? (
                 <>
@@ -372,10 +389,9 @@ export default function WebsiteAnalytics({
                         <tr>
                           <th>Source</th>
                           <th>Visits</th>
-                          <th>Visitors</th>
-                          <th>Quiz starts</th>
-                          <th>Enquiring visits</th>
-                          <th>Enquiry rate</th>
+                          <th>Enquiries</th>
+                          <th>Customers</th>
+                          <th>Enquiry-to-customer</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -395,14 +411,14 @@ export default function WebsiteAnalytics({
                               </button>
                             </th>
                             <td>{number(row.visits)}</td>
-                            <td>{number(row.visitors)}</td>
-                            <td>{number(row.quizStarts)}</td>
-                            <td>{number(row.enquiries)}</td>
+                            <td>{number(row.leads)}</td>
+                            <td>{number(row.customers)}</td>
                             <td>
-                              {percentage(row.enquiries, row.visits)}
-                              <small>
-                                {row.enquiries} of {row.visits} visits
-                              </small>
+                              {percentage(row.customers, row.leads)}
+                              <span className="ha-conversion-track" aria-hidden="true">
+                                <span style={{ width: `${row.leads ? row.customers / row.leads * 100 : 0}%` }} />
+                              </span>
+                              <small>{row.customers} of {row.leads} enquiries</small>
                             </td>
                           </tr>
                         ))}
@@ -427,6 +443,7 @@ export default function WebsiteAnalytics({
             </Panel>
             <Panel
               wide
+              when={data.quiz.started > 0}
               title="Where the quiz loses people"
               description="Follow each goal separately, so a completed three-question route is never mistaken for an unfinished five-question route."
             >
@@ -538,7 +555,8 @@ export default function WebsiteAnalytics({
             </Panel>
             <Panel
               wide
-              title="From opening the form to sending an enquiry"
+              when={data.forms.length > 0}
+              title="Enquiry forms"
               description="Confirmed enquiries are counted only after the website has saved the submission. Failed attempts are not conversions."
             >
               {data.forms.length ? (
@@ -582,7 +600,7 @@ export default function WebsiteAnalytics({
               </p>
             </Panel>
           </div>
-          <details className="ha-website-detail ha-quality">
+          {data.totals.visits > 0 && <details className="ha-website-detail ha-quality">
             <summary>
               <span>Pages & devices</span>
               <span>Explore where visits begin and end</span>
@@ -633,7 +651,7 @@ export default function WebsiteAnalytics({
                 />
               </Panel>
             </div>
-          </details>
+          </details>}
           <div className="ha-website-updated">
             <span>
               {data.updatedAt &&
@@ -683,7 +701,9 @@ export default function WebsiteAnalytics({
                   .
                 </p>
                 <p>
-                  Earlier visits are not reconstructed.{" "}
+                  Source and campaign labels saved with an enquiry remain in Sales leads
+                  after visit events expire. Enquiries without consent show Website as
+                  their intake channel; their visitor source is unknown. Earlier visits are not reconstructed.{" "}
                   {data.from !== from || data.to !== to
                     ? `This report uses ${shortDate(data.from)} to ${shortDate(data.to)}, within the available range.`
                     : "Report dates use Europe/Amsterdam."}

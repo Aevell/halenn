@@ -160,6 +160,19 @@ export function Editor({
           )}
         </div>
       </details>
+      {lead?.acquisition_source && (
+        <p className="hw-attribution">
+          Website source: <strong>{lead.acquisition_source}</strong>
+          {lead.acquisition_medium && <> · {lead.acquisition_medium}</>}
+          {lead.acquisition_campaign && <> · Campaign: {lead.acquisition_campaign}</>}
+          <small>Recorded with consent when the enquiry was sent.</small>
+        </p>
+      )}
+      <label className="hw-test-toggle">
+        <input type="checkbox" checked={fields.is_test ?? false}
+          onChange={(e) => setFields((f) => ({ ...f, is_test: e.target.checked }))} />
+        Test lead — exclude from analytics by default
+      </label>
       {error && <p role="alert">{error}</p>}
       <footer>
         <button className="hw-primary" disabled={pending}>

@@ -10,6 +10,8 @@ import {
   day,
   daysBetween,
   duration,
+  contactDuration,
+  leadSource,
   money,
   periodFor,
   previousPeriod,
@@ -22,7 +24,7 @@ import {
   type Filters,
 } from "../../lib/analytics";
 import { Bars, Empty, Panel, Stat, Trend } from "./Charts";
-import WebsiteAnalytics from "./WebsiteAnalytics";
+import WebsiteAnalytics, { type WebsiteReport } from "./WebsiteAnalytics";
 import RecordActivity, {
   AnalyticsDialog,
   CorrectRecord,
@@ -56,11 +58,13 @@ export default function Analytics({
   activity,
   now,
   preview = false,
+  websitePreview,
 }: {
   leads: Lead[];
   activity: Activity[];
   now: string;
   preview?: boolean;
+  websitePreview?: WebsiteReport;
 }) {
   const search = useSearchParams();
   const [params, setParams] = useState(
@@ -126,6 +130,7 @@ export default function Analytics({
       : basePeriod;
   const filters = useMemo<Filters>(
     () => ({
+      includeTests: params.get("tests") === "include",
       from: period.from,
       to: period.to,
       channel: params.get("source") || "",
@@ -199,7 +204,10 @@ export default function Analytics({
               <td>{row.leads}</td>
               <td>{row.won}</td>
               <td>
-                {rate(row.rate)}
+                <span className="ha-conversion-value">{rate(row.rate)}</span>
+                <span className="ha-conversion-track" aria-hidden="true">
+                  <span style={{ width: `${row.rate || 0}%` }} />
+                </span>
                 <small>
                   {row.won} of {row.leads}
                 </small>
@@ -266,7 +274,7 @@ export default function Analytics({
         .map((e) => e.owner || "Unassigned"),
     ),
   ];
-  const noManualRecords = !activity.some(
+  const noManualRecords = !model.events.some(
     (e) => e.kind !== "stage" && e.kind !== "baseline" && !e.voided_at,
   );
   const labelActivity = (e: Activity) =>
@@ -279,10 +287,9 @@ export default function Analytics({
     <section className="ha hw-enter">
       <header className="ha-heading">
         <div>
-          <span className="ha-eyebrow">YOUR BUSINESS, IN PERSPECTIVE</span>
           <h1>Analytics</h1>
           <p>
-            See what brings customers in. Understand what moves them forward.
+            From first visit to lasting customer.
           </p>
         </div>
         <div className="ha-heading-actions">
@@ -395,7 +402,7 @@ export default function Analytics({
             key: "source",
             label: "Lead source",
             value: filters.channel,
-            options: channels,
+            options: [...new Set([...channels, ...leads.map(leadSource)])].sort(),
           },
           {
             key: "service",
@@ -451,6 +458,12 @@ export default function Analytics({
       </div>
       <div className="ha-period-caption">
         <span>{periodLabel} · Europe/Amsterdam</span>
+        <label className="ha-test-filter">
+          <input type="checkbox" checked={!!filters.includeTests}
+            onChange={(e) => change({ tests: e.target.checked ? "include" : "" })} />
+          Include test data
+        </label>
+        {!websiteView && <span>{leads.filter((l) => l.is_test).length} test leads {filters.includeTests ? "included" : "excluded"}</span>}
         {compare && selectedTab === "overview" && (
           <span>
             Compared with {shortDate(previous.from)} – {shortDate(previous.to)}{" "}
@@ -503,6 +516,11 @@ export default function Analytics({
         role="tabpanel"
         aria-labelledby={"ha-tab-" + selectedTab}
       >
+        {!websiteView && <div className="ha-reading-key">
+          <span>{selectedTab === "acquisition" ? "Leads added in this period · results to date" : selectedTab === "growth" ? "Position at period end · activity during this period" : "During this period"}</span>
+          {((selectedTab === "overview" || selectedTab === "acquisition") && model.cohort.length > 0 && model.cohort.length < 20) &&
+            <span className="ha-sample-note">Limited data · {model.cohort.length} leads — compare counts alongside rates</span>}
+        </div>}
         {selectedTab === "overview" && (
           <>
             <div className="ha-stats">
@@ -565,69 +583,11 @@ export default function Analytics({
                 detail="Payments received less refunds"
               />
             </div>
-            {noManualRecords && (
-              <div className="ha-onboarding">
-                <div>
-                  <strong>
-                    Your lead data is ready. Start building the bigger picture.
-                  </strong>
-                  <p>
-                    Assign sources and services to your leads. Record calls,
-                    meetings and payments as they happen.
-                  </p>
-                </div>
-                <button
-                  className="ha-text-button"
-                  onClick={() => setRecord(true)}
-                >
-                  Record your first activity ↗
-                </button>
-              </div>
-            )}
-            <div className="ha-grid ha-overview-grid">
+            <div className="ha-attention-priority">
               <Panel
-                title="Activity over time"
-                description="New leads and first recorded wins in each interval."
-              >
-                <Trend
-                  rows={trendRows}
-                  labels={["Leads added", "Customers won"]}
-                />
-              </Panel>
-              <Panel
-                title="The lead journey"
-                description="Leads added in this period, with milestones recorded to date."
-              >
-                {journey}
-                <p className="ha-caption">
-                  Only recorded milestones are counted. Skipped stages are not
-                  inferred.
-                </p>
-              </Panel>
-              <Panel
-                title="Where customers come from"
-                description="Customers from leads added in this period, measured to date."
-              >
-                <Bars
-                  rows={sourceGroups.slice(0, 6).map((r) => ({
-                    label: r.label,
-                    value: r.won,
-                    detail: `${r.won} of ${r.leads} leads · ${rate(r.rate)}`,
-                    onClick: () => inspect(r.label, r.ids),
-                  }))}
-                />
-                <button
-                  className="ha-section-link"
-                  onClick={() =>
-                    change({ tab: "acquisition", view: "leads" }, true)
-                  }
-                >
-                  Explore lead sources <span aria-hidden="true">↗</span>
-                </button>
-              </Panel>
-              <Panel
+                basis="Current position"
                 title="Needs attention"
-                description="Open leads as of today, across the selected sources and owners."
+                description="Open leads today, regardless of when they were added."
               >
                 <div className="ha-attention">
                   {[
@@ -678,6 +638,73 @@ export default function Analytics({
                 </div>
               </Panel>
             </div>
+            {noManualRecords && (
+              <div className="ha-onboarding">
+                <div>
+                  <strong>
+                    Your lead data is ready. Start building the bigger picture.
+                  </strong>
+                  <p>
+                    Assign sources and services to your leads. Record calls,
+                    meetings and payments as they happen.
+                  </p>
+                </div>
+                <button
+                  className="ha-text-button"
+                  onClick={() => setRecord(true)}
+                >
+                  Record your first activity ↗
+                </button>
+              </div>
+            )}
+            <div className="ha-grid ha-overview-grid">
+              <Panel
+                when={model.cohort.length > 0 || model.wins.length > 0}
+                title="Activity over time"
+                description="New leads and first recorded wins in each interval."
+              >
+                <Trend
+                  rows={trendRows}
+                  labels={["Leads added", "Customers won"]}
+                />
+              </Panel>
+              <Panel
+                when={model.cohort.length > 0}
+                basis="Leads added in this period · results to date"
+                title="The lead journey"
+                description="Leads added in this period, with milestones recorded to date."
+              >
+                {journey}
+                <p className="ha-caption">
+                  Only recorded milestones are counted. Skipped stages are not
+                  inferred.
+                </p>
+              </Panel>
+              <Panel
+                when={model.cohortWon.length > 0}
+                basis="Leads added in this period · results to date"
+                title="Where customers come from"
+                description="Customers from leads added in this period, measured to date."
+              >
+                <Bars
+                  rows={sourceGroups.slice(0, 6).map((r) => ({
+                    label: r.label,
+                    value: r.won,
+                    detail: `${r.won} of ${r.leads} leads · ${rate(r.rate)}`,
+                    onClick: () => inspect(r.label, r.ids),
+                  }))}
+                />
+                <button
+                  className="ha-section-link"
+                  onClick={() =>
+                    change({ tab: "acquisition", view: "leads" }, true)
+                  }
+                >
+                  Explore lead sources <span aria-hidden="true">↗</span>
+                </button>
+              </Panel>
+
+            </div>
           </>
         )}
         {selectedTab === "acquisition" && (
@@ -703,7 +730,7 @@ export default function Analytics({
               </button>
             </div>
             {websiteView ? (
-              <WebsiteAnalytics from={period.from} to={period.to} />
+              <WebsiteAnalytics from={period.from} to={period.to} includeTests={!!filters.includeTests} previewData={websitePreview} />
             ) : (
               <>
                 <div className="ha-stats">
@@ -720,18 +747,20 @@ export default function Analytics({
                   <Stat
                     label="Acquisition spend"
                     value={fmt(model.acquisition)}
-                    detail="Recorded acquisition costs + commissions"
+                    detail="During this period · acquisition + commission"
                   />
                   <Stat
                     label="Spend per customer won"
                     value={fmt(model.acquisitionPerWin)}
-                    detail={`${model.wins.length} dated wins · period-based ratio`}
+                    detail={`During this period · ${model.wins.length} dated wins`}
                   />
                 </div>
-                <div className="ha-grid">
+                {!model.cohort.some((l) => l.industry || (l.service && l.service !== "Not recorded")) && <div className="ha-onboarding"><div><strong>Build a clearer lead picture</strong><p>Add a business type and service to your leads to unlock those comparisons.</p></div></div>}
+            <div className="ha-grid">
                   <Panel
-                    title="Source performance"
-                    description="Acquisition cohorts: leads added in this period, conversions to date."
+                    wide
+                    title="From source to customer"
+                    description="Leads added in this period, with customer wins measured to date. Website leads use their consented visitor source when available."
                   >
                     {sourceGroups.length ? (
                       tableRows("channel", "Source")
@@ -741,23 +770,10 @@ export default function Analytics({
                       </Empty>
                     )}
                   </Panel>
+
                   <Panel
-                    title="Customer conversion by source"
-                    description="Rates always include the number of leads behind them."
-                  >
-                    <Bars
-                      max={100}
-                      format={(n) => rate(n)}
-                      rows={sourceGroups.map((r) => ({
-                        label: r.label,
-                        value: r.rate || 0,
-                        detail: `${r.won} customers from ${r.leads} leads`,
-                        onClick: () => inspect(r.label, r.ids),
-                      }))}
-                    />
-                  </Panel>
-                  <Panel
-                    title="Which businesses respond"
+                    when={model.cohort.some((l) => !!l.industry)}
+                    title="Conversion by industry"
                     description="Compare industries using the same acquisition period."
                   >
                     {model.groups("industry").length ? (
@@ -769,6 +785,7 @@ export default function Analytics({
                     )}
                   </Panel>
                   <Panel
+                    when={model.cohort.some((l) => l.service && l.service !== "Not recorded")}
                     title="Service interest"
                     description="What the leads in this acquisition period are interested in."
                   >
@@ -811,9 +828,9 @@ export default function Analytics({
                 detail={`${model.meetingsHeld} held · ${model.noShows} no-shows recorded`}
               />
               <Stat
-                label="First contact"
-                value={duration(model.firstContact)}
-                detail={`Median · ${model.firstContactSample} leads with known contact dates`}
+                label="Time to first contact"
+                value={contactDuration(model.firstContact)}
+                detail={`Median · ${model.firstContactSample} leads added in period · contact to date`}
               />
               <Stat
                 label="Time to win"
@@ -821,8 +838,10 @@ export default function Analytics({
                 detail={`Median · ${model.cycleSample} dated wins in period`}
               />
             </div>
+            {!people.length && <div className="ha-onboarding"><div><strong>Activity details appear as you use the workspace</strong><p>Record calls and meetings to measure follow-up speed, attendance and team activity.</p></div></div>}
             <div className="ha-grid">
               <Panel
+                basis="Current position"
                 title="Your current pipeline"
                 description="Where open leads are now. This view is not limited by acquisition date."
               >
@@ -843,6 +862,8 @@ export default function Analytics({
                 />
               </Panel>
               <Panel
+                when={model.stageAges.some((s) => s.value !== null)}
+                basis="Current position"
                 title="Time in the current stage"
                 description="Median days for open leads with a known stage-entry date."
               >
@@ -860,6 +881,7 @@ export default function Analytics({
                 />
               </Panel>
               <Panel
+                when={people.length > 0}
                 title="Outreach & meeting activity"
                 description="Activities that happened in this period. One lead may have several attempts."
               >
@@ -886,6 +908,8 @@ export default function Analytics({
                 />
               </Panel>
               <Panel
+                when={model.lossReasons.length > 0}
+                basis="Leads added in this period · results to date"
                 title="Why opportunities were lost"
                 description="Leads acquired in this period that are closed without a recorded win."
               >
@@ -899,6 +923,7 @@ export default function Analytics({
               </Panel>
               <Panel
                 wide
+                when={people.length > 0}
                 title="Activity by person"
                 description="Based on the person recorded on each activity, separate from lead ownership."
               >
@@ -952,7 +977,7 @@ export default function Analytics({
         )}
         {selectedTab === "revenue" && (
           <>
-            <div className="ha-stats">
+            <div className="ha-stats ha-stats-three">
               <Stat
                 label="Net revenue collected"
                 value={fmt(model.revenue)}
@@ -966,16 +991,13 @@ export default function Analytics({
               <Stat
                 label="After recorded costs"
                 value={fmt(model.contribution)}
-                detail="Net collections minus recorded costs"
-              />
-              <Stat
-                label="Recorded contribution"
-                value={rate(model.contributionRate)}
-                detail="After recorded costs ÷ net collections"
+                detail={model.contributionRate === null ? "Net collections minus recorded costs" : `${rate(model.contributionRate)} of net collections · recorded costs only`}
               />
             </div>
+            {model.revenue === null && model.costs === null && <div className="ha-onboarding"><div><strong>Start with your first payment or cost</strong><p>Record actual payments and costs to see collections and the amount left after recorded costs.</p></div></div>}
             <div className="ha-grid">
               <Panel
+                when={model.revenue !== null || model.costs !== null}
                 title="Collections & costs"
                 description={`Recorded amounts in ${filters.currency}, excluding VAT or sales tax.`}
               >
@@ -992,6 +1014,7 @@ export default function Analytics({
                 />
               </Panel>
               <Panel
+                when={model.costs !== null}
                 title="Where the money goes"
                 description="Recorded costs in the selected period."
               >
@@ -1021,6 +1044,8 @@ export default function Analytics({
               </Panel>
               <Panel
                 wide
+                when={model.cohort.some((l) => !!l.offer)}
+                basis="Leads added in this period · results to date"
                 title="Which offers convert"
                 description="Leads added in this period, with customer conversion measured to date."
               >
@@ -1068,8 +1093,10 @@ export default function Analytics({
                 detail={`${model.churned.length} of ${model.openingSubscribers} opening subscribers inactive at period end`}
               />
             </div>
+            {!model.subscriptionsRecorded && !model.lifecycle.length && !model.upsellCustomers && !model.count("referral") && <div className="ha-onboarding"><div><strong>Customer insights will grow with your sales</strong><p>Mark customers as won and record subscriptions, upsells and referrals to reveal these details.</p></div></div>}
             <div className="ha-grid">
               <Panel
+                when={model.subscriptionsRecorded}
                 title="Recurring revenue over time"
                 description={`Monthly totals in ${filters.currency}, at the end of each interval.`}
               >
@@ -1085,6 +1112,7 @@ export default function Analytics({
                 />
               </Panel>
               <Panel
+                when={model.subscriptionsRecorded || model.upsellCustomers > 0 || model.count("referral") > 0}
                 title="Retention & expansion"
                 description="Recorded subscription and relationship activity in this period."
               >
@@ -1136,6 +1164,7 @@ export default function Analytics({
               </Panel>
               <Panel
                 wide
+                when={model.lifecycle.length > 0}
                 title="Customer value"
                 description={`Collections during this period and monthly totals at period end, in ${filters.currency}.`}
               >
