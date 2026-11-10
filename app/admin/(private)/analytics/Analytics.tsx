@@ -23,7 +23,7 @@ import {
   type Activity,
   type Filters,
 } from "../../lib/analytics";
-import { Bars, Empty, Panel, Stat, Trend } from "./Charts";
+import { Bars, Columns, Empty, Panel, Stat, Trend } from "./Charts";
 import WebsiteAnalytics, { type WebsiteReport } from "./WebsiteAnalytics";
 import RecordActivity, {
   AnalyticsDialog,
@@ -1001,7 +1001,7 @@ export default function Analytics({
                 title="Collections & costs"
                 description={`Recorded amounts in ${filters.currency}, excluding VAT or sales tax.`}
               >
-                <Trend
+                <Columns showZero
                   rows={model.trend.map((r) => ({
                     label: r.label,
                     fullLabel: shortDate(r.from) + " – " + shortDate(r.to),
@@ -1102,7 +1102,7 @@ export default function Analytics({
               >
                 <Trend
                   rows={model.subTrend.map((r) => ({
-                    label: r.label,
+                    label: shortDate(r.to),
                     fullLabel: shortDate(r.to),
                     a: r.mrr / 100,
                   }))}
@@ -1112,55 +1112,24 @@ export default function Analytics({
                 />
               </Panel>
               <Panel
-                when={model.subscriptionsRecorded || model.upsellCustomers > 0 || model.count("referral") > 0}
-                title="Retention & expansion"
-                description="Recorded subscription and relationship activity in this period."
+                when={model.subscriptionsRecorded || model.count("referral") > 0}
+                title="Customer retention"
+                basis="Subscribers active at the start · status at period end"
+                description="A consistent group of customers, so new subscriptions do not hide losses."
               >
-                <Bars
-                  rows={
-                    model.subscriptionsRecorded ||
-                    model.upsellCustomers ||
-                    model.count("referral")
-                      ? [
-                          {
-                            label: "Active at period start",
-                            value: model.openingSubscribers,
-                          },
-                          {
-                            label: "Active at period end",
-                            value: model.activeSubscriptions,
-                          },
-                          {
-                            label: "Opening subscribers lost",
-                            value: model.churned.length,
-                            onClick: () =>
-                              inspect(
-                                "Opening subscribers lost",
-                                model.churned,
-                              ),
-                          },
-                          {
-                            label: "Customers with an upsell",
-                            value: model.upsellCustomers,
-                            onClick: () =>
-                              inspect(
-                                "Customers with an upsell",
-                                model.inPeriod
-                                  .filter(
-                                    (e) => e.kind === "upsell" && e.lead_id,
-                                  )
-                                  .map((e) => e.lead_id!),
-                              ),
-                          },
-                          {
-                            label: "Referrals received",
-                            value: model.count("referral"),
-                          },
-                        ]
-                      : []
-                  }
-                  empty="Record customer activity to understand retention, referrals and upsells."
-                />
+                {model.openingSubscribers > 0 ? <>
+                  <div className="ha-retention-key">
+                    <div><span><i className="ha-retained-dot" />Still active</span><strong>{model.openingSubscribers - model.churned.length}<small>{rate(100 - model.churn!)} of opening subscribers</small></strong></div>
+                    <div><span><i className="ha-lost-dot" />No longer active</span><strong>{model.churned.length}<small>{rate(model.churn)} of opening subscribers</small></strong></div>
+                  </div>
+                  <div className="ha-retention-track" role="img" aria-label={`${model.openingSubscribers - model.churned.length} of ${model.openingSubscribers} opening subscribers are still active; ${model.churned.length} are no longer active.`}>
+                    <span className="ha-retained" style={{ width: `${100 - model.churn!}%` }} />
+                    <span className="ha-lost" style={{ width: `${model.churn}%` }} />
+                  </div>
+                  <p className="ha-caption">Based on {model.openingSubscribers} subscribers active at the start. Customers added during this period are excluded.</p>
+                  {model.churned.length > 0 && <button className="ha-text-button ha-retention-link" onClick={() => inspect("Opening subscribers no longer active", model.churned)}>View lost subscribers ↗</button>}
+                </> : <p className="ha-retention-empty">No subscribers were active at the start of this period. Retention will appear once there is an opening group to follow.</p>}
+                <div className="ha-relationship-count"><span>Referrals received in this period</span><strong>{model.count("referral")}</strong></div>
               </Panel>
               <Panel
                 wide

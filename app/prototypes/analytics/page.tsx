@@ -12,13 +12,14 @@ export default async function AnalyticsPreview({ searchParams }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   if (process.env.NODE_ENV !== "development") notFound();
-  const blank = (await searchParams).sample === "empty";
+  const sample = (await searchParams).sample;
+  const blank = sample === "empty";
   const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
   const now = "2026-11-10";
   const sources = ["Instagram", "Google", "Referral", "Direct"];
   const leads: Lead[] = blank ? [] : Array.from({ length: 38 }, (_, i) => ({
     ...empty, id: id(i + 1), revision: 1, company: `Sample business ${i + 1}`,
-    created_at: `2026-10-${String(15 + i % 15).padStart(2, "0")}T10:00:00Z`,
+    created_at: i < 4 ? "2026-09-15T10:00:00Z" : `2026-10-${String(15 + i % 15).padStart(2, "0")}T10:00:00Z`,
     channel: "Website", acquisition_source: sources[i % 4], acquisition_medium: "social",
     service: ["Website", "AI & automation", "App"][i % 3], industry: ["Beauty", "Fitness", "Home services"][i % 3],
     status: i < 8 ? "Won" : i < 12 ? "Closed" : i < 20 ? "Proposal" : i < 28 ? "Contacted" : "New",
@@ -29,7 +30,7 @@ export default async function AnalyticsPreview({ searchParams }: {
   let seq = 100;
   const activity: Activity[] = leads.flatMap((l, i) => {
     const record = (kind: Activity["kind"], amount: number | null = null, stage: string | null = null): Activity => ({
-      id: id(seq++), lead_id: l.id, kind, occurred_at: "2026-11-06T10:30:00Z", created_at: "2026-11-06T10:30:00Z",
+      id: id(seq++), lead_id: l.id, kind, occurred_at: `2026-10-${String(19 + i % 10).padStart(2, "0")}T10:30:00Z`, created_at: "2026-11-06T10:30:00Z",
       from_stage: null, to_stage: stage, amount_cents: amount, currency: "EUR", channel: "Website", owner: l.owner || "",
       note: "Fictional preview", voided_at: null, void_reason: "",
     });
@@ -37,6 +38,12 @@ export default async function AnalyticsPreview({ searchParams }: {
     if (i < 28) entries.push(record("contact_attempt"), record("conversation"));
     if (i < 18) entries.push(record("meeting_held"));
     if (l.status === "Won") entries.push(record("stage", null, "Won"), record("payment", 65000), record("delivery_cost", 12500), record("subscription_started", 4700));
+    if (i < 4) {
+      const subscription = entries.find((entry) => entry.kind === "subscription_started");
+      if (subscription) subscription.occurred_at = "2026-09-20T10:00:00Z";
+    }
+    if (i === 0 || (sample === "lost" && i < 4)) entries.push({ ...record("subscription_cancelled", 0), occurred_at: "2026-11-07T10:30:00Z" });
+    if (i === 0 && sample === "refunds") entries.push({ ...record("refund", 90000), occurred_at: "2026-11-08T10:30:00Z" });
     return entries;
   });
   const website: WebsiteReport = {
@@ -58,5 +65,17 @@ export default async function AnalyticsPreview({ searchParams }: {
     devices: blank ? [] : [{device: "mobile", visits: 59, enquiries: 13}, {device: "desktop", visits: 21, enquiries: 5}],
     coverage: { retentionDays: 90, consentOnly: true, includesTests: false, excludedVisits: 4 },
   };
+  if (sample === "no-enquiries") {
+    website.totals.enquiries = 0;
+    website.totals.quizEnquiries = 0;
+    website.trend.forEach((row) => { row.enquiries = 0; });
+    website.sources.forEach((row) => { row.enquiries = 0; row.leads = 0; row.customers = 0; });
+    website.devices.forEach((row) => { row.enquiries = 0; });
+    website.forms = [];
+    website.journey[website.journey.length - 1].count = 0;
+    website.quiz.enquired = 0;
+    website.quiz.pending += 1;
+    website.quiz.branches.forEach((row) => { row.pending += row.enquired; row.enquired = 0; });
+  }
   return <div className="hw"><div className="hw-bar"><div className="hw-bar-inner"><a href="/prototypes/analytics">halenn / Preview</a></div></div><main className="hw-main"><Suspense><Analytics leads={leads} activity={activity} now={now} preview websitePreview={website} /></Suspense></main></div>;
 }
