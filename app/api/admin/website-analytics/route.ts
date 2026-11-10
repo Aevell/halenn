@@ -29,11 +29,12 @@ export async function GET(request: NextRequest) {
       { error: "Choose valid report filters." },
       { status: 400, headers: privateHeaders },
     );
-  const { data, error } = await db.rpc("halenn_website_report", {
+  const { data, error } = await db.rpc("halenn_website_report_v2", {
     p_from: from,
     p_to: to,
     p_source: source,
     p_device: device,
+    p_include_tests: p.get("tests") === "include",
   });
   if (error)
     return NextResponse.json(

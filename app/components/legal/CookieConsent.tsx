@@ -219,7 +219,7 @@ function PublicConsent({ children }: { children: ReactNode }) {
         </div>
         <div className={s.settings}>
           <div className={s.setting}><div><h3>Essential</h3><p>Remembers your privacy choice.</p></div><span>Always on</span></div>
-          <div className={s.setting}><div><h3 id="optional-label">Website analytics</h3><p id="optional-description">Understand page visits, referral sources, quiz progress and completed enquiries. Your form contents are not included in analytics events.</p></div>
+          <div className={s.setting}><div><h3 id="optional-label">Website analytics</h3><p id="optional-description">Understand page visits, referral sources, quiz progress and which enquiries become customers. With consent, source and campaign labels stay with your enquiry. Your form contents are not included in analytics events.</p></div>
             <button type="button" role="switch" aria-checked={draft} aria-labelledby="optional-label" aria-describedby="optional-description" className={s.switch} disabled={busy} onClick={() => setDraft(value => !value)}><span /></button>
           </div>
           <p className={s.explanation}>Optional analytics uses a random visitor identifier for up to 30 days and visit information in this tab. Events are kept for 90 days in our private Supabase database. We do not use advertising pixels or record your screen. Rejecting does not affect the website or enquiry form.</p>

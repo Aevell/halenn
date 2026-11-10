@@ -114,6 +114,21 @@ try {
   });
   await db.exec(brandedSql);
 
+  await test("analytics upgrade preserves both email outboxes and does not resend historical enquiries", async () => {
+    await ready(); const p = enquiry(); await submit(p);
+    const founderBefore = await admin(p), customerBefore = await outbox(p);
+    const requestsBefore = await query("select id from net.test_requests order by id");
+    const stripTransaction = (sql) => sql.replace(/^begin;\n/, "").replace(/commit;\s*$/, "");
+    await db.exec(stripTransaction(await migration("202611090003_website_reporting.sql")));
+    await db.exec(stripTransaction(await migration("202611100004_analytics_clarity.sql")));
+    assert.deepEqual(await admin(p), founderBefore);
+    assert.deepEqual(await outbox(p), customerBefore);
+    assert.deepEqual(await query("select id from net.test_requests order by id"), requestsBefore);
+    const next = enquiry(); await submit(next);
+    assert.equal(await requestCount(next), 1);
+    assert.equal(await requestCount(next, false), 1);
+  });
+
   await test("branded email provides real text, accessible fluid tables, licensed font references and small-screen fallbacks", async () => {
     await ready(); const p = enquiry(); await submit(p);
     const html = (await request(p)).body.html;

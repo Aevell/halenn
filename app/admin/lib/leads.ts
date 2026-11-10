@@ -51,11 +51,15 @@ export type Fields = {
   industry?: string;
   offer?: string;
   lost_reason?: string;
+  is_test?: boolean;
 };
 export type Lead = Fields & {
   id: string;
   revision: number;
   created_at: string;
+  acquisition_source?: string;
+  acquisition_medium?: string;
+  acquisition_campaign?: string;
 };
 export const empty: Fields = {
   company: "",
@@ -155,6 +159,9 @@ export function clean(input: Fields): Fields {
       throw new Error("Keep " + key + " under 120 characters.");
     fields[key] = value.trim();
   }
+  if (input.is_test !== undefined && typeof input.is_test !== "boolean")
+    throw new Error("Choose whether this is a test lead.");
+  fields.is_test = input.is_test ?? false;
   fields.follow_up = input.follow_up || null;
   if (
     fields.follow_up &&

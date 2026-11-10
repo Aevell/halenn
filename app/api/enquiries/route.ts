@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: true }, { headers: privateHeaders });
     const payload = cleanEnquiry(raw);
     if (!analyticsAllowed(request)) payload.tracking = null;
-    const { data, error } = await intakeDatabase().rpc(
+    const { data, error } = await (await intakeDatabase()).rpc(
       "halenn_submit_website_enquiry",
       { payload },
     );

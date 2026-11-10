@@ -1157,3 +1157,9 @@
     border-color 0.16s,
     color 0.16s;
 }
+
+.hw-form .hw-test-toggle { display: flex; align-items: center; gap: 10px; font-size: 13px; line-height: 1.5; }
+.hw-form .hw-test-toggle input { width: 16px; height: 16px; accent-color: #b9d2ec; flex-shrink: 0; }
+.hw-attribution { font-size: 13px; line-height: 1.6; }
+.hw-attribution small { display: block; color: var(--sub); }
+.hw-test-badge { display: inline-block; margin-left: 9px; padding: 2px 6px; border: 1px solid var(--edge); border-radius: 4px; color: var(--sub); font-size: 10px; font-weight: 400; vertical-align: middle; }

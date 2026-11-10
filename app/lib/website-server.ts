@@ -1,15 +1,13 @@
 import "server-only";
-import { createClient } from "@supabase/supabase-js";
-import { url, key } from "../admin/lib/config";
+import { database } from "../admin/lib/db";
 import {
   CONSENT_COOKIE,
   parseConsent,
 } from "../components/legal/consent-model";
 import type { NextRequest } from "next/server";
-export const intakeDatabase = () =>
-  createClient(url, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+// Forward the existing session so the database can recognise signed-in founder tests.
+// Public visitors still use the same anonymous, write-only intake functions.
+export const intakeDatabase = database;
 export const analyticsAllowed = (r: NextRequest) =>
   parseConsent(r.cookies.get(CONSENT_COOKIE)?.value)?.optional === true;
 export function sameOrigin(r: NextRequest) {

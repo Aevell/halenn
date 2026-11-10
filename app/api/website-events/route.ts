@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     return new NextResponse(null, { status: 204, headers: privateHeaders });
   try {
     const payload = cleanWebsiteBatch(await limitedJson(request, 20000));
-    const { data, error } = await intakeDatabase().rpc(
+    const { data, error } = await (await intakeDatabase()).rpc(
       "halenn_record_website_events",
       { payload },
     );
