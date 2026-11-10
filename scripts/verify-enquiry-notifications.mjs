@@ -1,7 +1,7 @@
 // Standalone PostgreSQL checks with local pg_net/Vault stubs. No email is sent.
 // HALENN_PGLITE_MODULE=/absolute/path/to/pglite/dist/index.js node scripts/verify-enquiry-notifications.mjs
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 const { PGlite } = await import(
@@ -92,6 +92,78 @@ try {
   const extension = "create extension if not exists pg_net with schema extensions;";
   assert.equal(notificationSql.split(extension).length, 2, "Stub only the exact extension DDL");
   await db.exec(notificationSql.replace(extension, "-- pg_net is stubbed for this local verification."));
+
+  const brandedSql = await migration("202611100003_branded_enquiry_notification.sql");
+  assert.ok(brandedSql.startsWith("begin;\n") && /commit;\s*$/.test(brandedSql));
+  const brandedInTransaction = brandedSql.replace(/^begin;\n/, "").replace(/commit;\s*$/, "");
+  await test("internal brand upgrade preserves frozen retries, accepted records, envelope and helper permissions", async () => {
+    await ready();
+    const pending = enquiry(); const accepted = enquiry();
+    await submit(pending); await submit(accepted); await respond(accepted); await worker();
+    const originalPending = await outbox(pending); const originalAccepted = await outbox(accepted);
+    const originalConfig = (await query("select * from private.halenn_enquiry_notification_config"))[0];
+    assert.ok(originalPending.payload.html.includes("#f4f1eb"));
+    assert.equal(originalAccepted.status, "accepted");
+    await db.exec(brandedInTransaction);
+    assert.deepEqual(await outbox(pending), originalPending);
+    assert.deepEqual(await outbox(accepted), originalAccepted);
+    assert.deepEqual((await query("select * from private.halenn_enquiry_notification_config"))[0], originalConfig);
+    assert.equal((await query("select count(*)::int as n from private.halenn_enquiry_notifications"))[0].n, 2);
+    const updated = (await query("select private.halenn_notification_payload($1) as p", [pending.id]))[0].p;
+    const omitHtml = (payload) => Object.fromEntries(Object.entries(payload).filter(([key]) => key !== "html"));
+    assert.notEqual(updated.html, originalPending.payload.html);
+    assert.deepEqual(omitHtml(updated), omitHtml(originalPending.payload));
+    await respond(pending, 503, '{}'); await worker(); await due(pending); await worker();
+    assert.deepEqual((await request(pending)).body, originalPending.payload);
+    assert.equal(await requestCount(accepted), 1);
+    const next = enquiry(); await submit(next);
+    assert.ok((await request(next)).body.html.includes("#07090d"));
+    for (const role of ["anon", "authenticated"])
+      assert.equal((await query("select has_function_privilege($1, 'private.halenn_notification_payload(uuid)', 'execute') as allowed", [role]))[0].allowed, false);
+  });
+  await db.exec(brandedSql);
+
+  await test("internal email escapes all visitor fields once, preserving literal template markers, newlines and long content", async () => {
+    await ready();
+    const message = '{{received}} {{reference}} %s %1$s <img src=x onerror="bad()"> & \'quoted\'\n\n' + 'LongToken'.repeat(2000) + '\r\nFinal line';
+    const p = enquiry({ name: 'A {{received}} %s <B> & "C"', email: "o'connor&team@example.test", company: '{{reference}} <Company> & ' + 'C'.repeat(150), message });
+    assert.ok(message.length < 20000);
+    assert.equal(await submit(p), "received");
+    const html = (await request(p)).body.html;
+    const escape = (value) => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+    for (const value of [p.name, p.email, p.company]) assert.ok(html.includes(escape(value)));
+    assert.ok(html.includes(escape(message).replaceAll('\r\n', '\n').replaceAll('\r', '\n').replaceAll('\n', '<br>')));
+    assert.ok(html.includes('{{received}} {{reference}} %s %1$s'));
+    assert.ok(!html.includes('<img src=x')); assert.ok(!html.includes('<Company>')); assert.ok(!html.includes('<B>'));
+    assert.match(html, /overflow-wrap:anywhere;word-wrap:break-word;/);
+    assert.match(html, /class="halenn-message"[^>]*white-space:pre-wrap;[^>]*word-break:normal;/);
+    assert.match(html, /class="halenn-value"[^>]*word-break:normal;/);
+    assert.ok(html.indexOf('>View this lead</a>') < html.indexOf('>MESSAGE</h2>'), "The lead action precedes potentially long message content");
+    assert.equal((await request(p)).body.text.includes(message), true, "Plain text keeps the exact original message");
+    const noCompany = enquiry({ company: '' }); await submit(noCompany);
+    assert.ok(!(await request(noCompany)).body.html.includes('>BUSINESS</p>'));
+  });
+
+  await test("internal branded layout matches customer assets and offers fluid accessible tables with font fallbacks", async () => {
+    await ready(); const p = enquiry({ name: 'Sophie van Dijk (synthetic example)', email: 'sophie@example.test', company: 'Studio Lune Nails — synthetic example', message: 'I run a nail studio and currently take appointments through Instagram.\n\nI’d like a refined website with online booking, appointment reminders and a simple way to follow up with new enquiries.\n\nCould you help me understand the best starting point and the monthly costs?', origin: 'quiz' });
+    await submit(p); const html = (await request(p)).body.html;
+    assert.match(html, /<h1[^>]*>New website<br>enquiry\.<\/h1>/);
+    assert.ok(!/<script|javascript:|display\s*:\s*(?:flex|grid)/i.test(html));
+    const tables = html.match(/<table\b[^>]*>/g);
+    assert.ok(tables.length >= 4 && tables.every((table) => table.includes('role="presentation"')));
+    assert.match(html, /src="https:\/\/halenn\.com\/brand\/email\/halenn-wordmark-v1\.png" alt="Halenn" width="167" height="24"/);
+    assert.match(html, /src="https:\/\/halenn\.com\/brand\/halenn-mark-v2-180\.png" alt="" width="48" height="48"/);
+    for (const font of ["Manrope-Light.ttf", "Geist-Regular.ttf"]) assert.ok(html.includes("https://halenn.com/brand/email/" + font));
+    assert.ok(html.includes("<!--[if !mso]><!-->") && html.includes("<!--[if mso]><style>"));
+    assert.match(html, /font-family:Arial,sans-serif !important/);
+    assert.ok(html.includes("font-family:'Helvetica Neue',Helvetica,Arial,sans-serif"));
+    assert.match(html, /width:100%;max-width:600px;table-layout:fixed/);
+    assert.match(html, /max-width:480px/); assert.match(html, /font-size:32px !important/);
+    for (const colour of ["#07090d", "#0a1018", "#f2f1ed", "#b8c7d9", "#263347"]) assert.ok(html.includes(colour));
+    assert.match(html, /href="https:\/\/halenn\.com\/admin\/leads\?lead=[0-9a-f-]+"/);
+    assert.ok(html.includes('Reply to this email to respond directly to the sender.'));
+    if (process.env.HALENN_NOTIFICATION_PREVIEW) await writeFile(process.env.HALENN_NOTIFICATION_PREVIEW, html);
+  });
 
   await test("disabled setup saves new enquiries without sending or backfilling history", async () => {
     assert.equal((await query("select count(*)::int as n from private.halenn_enquiry_notifications"))[0].n, 0);
@@ -417,6 +489,10 @@ try {
   await db.exec(scheduleSql.replace(cronExtension, "-- pg_cron is stubbed locally."));
   assert.deepEqual(await query("select * from cron.test_jobs"), [{ name: "halenn-enquiry-notifications", schedule: "*/5 * * * *", command: "select private.halenn_process_enquiry_notifications();" }]);
   console.log(`Verified ${checks} notification scenarios and the repeatable five-minute schedule. No network calls were made.`);
+} catch (error) {
+  console.error(error.message);
+  if (error.detail) console.error(error.detail);
+  process.exitCode = 1;
 } finally {
   await db.close();
 }
