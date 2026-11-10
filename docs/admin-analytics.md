@@ -108,3 +108,12 @@ Apply `202611100004_analytics_clarity.sql` before deploying the updated dashboar
 - **During this period**, **Current position**, and **Leads added in this period · results to date** distinguish different date bases. The limited-data note appears below 20 leads/visits as a reading aid, not a statistical confidence threshold.
 
 Additional checks: `node scripts/verify-analytics-attribution.mjs` with `HALENN_PGLITE_MODULE` set to an installed PGlite module. This covers exact setup backfill, authenticated internal detection, consented snapshots, source-to-sale reporting, mixed test/genuine visits, reversible exclusions, retention, and read/write isolation. `/prototypes/analytics` provides fictional populated/empty views in development only; production returns 404.
+
+
+## Chart presentation
+
+- Traffic and enquiry trends are stacked, with identical dates and independent vertical scales. Enquiries remain assigned to their visit's start date. A recorded zero-enquiry period shows a zero line; an absence of tracked visits retains the empty state.
+- The quiz journey includes previous-step progression as well as the share of all visits. Question drop-off bars share a fixed 0–100% scale and use dropped attempts / attempts reaching that question. Counts and still-active attempts remain visible; the full question table is expandable. Routes retain their own question order and are not combined into a fixed-length funnel.
+- Collections and costs use paired columns on the same currency scale, including below-zero collections when refunds exceed payments. Exact interval values remain available without relying on hover.
+- Retention compares only opening subscribers: still active versus inactive at period end. New subscribers do not enter that comparison. With no opening subscribers, the view explains that retention is not yet available. Upsells remain a separate headline metric; referrals are shown separately below retention.
+- The development-only preview includes `sample=refunds` for negative net collections, `sample=lost` for full opening-cohort churn and `sample=no-enquiries` for tracked visits without enquiries, alongside its populated and empty states.

@@ -336,23 +336,31 @@ export default function WebsiteAnalytics({
           )}
           <div className="ha-grid ha-overview-grid">
             <Panel
+              wide
               when={data.totals.visits > 0}
-              title="Visits & enquiries"
-              description="Daily activity from visits that began in the selected period."
+              title="Traffic & enquiries over time"
+              description="The same dates, with a separate scale for each measure. Enquiries are grouped by the day their visit started."
             >
-              <Trend
-                rows={data.trend.map((row) => ({
-                  label: shortDate(row.date),
-                  fullLabel: shortDate(row.date),
-                  a: row.visits,
-                  b: row.enquiries,
-                }))}
-                labels={["Visits", "Enquiries received"]}
-                empty="The chart fills in as visitors accept analytics and explore the website."
-              />
+              <div className="ha-aligned-trends">
+                <Trend compact showZero wholeNumbers
+                  rows={data.trend.map((row) => ({
+                    label: shortDate(row.date), fullLabel: shortDate(row.date), a: row.visits,
+                  }))}
+                  labels={["Visits"]}
+                  format={number}
+                />
+                <Trend compact showZero wholeNumbers
+                  rows={data.trend.map((row) => ({
+                    label: shortDate(row.date), fullLabel: shortDate(row.date), a: row.enquiries,
+                  }))}
+                  labels={["Enquiries received"]}
+                  format={number}
+                />
+              </div>
             </Panel>
             <Panel
               when={data.journey.some((row, i) => i > 0 && row.count > 0)}
+              wide
               title="Enquiries through the quiz"
               description="Distinct visits with each preceding quiz milestone recorded. The last step counts enquiries after a recommendation."
             >
@@ -360,10 +368,10 @@ export default function WebsiteAnalytics({
                 max={data.totals.visits}
                 rows={
                   data.totals.visits
-                    ? data.journey.map((row) => ({
+                    ? data.journey.map((row, i) => ({
                         label: row.label,
                         value: row.count,
-                        detail: `${percentage(row.count, data.totals.visits)} of tracked visits`,
+                        detail: i === 0 ? "All tracked visits in this period" : `${percentage(row.count, data.journey[i - 1].count)} of the previous step · ${percentage(row.count, data.totals.visits)} of visits`,
                       }))
                     : []
                 }
@@ -472,7 +480,7 @@ export default function WebsiteAnalytics({
               </p>
               {data.quiz.branches.length ? (
                 <div className="ha-quiz-branches">
-                  {data.quiz.branches.map((branch) => {
+                  {data.quiz.branches.map((branch, branchIndex) => {
                     const order = branchOrder[branch.goal] ?? ["goal"];
                     const rows = data.quiz.questions
                       .filter((row) => row.goal === branch.goal)
@@ -481,7 +489,7 @@ export default function WebsiteAnalytics({
                           order.indexOf(a.question) - order.indexOf(b.question),
                       );
                     return (
-                      <details className="ha-quiz-branch" key={branch.goal}>
+                      <details className="ha-quiz-branch" key={branch.goal} open={branchIndex === 0}>
                         <summary>
                           <span>
                             <b>{goals[branch.goal] || branch.goal}</b>
@@ -502,6 +510,17 @@ export default function WebsiteAnalytics({
                             {branch.pending} attempts are still active.
                           </p>
                           {rows.length ? (
+                            <>
+                            <div className="ha-dropoff-bars">
+                              <Bars max={100} format={(value) => rate(value)} rows={rows.filter((row) => row.seen > 0).map((row) => ({
+                                label: questions[row.question] || row.question,
+                                value: row.dropped / row.seen * 100,
+                                detail: `${number(row.dropped)} of ${number(row.seen)} attempts left here · ${number(row.pending)} still active here`,
+                              }))} />
+                            </div>
+                            <p className="ha-caption">Bar length shows the share of attempts that reached this question and then dropped off. A longer bar means more drop-off.</p>
+                            <details className="ha-details">
+                              <summary>View question counts</summary>
                             <div className="ha-table-scroll">
                               <table className="ha-website-table">
                                 <thead>
@@ -535,6 +554,8 @@ export default function WebsiteAnalytics({
                                 </tbody>
                               </table>
                             </div>
+                            </details>
+                            </>
                           ) : (
                             <p>
                               No question-level records are available for this

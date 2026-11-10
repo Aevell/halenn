@@ -3,6 +3,8 @@
 }
 .ha {
   --ha-accent: #b9d2ec;
+  --ha-positive: #9ccfc3;
+  --ha-caution: #d4b48f;
   --ha-line: #2b3743;
   --ha-quiet: #81919f;
 }
@@ -374,6 +376,29 @@ button.ha-bar-row:hover .ha-bar-track > span {
 .ha-legend i.ha-secondary {
   background: #758493;
 }
+.ha-columns .ha-legend i { height: 9px; width: 12px; border-radius: 1px; }
+.ha-columns .ha-legend i.ha-secondary { background: var(--ha-caution); }
+.ha-column { fill: var(--ha-accent); }
+.ha-column-secondary { fill: var(--ha-caution); }
+.ha-zero-line { stroke: var(--ha-quiet); stroke-width: 1; }
+.ha-aligned-trends { display: grid; gap: 24px; }
+.ha-aligned-trends > .ha-trend + .ha-trend { border-top: 1px solid var(--edge); padding-top: 24px; }
+.ha-aligned-trends .ha-legend { color: var(--paper); font-weight: 500; margin-bottom: 8px; }
+.ha-aligned-trends .ha-trend:last-child { --ha-accent: var(--ha-positive); }
+.ha-dropoff-bars { --ha-accent: var(--ha-caution); padding-top: 9px; }
+.ha-retention-key { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.ha-retention-key > div > span { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--sub); }
+.ha-retention-key i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+.ha-retained-dot, .ha-retained { background: var(--ha-positive); }
+.ha-lost-dot, .ha-lost { background: var(--ha-caution); }
+.ha-retention-key strong { display: block; font-size: 30px; font-weight: 450; font-variant-numeric: tabular-nums; margin-top: 10px; }
+.ha-retention-key small { display: block; color: var(--sub); font-size: 12px; line-height: 1.6; margin-top: 4px; }
+.ha-retention-track { display: flex; width: 100%; height: 12px; border-radius: 3px; overflow: hidden; margin-top: 24px; }
+.ha-retention-track > span { height: 100%; }
+.ha-retention-link { margin-top: 12px; font-size: 12px; }
+.ha-retention-empty { color: var(--sub); font-size: 13px; line-height: 1.7; }
+.ha-relationship-count { display: flex; align-items: center; justify-content: space-between; gap: 18px; border-top: 1px solid var(--edge); margin-top: 24px; padding-top: 18px; color: var(--sub); font-size: 12px; }
+.ha-relationship-count strong { color: var(--paper); font-size: 20px; font-weight: 450; font-variant-numeric: tabular-nums; }
 .ha-trend svg {
   width: 100%;
   display: block;
@@ -1036,39 +1061,39 @@ button.ha-bar-row:hover .ha-bar-track > span {
 .ha-quiz-branch:last-child {
   border-bottom: 1px solid var(--edge);
 }
-.ha-quiz-branch summary {
+.ha-quiz-branch > summary {
   display: flex;
   align-items: center;
   gap: 20px;
   padding: 20px 0;
   list-style: none;
 }
-.ha-quiz-branch summary::-webkit-details-marker {
+.ha-quiz-branch > summary::-webkit-details-marker {
   display: none;
 }
-.ha-quiz-branch summary::after {
+.ha-quiz-branch > summary::after {
   content: "+";
   font-size: 18px;
   color: var(--sub);
 }
-.ha-quiz-branch[open] summary::after {
+.ha-quiz-branch[open] > summary::after {
   content: "−";
 }
-.ha-quiz-branch summary > span:first-child {
+.ha-quiz-branch > summary > span:first-child {
   flex: 1;
   min-width: 0;
 }
-.ha-quiz-branch summary > span:nth-child(2) {
+.ha-quiz-branch > summary > span:nth-child(2) {
   text-align: right;
   font-variant-numeric: tabular-nums;
   font-size: 20px;
 }
-.ha-quiz-branch summary b {
+.ha-quiz-branch > summary b {
   display: block;
   font-size: 14px;
   font-weight: 500;
 }
-.ha-quiz-branch summary small {
+.ha-quiz-branch > summary small {
   display: block;
   color: var(--sub);
   font-size: 11px;
@@ -1143,16 +1168,16 @@ button.ha-bar-row:hover .ha-bar-track > span {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     row-gap: 22px;
   }
-  .ha-quiz-branch summary {
+  .ha-quiz-branch > summary {
     gap: 12px;
   }
-  .ha-quiz-branch summary b {
+  .ha-quiz-branch > summary b {
     font-size: 13px;
   }
-  .ha-quiz-branch summary > span:nth-child(2) {
+  .ha-quiz-branch > summary > span:nth-child(2) {
     font-size: 18px;
   }
-  .ha-quiz-branch summary small {
+  .ha-quiz-branch > summary small {
     font-size: 10px;
   }
   .ha-website .ha-website-table {
