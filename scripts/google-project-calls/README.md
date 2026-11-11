@@ -2,15 +2,15 @@
 
 Owner-run Apps Script for Halenn's optional project calls. The original sync reads the shared Gmail calendar and sends verified booking changes to `https://halenn.com/api/project-call-events`. The separately gated `OnlineBooking.gs` module adds signed availability, creation and cancellation requests and sends results to `/api/project-call-result`. It creates organizer-only events without customer attendees; Halenn's existing Resend connection sends the combined confirmation.
 
-**The combined-confirmation upgrade is prepared but not activated.** It requires new owner approval for `calendar.events.owned` and a web-app deployment. Follow the [combined confirmation rollout](../../docs/project-call-bookings.md#combined-confirmation-upgrade--prepared-not-activated) before changing live permissions or enabling `HALENN_ONLINE_BOOKING_ENABLED`. The older setup instructions below describe the original read-only integration; they are not authorization for the new write grant. Add both `.gs` files when installing the updated manifest, and keep the new flag false until the new endpoint is configured and verified.
+**The combined-confirmation upgrade is live and verified.** The owner approved `calendar.events.owned` and the signed web-app deployment, completed authorization, and both booking flags are enabled. A real enquiry, booking, combined inbox confirmation, analytics milestone and cancellation were verified. See the [live rollout record and controls](../../docs/project-call-bookings.md#combined-confirmation-upgrade--live). The old native appointment schedule has been retired; existing appointments and historical sync remain. The older setup instructions below describe the original read-only integration, not the current customer journey or authorization for a new permission grant. Add both `.gs` files when installing the updated manifest; any fresh installation must keep the new flag false until its endpoint is configured, authorized and verified.
 
 The implementation is **not activated by adding these files to the repository**. A calendar owner must install and authorize the script. Validate Google's actual booking-event format before enabling the production sync.
 
-## Booking page settings
+## Original native booking page settings — historical reference
 
 Use the personal Google Calendar account **aevellgroup@gmail.com** and its primary calendar. Native Google supports one free appointment schedule on a personal account. Automatic reminders, additional booking schedules and some availability features require a paid subscription; none is required by this bridge. [Google feature comparison](https://support.google.com/calendar/answer/16287038?hl=en)
 
-Configure the schedule in Google Calendar:
+These were the native schedule settings. Do not recreate the retired page for the current flow. `OnlineBooking.gs` now enforces the same duration, availability, buffer, notice and capacity on Halenn:
 
 | Setting | Value |
 | --- | --- |
@@ -33,7 +33,7 @@ The sentence and title distinguish project calls from unrelated calendar entries
 
 Dutch calls are handled by Dave; English calls can be handled by Dave or Terence. The shared calendar records the selected language. This script does not guess personal host email addresses or route invitations between people. It emits `preferredLanguage: "nl"` or `"en"` only when exactly one recognizable answer exists. Missing or unrecognized answers remain unset for admin review.
 
-## Install without activating
+## Original read-only installation — historical reference
 
 1. Sign in to [Google Apps Script](https://script.google.com/) as **aevellgroup@gmail.com** and create a standalone project named **Halenn project-call sync**.
 2. Replace `Code.gs` with this directory's `Code.gs`. In Project Settings, enable **Show appsscript.json manifest file in editor**, then replace that file with this directory's manifest.
@@ -51,7 +51,7 @@ Dutch calls are handled by Dave; English calls can be handled by Dave or Terence
 
 The original read-only integration requires no web-app deployment. The new optional booking module does require the separately approved signed endpoint described above. Google retains the Calendar OAuth grant; Halenn does not receive a Google refresh token. Installable triggers run as their creator. [Trigger ownership](https://developers.google.com/apps-script/guides/triggers/installable)
 
-## Verify and activate
+## Verify the legacy sync — historical reference
 
 Use an explicitly designated test enquiry and booking email. Keep the test records excluded from commercial analytics.
 
@@ -108,7 +108,7 @@ Google appointment links have no documented hidden enquiry-metadata interface us
 - The cache is bounded at 1,500 tracked events and 180,000 serialized characters. Cancelled records are pruned after 90 days; active records are never silently evicted. A capacity error stops before posting and leaves the prior token intact. At that point migrate/extend the cache or retire old completed records through a reviewed maintenance process; do not delete the state blindly, because that loses recognition of later ID-only deletions.
 - State is written in small chunks and published using one manifest pointer. An interrupted write leaves the previous complete state usable. Do not manually edit or delete `HALENN_PROJECT_CALL_STATE` or `HALENN_PROJECT_CALL_CHUNK_*` properties.
 - To pause immediately, set `HALENN_BOOKING_SYNC_ENABLED=false`. To disconnect, also remove the two installed triggers and revoke the script's Calendar authorization in the Google account. Keep the CRM's historical booking records.
-- A private calendar read scope necessarily permits the script to read the whole calendar. Local filtering prevents unrelated events from being transmitted or stored. This script neither logs event payloads nor requests Calendar write access.
+- A private calendar read scope necessarily permits the script to read the whole calendar. Local filtering prevents unrelated events from being transmitted or stored. The legacy reader does not write events or log payloads. The approved `OnlineBooking.gs` module additionally uses the owned-calendar event permission; its code limits changes to Halenn-tagged events on the Aevell calendar, but the Google OAuth permission itself is broader.
 
 ## Offline verification
 
