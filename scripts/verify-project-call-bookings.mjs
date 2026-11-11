@@ -58,6 +58,19 @@ const test = async (name, fn) => {
 };
 const customer = (p) => scalar("select payload from private.halenn_customer_confirmations where enquiry_id=$1", [p.id]);
 const founderMail = (p) => scalar("select payload from private.halenn_enquiry_notifications where enquiry_id=$1", [p.id]);
+const confirmation = async (p) => (await query("select * from private.halenn_customer_confirmations where enquiry_id=$1", [p.id]))[0];
+const mailCount = (p, customer = true) => scalar("select count(*)::int from net.test_requests where headers->>'Idempotency-Key'=$1", [(customer ? "halenn-customer-confirmation/" : "halenn-enquiry/") + p.id]);
+const mailWorker = () => db.exec("select private.halenn_process_enquiry_notifications()");
+const makeReceiptDue = async (p, { minutes = 16, fresh = true } = {}) => {
+  await query("update private.halenn_customer_confirmations set created_at=clock_timestamp()-($2::text||' minutes')::interval,booking_check_after=clock_timestamp()-($2::text||' minutes')::interval+interval '15 minutes',next_attempt_at=clock_timestamp()-interval '1 second' where enquiry_id=$1", [p.id, minutes]);
+  if (fresh) await db.exec("update private.halenn_project_call_config set last_sync_at=clock_timestamp(),last_complete_scan_started_at=clock_timestamp()");
+};
+const retryReceiptNow = (p) => query("update private.halenn_customer_confirmations set next_attempt_at=clock_timestamp()-interval '1 second' where enquiry_id=$1", [p.id]);
+const receiveMailResponse = async (p, code = 200) => {
+  const row = await confirmation(p);
+  await query("insert into net._http_response(id,status_code,content,timed_out) values($1,$2,$3,false)", [row.request_id, code, code === 200 ? JSON.stringify({ id: id(sequence++) }) : '{}']);
+};
+const emailStatus = async () => { await identity("founder"); const result = await scalar("select public.halenn_enquiry_notification_status()"); await identity(); return result; };
 try {
   await db.exec(`create role anon;create role authenticated;create schema auth;
     create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz,encrypted_password text);
@@ -100,6 +113,174 @@ try {
   await db.exec(bookingMigration);
   await db.exec(await migration("202611110004_project_call_reporting"));
 
+  const receiptPolicy = await migration("202611110005_booking_aware_confirmations");
+  await test("booking-aware upgrade preserves old queued, accepted and unattempted mail without backfill or sends", async () => {
+    await readyMail(); await configure();
+    const pending = fixture(), accepted = fixture(); await submit(pending); await submit(accepted);
+    await receiveMailResponse(accepted); await mailWorker();
+    await db.exec("delete from vault.decrypted_secrets where name='halenn_resend_api_key'");
+    const neverAttempted = fixture(); await submit(neverAttempted);
+    const before = {
+      customer: await query("select * from private.halenn_customer_confirmations order by enquiry_id"),
+      internal: await query("select * from private.halenn_enquiry_notifications order by enquiry_id"),
+      mail: await query("select * from net.test_requests order by id"),
+      config: await query("select * from private.halenn_enquiry_notification_config"),
+      renderer: await scalar("select pg_get_functiondef('private.halenn_notification_payload(uuid)'::regprocedure)")
+    };
+    await db.exec(withoutTransaction(receiptPolicy));
+    const after = await query("select * from private.halenn_customer_confirmations order by enquiry_id");
+    assert.deepEqual(after.map(row => Object.fromEntries(Object.entries(row).filter(([key]) => key !== "booking_check_after"))), before.customer);
+    assert.equal(await scalar("select count(*)::int from private.halenn_customer_confirmations where booking_check_after is not null"), 0);
+    assert.deepEqual(await query("select * from private.halenn_enquiry_notifications order by enquiry_id"), before.internal);
+    assert.deepEqual(await query("select * from net.test_requests order by id"), before.mail);
+    assert.deepEqual(await query("select * from private.halenn_enquiry_notification_config"), before.config);
+    assert.equal(await scalar("select pg_get_functiondef('private.halenn_notification_payload(uuid)'::regprocedure)"), before.renderer);
+    await readyMail(); await retryReceiptNow(neverAttempted); await mailWorker();
+    assert.equal((await confirmation(neverAttempted)).status, "queued", "Old never-attempted rows retain normal delivery even without a sync heartbeat");
+    await receive([event(pending.email)]); await receiveMailResponse(pending, 503); await mailWorker(); await retryReceiptNow(pending); await mailWorker();
+    assert.deepEqual(await customer(pending), before.customer.find(n => n.enquiry_id === pending.id).payload);
+    assert.equal(await mailCount(pending), 2); assert.equal(await mailCount(accepted), 1);
+  });
+  await db.exec(receiptPolicy);
+
+  await test("new configured enquiries wait fifteen minutes with no customer send or throttle reservation and immediate founder alerts", async () => {
+    await readyMail(); await configure(); const p = fixture(); const result = await submit(p);
+    assert.equal(result.result, "received"); assert.ok(result.bookingUrl);
+    const row = await confirmation(p);
+    assert.equal(row.status, "pending"); assert.equal(row.attempts, 0);
+    assert.equal(row.payload, null); assert.equal(row.request_id, null); assert.equal(row.first_attempt_at, null);
+    const delay = new Date(row.booking_check_after).getTime() - new Date(row.created_at).getTime();
+    assert.equal(delay, 15 * 60 * 1000);
+    assert.deepEqual(row.next_attempt_at, row.booking_check_after);
+    assert.equal(await mailCount(p), 0); assert.equal(await mailCount(p, false), 1);
+    await mailWorker(); assert.equal(await mailCount(p), 0);
+    assert.deepEqual(await submit(p), result); assert.equal(await mailCount(p, false), 1);
+    const s = (await emailStatus()).customer;
+    assert.equal(s.waitingForBooking, 1); assert.equal(s.pending, 0); assert.equal(s.bookingSuppressed, 0);
+  });
+  await test("fresh post-deadline sync releases a non-booker's receipt once, preserving the optional invitation", async () => {
+    await readyMail(); await configure(); const p = fixture(); const result = await submit(p);
+    await makeReceiptDue(p); await mailWorker();
+    const row = await confirmation(p); assert.equal(row.status, "queued"); assert.equal(row.attempts, 1);
+    assert.ok(row.payload.text.includes(`https://halenn.com${result.bookingUrl}`));
+    assert.equal(await mailCount(p), 1); assert.equal(await mailCount(p, false), 1);
+    await receiveMailResponse(p); await mailWorker(); await retryReceiptNow(p); await mailWorker();
+    assert.equal((await confirmation(p)).status, "accepted"); assert.equal(await mailCount(p), 1);
+  });
+  await test("a linked actual booking suppresses the unattempted receipt, including a later cancellation, without another outbound email", async () => {
+    await readyMail(); await configure();
+    for (const cancelled of [false, true]) {
+      const p = fixture(); await submit(p); const e = event(p.email); await receive([e]);
+      if (cancelled) await receive([{ id: e.id, status: "cancelled" }]);
+      assert.equal((await record(e)).enquiry_id, p.id);
+      await makeReceiptDue(p); await mailWorker();
+      const row = await confirmation(p); assert.equal(row.status, "skipped"); assert.equal(row.last_error, "project_call_booked");
+      assert.equal(row.attempts, 0); assert.equal(row.payload, null); assert.equal(await mailCount(p), 0); assert.equal(await mailCount(p, false), 1);
+      await retryReceiptNow(p); await mailWorker(); assert.equal(await mailCount(p), 0);
+    }
+    const s = (await emailStatus()).customer;
+    assert.equal(s.bookingSuppressed, 2); assert.equal(s.waitingForBooking, 0);
+  });
+  await test("opening a booking link or recording only a manual meeting milestone never suppresses the receipt", async () => {
+    await readyMail(); await configure(); const p = fixture(); const result = await submit(p);
+    await identity("anon"); assert.equal(await scalar("select public.halenn_project_call_destination($1)", [result.bookingUrl.split('/').at(-1)]), bookingUrl); await identity();
+    await query("insert into public.halenn_activity(lead_id,kind) values($1,'meeting_booked')", [await leadFor(p)]);
+    await makeReceiptDue(p); await mailWorker();
+    assert.equal((await confirmation(p)).status, "queued"); assert.equal(await mailCount(p), 1);
+  });
+  await test("unmatched same-email booking holds the receipt for review until exact manual linking", async () => {
+    await readyMail(); await configure(); const p = fixture(); await submit(p); await submit(fixture({ email: p.email }));
+    const e = event(p.email); await receive([e]); const b = await record(e); assert.equal(b.enquiry_id, null);
+    await makeReceiptDue(p, { minutes: 31 }); await mailWorker();
+    assert.equal((await confirmation(p)).status, "pending"); assert.equal((await confirmation(p)).last_error, "booking_match_required");
+    assert.equal(await mailCount(p), 0); assert.equal((await emailStatus()).customer.bookingReview, 1);
+    await link(b.id, await leadFor(p)); assert.equal((await record(e)).enquiry_id, p.id);
+    await retryReceiptNow(p); await mailWorker();
+    assert.equal((await confirmation(p)).status, "skipped"); assert.equal((await confirmation(p)).last_error, "project_call_booked");
+  });
+  await test("missing, pre-deadline and stale completed scans hold a receipt; a fresh post-deadline scan releases it", async () => {
+    await readyMail(); await configure(); const p = fixture(); await submit(p);
+    await makeReceiptDue(p, { minutes: 16, fresh: false });
+    await db.exec("update private.halenn_project_call_config set last_sync_at=clock_timestamp(),last_complete_scan_started_at=clock_timestamp()-interval '2 minutes'");
+    await mailWorker();
+    assert.equal((await confirmation(p)).last_error, "awaiting_booking_sync", "A scan begun before the decision deadline cannot establish no booking");
+    assert.equal(await mailCount(p), 0);
+    await makeReceiptDue(p, { minutes: 31, fresh: false });
+    for (const heartbeat of ["null", "clock_timestamp()-interval '20 minutes'", "clock_timestamp()-interval '11 minutes'"]) {
+      await db.exec(`update private.halenn_project_call_config set last_sync_at=clock_timestamp(),last_complete_scan_started_at=${heartbeat}`);
+      await retryReceiptNow(p); await mailWorker();
+      assert.equal((await confirmation(p)).status, "pending"); assert.equal((await confirmation(p)).last_error, "awaiting_booking_sync");
+      assert.equal(await mailCount(p), 0); assert.equal((await emailStatus()).customer.bookingReview, 1);
+    }
+    await receive([], { scanStartedAt: iso(-1) }); await retryReceiptNow(p); await mailWorker();
+    assert.equal((await confirmation(p)).status, "queued"); assert.equal(await mailCount(p), 1);
+  });
+  await test("only a signed final empty completed scan can release a receipt; data batches and old heartbeats cannot", async () => {
+    await readyMail(); await configure(); const p = fixture(); await submit(p);
+    await makeReceiptDue(p, { fresh: false });
+    await receive([event('unrelated@example.test')]);
+    assert.ok(await scalar("select last_sync_at from private.halenn_project_call_config"));
+    assert.equal(await scalar("select last_complete_scan_started_at from private.halenn_project_call_config"), null);
+    await mailWorker(); assert.equal((await confirmation(p)).last_error, 'awaiting_booking_sync'); assert.equal(await mailCount(p), 0);
+    await receive([]); await retryReceiptNow(p); await mailWorker();
+    assert.equal(await scalar("select last_complete_scan_started_at from private.halenn_project_call_config"), null);
+    assert.equal(await mailCount(p), 0);
+    await receive([], { scanStartedAt: iso(-120) }); await retryReceiptNow(p); await mailWorker();
+    assert.equal(await mailCount(p), 0, 'Completing a scan that began before the grace deadline is not sufficient');
+    await receive([], { scanStartedAt: iso(-10) }); await retryReceiptNow(p); await mailWorker();
+    assert.equal((await confirmation(p)).status, 'queued'); assert.equal(await mailCount(p), 1); assert.equal(await mailCount(p, false), 1);
+  });
+  await test("completed scan checkpoints are monotonic across older finals, data batches and legacy empty heartbeats", async () => {
+    await configure(); const current = iso(-30);
+    await receive([], { scanStartedAt: current });
+    assert.equal(new Date(await scalar("select last_complete_scan_started_at from private.halenn_project_call_config")).toISOString(), current);
+    await receive([], { scanStartedAt: iso(-120) });
+    await receive([event('another@example.test')]); await receive([]);
+    assert.equal(new Date(await scalar("select last_complete_scan_started_at from private.halenn_project_call_config")).toISOString(), current);
+    const newer = iso(-1); await receive([], { scanStartedAt: newer });
+    assert.equal(new Date(await scalar("select last_complete_scan_started_at from private.halenn_project_call_config")).toISOString(), newer);
+  });
+  await test("malformed, future or nonempty scan acknowledgements are rejected atomically after authentication", async () => {
+    await configure(); await receive([], { scanStartedAt: iso(-60) });
+    const before = await query("select * from private.halenn_project_call_config");
+    for (const scanStartedAt of [null, 1, {}, 'not-a-date', '1999-12-31T23:59:59Z', iso(30)])
+      await rejected(() => receive([], { scanStartedAt }), '22023');
+    const e = event('atomic@example.test');
+    await rejected(() => receive([e], { scanStartedAt: iso(-1) }), '22023');
+    const oldDelivery = String(Math.floor(Date.now() / 1000) - 120);
+    await rejected(() => receiveRaw(JSON.stringify({ version: 1, calendarId, events: [], scanStartedAt: iso(-60) }), oldDelivery), '22023');
+    const futureDelivery = String(Math.floor(Date.now() / 1000) + 120);
+    await rejected(() => receiveRaw(JSON.stringify({ version: 1, calendarId, events: [], scanStartedAt: iso(60) }), futureDelivery), '22023');
+    assert.deepEqual(await query("select * from private.halenn_project_call_config"), before);
+    assert.equal(await scalar("select count(*)::int from private.halenn_project_call_bookings"), 0);
+  });
+  await test("a missing email key after a completed booking scan is classified as ordinary delivery pending", async () => {
+    await readyMail(); await configure(); const p = fixture(); await submit(p);
+    await makeReceiptDue(p); await db.exec("delete from vault.decrypted_secrets where name='halenn_resend_api_key'");
+    await mailWorker();
+    const row = await confirmation(p); assert.equal(row.status, 'pending'); assert.equal(row.last_error, 'sending_key_missing'); assert.equal(row.attempts, 0);
+    const info = (await emailStatus()).customer;
+    assert.equal(info.pending, 1); assert.equal(info.waitingForBooking, 0); assert.equal(info.bookingReview, 0);
+    await readyMail(); await retryReceiptNow(p); await mailWorker();
+    assert.equal((await confirmation(p)).status, 'queued'); assert.equal(await mailCount(p), 1);
+  });
+  await test("unresolved booking review after twenty-four hours needs attention instead of a delayed customer receipt", async () => {
+    await readyMail(); await configure(); const p = fixture(); await submit(p);
+    await makeReceiptDue(p, { minutes: 24 * 60 + 1, fresh: false }); await mailWorker();
+    const row = await confirmation(p); assert.equal(row.status, "attention"); assert.equal(row.last_error, "booking_confirmation_review_required");
+    assert.equal(row.attempts, 0); assert.equal(await mailCount(p), 0); assert.equal(await mailCount(p, false), 1);
+  });
+  await test("a later booking cannot rewrite an already attempted receipt or trigger a second confirmation", async () => {
+    await readyMail(); await configure(); const p = fixture(); await submit(p);
+    await makeReceiptDue(p); await mailWorker(); const frozen = await customer(p);
+    await receive([event(p.email)]); await receiveMailResponse(p, 503); await mailWorker();
+    await retryReceiptNow(p); await mailWorker();
+    assert.equal((await confirmation(p)).status, "queued"); assert.deepEqual(await customer(p), frozen);
+    assert.equal(await mailCount(p), 2); assert.equal(await mailCount(p, false), 1);
+    await receiveMailResponse(p); await mailWorker(); await receive([event(p.email)]); await mailWorker();
+    assert.equal((await confirmation(p)).status, "accepted"); assert.equal(await mailCount(p), 2);
+  });
+
   await test("disabled and unconfigured links preserve enquiry delivery and ordinary email receipt", async () => {
     await readyMail(); const p = fixture();
     assert.deepEqual(await submit(p), { result: "received", bookingUrl: null });
@@ -110,6 +291,9 @@ try {
     assert.equal(await scalar("select count(*)::int from private.halenn_project_call_invitations"), 0);
     await db.exec(`update private.halenn_project_call_config set enabled=true,booking_url='${bookingUrl}'`);
     assert.deepEqual(await submit(p), { result: "received", bookingUrl: null });
+    const missingKey = fixture(); assert.deepEqual(await submit(missingKey), { result: "received", bookingUrl: null });
+    assert.equal((await confirmation(missingKey)).status, "queued"); assert.equal((await confirmation(missingKey)).booking_check_after, null);
+    assert.equal(await mailCount(missingKey), 1);
     await rejected(() => receive([]), "55000");
   });
   await test("optional receipt and premium customer email use one opaque link, no PII, identical envelope and fixed copy", async () => {
@@ -118,6 +302,7 @@ try {
     const result = await submit(p);
     assert.equal(result.result, "received"); assert.match(result.bookingUrl, /^\/project-call\/[\da-f-]{36}$/);
     assert.deepEqual(await submit(p), result);
+    await makeReceiptDue(p); await mailWorker();
     const body = await customer(p); const full = `https://halenn.com${result.bookingUrl}`;
     for (const key of ["from", "to", "reply_to", "subject", "headers"]) if (key !== "to") assert.deepEqual(body[key], baseline[key]);
     assert.deepEqual(body.to, [p.email]);
@@ -139,7 +324,8 @@ try {
     await readyMail(); await configure();
     await db.exec("create function private.test_invitation_failure() returns trigger language plpgsql as $$begin raise exception 'Synthetic optional failure';end$$;create trigger test_invitation_failure before insert on private.halenn_project_call_invitations for each row execute function private.test_invitation_failure()");
     const p = fixture(); assert.deepEqual(await submit(p), { result: "received", bookingUrl: null });
-    assert.ok(await leadFor(p)); assert.ok(await customer(p)); assert.ok(await founderMail(p));
+    assert.ok(await leadFor(p)); assert.ok(await founderMail(p));
+    await makeReceiptDue(p); await mailWorker(); assert.ok(await customer(p));
   });
   await test("original deduplication, conflict and rate limit remain intact", async () => {
     await configure(); const p = fixture(); const result = await submit(p);
