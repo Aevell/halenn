@@ -593,7 +593,7 @@ export default function PricingBuilder({
           <EnquirySuccess
             bookingUrl={submission.bookingUrl}
             headingId="enquiry-title"
-            onContinueByEmail={() => dialog.current?.close()}
+            onDone={() => dialog.current?.close()}
           />
         ) : (
           <>
@@ -699,6 +699,10 @@ export default function PricingBuilder({
                   <input name="website" autoComplete="off" tabIndex={-1} />
                 </label>
               </div>
+              <p className={s.help}>
+                We’ll review your enquiry and reply by email. A 30-minute
+                project call is optional.
+              </p>
               <button
                 className={s.primary}
                 type="submit"
@@ -727,10 +731,6 @@ export default function PricingBuilder({
                   Start a new enquiry
                 </button>
               )}
-              <p className={s.help}>
-                Prefer email?{" "}
-                <a href="mailto:contact@halenn.com">contact@halenn.com</a>.
-              </p>
             </form>
           </>
         )}

@@ -34,8 +34,7 @@
 }
 
 .success .receipt,
-.success .description,
-.success .emailOption p {
+.success .description {
   margin: 0;
   color: #b4c3d6;
   font-size: 16px;
@@ -67,18 +66,21 @@
   white-space: normal;
 }
 
-.success .emailOption {
-  display: grid;
-  justify-items: start;
-  gap: 6px;
+.success .bookingHint {
+  margin: 0;
+  color: #aebfd2;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.success .actions {
+  display: flex;
+  align-items: center;
   margin-top: 28px;
 }
 
-.success .emailOption p {
-  font-size: 14px;
-}
-
-.success .continue {
+.success .done {
+  min-width: 44px;
   min-height: 44px;
   margin: 0;
   padding: 8px 0;
@@ -88,6 +90,7 @@
   background: transparent;
   font: inherit;
   font-size: 14px;
+  text-align: left;
   text-decoration: underline;
   text-decoration-color: #a8bfd888;
   text-underline-offset: 5px;
@@ -105,7 +108,7 @@
     background: #f5f9ff;
   }
 
-  .success .continue:hover {
+  .success .done:hover {
     color: #fff;
     text-decoration-color: currentColor;
   }

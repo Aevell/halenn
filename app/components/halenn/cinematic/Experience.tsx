@@ -77,7 +77,7 @@ export function Contact({ email }: { email?: string }) {
             form.current?.showModal();
           }}
         >
-          Start a project <ActionArrow />
+          Send an enquiry <ActionArrow />
         </button>
         <span>
           Websites. Commerce. Connected systems.
@@ -114,16 +114,16 @@ export function Contact({ email }: { email?: string }) {
           <EnquirySuccess
             bookingUrl={submission.bookingUrl}
             headingId="contact-dialog-title"
-            onContinueByEmail={() => form.current?.close()}
+            onDone={() => form.current?.close()}
           />
         ) : (
           <>
             <p className={s.kicker}>
               {email
-                ? "Send your enquiry directly to Halenn."
+                ? "Start with your idea."
                 : "Local prototype / Nothing is sent"}
             </p>
-            <h2 id="contact-dialog-title">Tell us about it.</h2>
+            <h2 id="contact-dialog-title">Tell us about your project.</h2>
             <form
               ref={entry}
               aria-busy={submission.pending}
@@ -176,7 +176,7 @@ export function Contact({ email }: { email?: string }) {
                 />
               </label>
               <label>
-                What are you planning?
+                What would you like to improve or create?
                 <textarea
                   key={enquiryGoal}
                   name="project"
@@ -184,6 +184,7 @@ export function Contact({ email }: { email?: string }) {
                   rows={4}
                   maxLength={5000}
                   defaultValue={enquiryGoal}
+                  placeholder="Share your idea or a task that takes too much time. You don’t need a technical brief."
                   disabled={submission.pending || submission.sent}
                 />
               </label>
@@ -203,8 +204,9 @@ export function Contact({ email }: { email?: string }) {
                 </label>
               </div>
               <p>
-                Tell us about the task or idea. You don’t need to choose a solution
-                yet.
+                {email
+                  ? "We’ll review your enquiry and reply by email. A 30-minute project call is optional."
+                  : "This preview does not send or store your enquiry."}
               </p>
               <button
                 type="submit"
@@ -240,8 +242,7 @@ export function Contact({ email }: { email?: string }) {
               )}
               {email && (
                 <p>
-                  Prefer email? <a href={`mailto:${email}`}>{email}</a>. We use your
-                  details to respond to your enquiry.{" "}
+                  We use your details to respond to your enquiry.{" "}
                   <a href="/privacy">Privacy policy</a>.
                 </p>
               )}

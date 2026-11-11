@@ -13,10 +13,10 @@ export default function ProjectCallPage() {
   return <div className={styles.page}>
     <Navigation page="project-call" />
     <main className={styles.content}>
-      <p className={styles.eyebrow}>Your next step</p>
+      <p className={styles.eyebrow}>Optional project call</p>
       <h1>Let’s continue<br /><span>the conversation.</span></h1>
       <p>Online booking isn’t available from this link at the moment.</p>
-      <p>Reply to your enquiry confirmation email to arrange a 30-minute project call. You’re equally welcome to continue by email.</p>
+      <p>If you’ve already sent an enquiry, we’ll still follow up by email. You can arrange a 30-minute call when we reply.</p>
       <ActionLink href="/" plainArrow>Back to Halenn</ActionLink>
     </main>
     <SiteFooter />
