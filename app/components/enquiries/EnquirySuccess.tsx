@@ -46,8 +46,7 @@ export default function EnquirySuccess({
             <ActionArrow />
           </a>
           <p className={s.bookingHint}>
-            Choose a time on our Google booking page. Use the same email address
-            as your enquiry.
+            Choose a time that suits you. Your enquiry is already with us.
           </p>
         </div>
       )}

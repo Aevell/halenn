@@ -22,6 +22,8 @@ type NotificationStatus = DeliveryCounts & {
   configured: boolean;
   recipient: string;
   customer: CustomerStatus | null;
+  callConfirmations: DeliveryCounts | null;
+  combinedCallEmails: boolean;
 };
 
 function validCount(count: unknown): count is number {
@@ -53,6 +55,9 @@ function readStatus(value: unknown): NotificationStatus | null {
     bookingFields.every((field) => customer[field] === undefined || validCount(customer[field]));
   return {
     ...status,
+    callConfirmations: status.callConfirmations && typeof status.callConfirmations === "object" && validCounts(status.callConfirmations as Record<string, unknown>)
+      ? status.callConfirmations as DeliveryCounts : null,
+    combinedCallEmails: status.combinedCallEmails === true,
     customer: customerValid ? {
       ...customer,
       waitingForBooking: customer.waitingForBooking ?? 0,
@@ -79,7 +84,7 @@ export default async function EnquiryNotifications() {
   const status = error ? null : readStatus(data);
   const active = status?.enabled && status.configured;
   const customerActive = active && status?.customer?.enabled;
-  const needsAttention = !!status && (status.attention > 0 || (status.customer?.attention ?? 0) > 0);
+  const needsAttention = !!status && (status.attention > 0 || (status.customer?.attention ?? 0) > 0 || (status.callConfirmations?.attention ?? 0) > 0);
   const label = !status ? "Status unavailable"
     : needsAttention ? "Needs attention"
     : !status.configured ? "Setup needed"
@@ -125,8 +130,8 @@ export default async function EnquiryNotifications() {
                 <div><dt>Waiting for booking check</dt><dd>{status.customer.waitingForBooking.toLocaleString("en-GB")}</dd></div>
                 <div><dt>Booking receipt only</dt><dd>{status.customer.bookingSuppressed.toLocaleString("en-GB")}</dd></div>
               </dl>
-              <p className="hw-notification-note">New enquiry confirmations wait 15 minutes, then check a fresh calendar sync. A matching booking uses Google’s booking confirmation only.</p>
-              <p className="hw-notification-note">If the enquiry confirmation has already been sent, a later booking still receives Google’s booking email.</p>
+              <p className="hw-notification-note">New enquiry confirmations wait 15 minutes, then check the booking status. {status.combinedCallEmails ? "Customers booking through Halenn receive one call confirmation with their appointment details, enquiry summary and next steps." : "A matching booking uses Google’s booking confirmation only."}</p>
+              <p className="hw-notification-note">If the enquiry confirmation has already been sent, a later booking still receives a call confirmation.</p>
               {status.customer.bookingReview > 0 && <p className="hw-notification-note">
                 {status.customer.bookingReview.toLocaleString("en-GB")} booking {status.customer.bookingReview === 1 ? "check is" : "checks are"} included in Needs review.
               </p>}
@@ -137,6 +142,12 @@ export default async function EnquiryNotifications() {
             <p className="hw-notification-note">Up to 40 customer confirmations per 24 hours, with at most one per address per hour and three per day. Temporary sending problems are retried automatically.</p>
           </>}
         </section>
+        {status.callConfirmations && (status.combinedCallEmails || status.callConfirmations.accepted > 0 || status.callConfirmations.pending > 0 || status.callConfirmations.attention > 0) && <section className="hw-customer-confirmations" aria-labelledby="call-confirmations-title">
+          <h3 id="call-confirmations-title">Booked-call emails</h3>
+          <Counts counts={status.callConfirmations} />
+          <p className="hw-notification-note">Halenn sends the combined call confirmation. Appointment changes and cancellations receive their own update. Existing Google bookings keep their original confirmation.</p>
+          {status.callConfirmations.attention > 0 && <p className="hw-notification-note">Check unresolved bookings and email delivery before contacting these customers.</p>}
+        </section>}
         <p className="hw-notification-note">
           Accepted means Resend accepted the email for sending; it does not confirm inbox delivery.
           {status.lastAcceptedAt && <> Your inbox last accepted: <time dateTime={status.lastAcceptedAt}>{new Intl.DateTimeFormat("en-GB", {

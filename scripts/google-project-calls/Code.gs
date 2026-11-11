@@ -52,6 +52,8 @@ var HalennProjectCalls = (function () {
   /** Returns only the fields permitted by the endpoint contract. */
   function selectEvent(raw, known) {
     if (!raw || typeof raw.id !== 'string' || !raw.id || raw.id.length > 1024) return null;
+    // Website bookings are linked by their signed request, not fuzzy guest matching.
+    if (raw.extendedProperties && raw.extendedProperties.private && raw.extendedProperties.private.halennOnlineCall) return null;
     var previous = known && Object.prototype.hasOwnProperty.call(known, raw.id) ? known[raw.id] : null;
     var updated = date(raw.updated);
     if (previous && updated && Date.parse(updated) < Date.parse(previous.updated)) return null;
@@ -364,9 +366,13 @@ var HalennProjectCalls = (function () {
 }());
 
 function setupHalennProjectCallSync() { return HalennProjectCalls.setup(); }
-function syncHalennProjectCalls() { return HalennProjectCalls.sync(); }
+function syncHalennProjectCalls() {
+  var legacy = HalennProjectCalls.sync();
+  if (typeof HalennOnlineCalls !== 'undefined') HalennOnlineCalls.sync();
+  return legacy;
+}
 function inspectHalennProjectCallSync() { return HalennProjectCalls.inspect(); }
 function onHalennCalendarUpdated(event) {
   if (event && event.calendarId && event.calendarId !== 'aevellgroup@gmail.com') return { skipped: 'different-calendar' };
-  return HalennProjectCalls.sync();
+  return syncHalennProjectCalls();
 }

@@ -1,6 +1,8 @@
 # Google Calendar project-call sync
 
-Owner-run Apps Script for Halenn's optional project calls. When enabled, it reads the shared Gmail calendar and sends verified booking changes to `https://halenn.com/api/project-call-events`. It does not create calendar events, send email, publish a web app, or expose credentials to the website.
+Owner-run Apps Script for Halenn's optional project calls. The original sync reads the shared Gmail calendar and sends verified booking changes to `https://halenn.com/api/project-call-events`. The separately gated `OnlineBooking.gs` module adds signed availability, creation and cancellation requests and sends results to `/api/project-call-result`. It creates organizer-only events without customer attendees; Halenn's existing Resend connection sends the combined confirmation.
+
+**The combined-confirmation upgrade is prepared but not activated.** It requires new owner approval for `calendar.events.owned` and a web-app deployment. Follow the [combined confirmation rollout](../../docs/project-call-bookings.md#combined-confirmation-upgrade--prepared-not-activated) before changing live permissions or enabling `HALENN_ONLINE_BOOKING_ENABLED`. The older setup instructions below describe the original read-only integration; they are not authorization for the new write grant. Add both `.gs` files when installing the updated manifest, and keep the new flag false until the new endpoint is configured and verified.
 
 The implementation is **not activated by adding these files to the repository**. A calendar owner must install and authorize the script. Validate Google's actual booking-event format before enabling the production sync.
 
@@ -47,7 +49,7 @@ Dutch calls are handled by Dave; English calls can be handled by Dave or Terence
 5. Select `setupHalennProjectCallSync` and run it once. Review and authorize the requested **read-only Calendar**, external HTTPS request, and trigger-management permissions. The setup verifies calendar read access and installs an event-update trigger plus a five-minute recovery trigger. Existing triggers for these two handler names are replaced, so rerunning setup does not duplicate them.
 6. Keep `HALENN_BOOKING_SYNC_ENABLED=false` until the endpoint is deployed and the checks below pass. Setup itself makes no request to Halenn; installed triggers return immediately while disabled.
 
-This is an owner-authorized script, not a deployed public web app. Google retains the Calendar OAuth grant; Halenn does not receive a Google refresh token. Installable triggers run as their creator. [Trigger ownership](https://developers.google.com/apps-script/guides/triggers/installable)
+The original read-only integration requires no web-app deployment. The new optional booking module does require the separately approved signed endpoint described above. Google retains the Calendar OAuth grant; Halenn does not receive a Google refresh token. Installable triggers run as their creator. [Trigger ownership](https://developers.google.com/apps-script/guides/triggers/installable)
 
 ## Verify and activate
 

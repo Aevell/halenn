@@ -6,15 +6,19 @@ import vm from 'node:vm';
 import ts from 'typescript';
 import * as links from '../app/lib/project-call-links.ts';
 import * as websiteModel from '../app/lib/website-model.ts';
+import * as onlineCall from '../app/lib/online-call.ts';
 
 const compile = file => ts.transpileModule(readFileSync(new URL(file, import.meta.url), 'utf8'), {
-  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+  fileName: file, compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
 }).outputText;
 const code = {
   events: compile('../app/api/project-call-events/route.ts'),
-  redirect: compile('../app/project-call/[token]/route.ts'),
+  redirect: compile('../app/project-call/[token]/page.tsx'),
   enquiry: compile('../app/api/enquiries/route.ts'),
   helpers: compile('../app/lib/website-server.ts'),
+  online: compile('../app/api/project-call/[token]/route.ts'),
+  result: compile('../app/api/project-call-result/route.ts'),
+  calendar: compile('../app/project-call/[token]/calendar/route.ts'),
 };
 const now = 1_800_000_000_000;
 const sentAt = String(now / 1000);
@@ -24,7 +28,7 @@ const invitation = '/project-call/' + token;
 const googleUrl = 'https://calendar.google.com/calendar/appointments/schedules/Example_123-abc?gv=true';
 const sign = (body, timestamp = sentAt) => createHmac('sha256', signingSecret).update(timestamp + '.').update(body).digest('hex');
 
-function harness(kind, { consent = false, rpc = async () => ({ data: null }) } = {}) {
+function harness(kind, { consent = false, rpc = async () => ({ data: null }), fetch = async () => { throw Error('Unexpected provider request'); } } = {}) {
   const calls = [];
   const db = { rpc: async (name, args) => { calls.push({ name, args }); return rpc(name, args, calls.length); } };
   const helpers = {};
@@ -37,11 +41,16 @@ function harness(kind, { consent = false, rpc = async () => ({ data: null }) } =
   });
   const api = {};
   vm.runInNewContext(code[kind], {
-    exports: api, URL, TextDecoder, Date: { now: () => now }, Error,
+    exports: api, URL, TextDecoder, Date: class extends Date { static now() { return now; } }, Error, fetch, AbortSignal,
     require(path) {
-      if (path === 'next/server') return { NextResponse: {
-        json: (value, init = {}) => new Response(JSON.stringify(value), { ...init, headers: { 'Content-Type': 'application/json', ...init.headers } }),
-        redirect: (location, init = {}) => new Response(null, { ...init, headers: { ...init.headers, Location: String(location) } }),
+      if (path === 'react/jsx-runtime') return { jsx: (type, props) => ({type,props}) };
+      if (path === 'next/navigation') return { redirect: url => { throw Object.assign(Error('redirect'), {destination:url}); } };
+      if (path.endsWith('/online-call')) return onlineCall;
+      if (path === '../page') return { default: 'UnavailablePage' };
+      if (path === '../CallBooking') return { default: 'CallBooking' };
+      if (path === 'next/server') return { NextResponse: class extends Response {
+        static json(value, init = {}) { return new Response(JSON.stringify(value), { ...init, headers: { 'Content-Type': 'application/json', ...init.headers } }); }
+        static redirect(location, init = {}) { return new Response(null, { ...init, headers: { ...init.headers, Location: String(location) } }); }
       } };
       if (path.endsWith('/project-call-links')) return links;
       if (path.endsWith('/website-model')) return websiteModel;
@@ -164,34 +173,24 @@ test('booking URL and token allowlists reject open redirects, contact data, whit
   for (const value of [token + '\n', token + '?next=https://evil.example', '../' + token, '']) assert.equal(links.projectCallToken(value), false);
 });
 
-test('invitation redirect sends only the allowed calendar URL and no enquiry identity or incoming query', async () => {
-  const h = harness('redirect', { rpc: async () => ({ data: googleUrl }) });
-  const request = new Request('https://halenn.com' + invitation + '?email=customer@example.com&next=https://evil.example');
-  const result = await h.api.GET(request, { params: Promise.resolve({ token }) });
-  assert.equal(result.status, 303);
-  assert.equal(result.headers.get('location'), googleUrl);
-  assert.equal(result.headers.get('referrer-policy'), 'no-referrer');
-  assert.equal(result.headers.get('cache-control'), 'private, no-store');
-  assert.equal(result.headers.get('x-robots-tag'), 'noindex, nofollow');
-  assert.deepEqual(JSON.parse(JSON.stringify(h.calls)), [{ name: 'halenn_project_call_destination', args: { token } }]);
-  assert.equal((await result.text()).includes('customer@example.com'), false);
+test('legacy invitation preserves its allowlisted Google destination until online booking is activated', async () => {
+  const h=harness('redirect',{rpc:async name=>({data:name==='halenn_online_call_portal'?null:googleUrl})});
+  await assert.rejects(()=>h.api.default({params:Promise.resolve({token})}),e=>e.destination===googleUrl);
+  assert.equal(h.api.metadata.referrer,'no-referrer');assert.equal(h.api.metadata.robots.index,false);
+  assert.deepEqual(JSON.parse(JSON.stringify(h.calls)),[{name:'halenn_online_call_portal',args:{token}},{name:'halenn_project_call_destination',args:{token}}]);
 });
-
-test('missing, invalid or unavailable invitations safely fall back without carrying token or query', async () => {
-  for (const [candidate, rpc] of [
-    ['not-a-token', async () => { throw Error('must not be called'); }],
-    [token + '\n', async () => { throw Error('must not be called'); }],
-    [token, async () => ({ data: null })],
-    [token, async () => ({ data: 'https://evil.example/?email=customer@example.com' })],
-    [token, async () => ({ error: { code: 'PGRST202', message: 'private' } })],
-    [token, async () => { throw Error('private transport'); }],
-  ]) {
-    const h = harness('redirect', { rpc });
-    const result = await h.api.GET(new Request('https://halenn.com' + invitation + '?email=customer@example.com'), { params: Promise.resolve({ token: candidate }) });
-    assert.equal(result.status, 303);
-    assert.equal(result.headers.get('location'), 'https://halenn.com/project-call');
-    if (!links.projectCallToken(candidate)) assert.equal(h.calls.length, 0);
-  }
+test('activated invitation renders the Halenn booking flow without redirecting to Google', async()=>{
+  const h=harness('redirect',{rpc:async()=>({data:{available:true,status:'new'}})});
+  const rendered=await h.api.default({params:Promise.resolve({token})});assert.equal(rendered.type,'CallBooking');assert.equal(rendered.props.token,token);assert.equal(h.calls.length,1);
+});
+test('invalid invitations and failed database reads use the email fallback without a guessed redirect',async()=>{
+  for(const [candidate,rpc] of [
+    ['not-a-token',async()=>{throw Error('must not be called');}],
+    [token,async()=>({data:null})],
+    [token,async()=>({data:'https://evil.example/'})],
+    [token,async()=>({error:{code:'XX000'}})],
+    [token,async()=>{throw Error('private transport');}],
+  ]){const h=harness('redirect',{rpc});const rendered=await h.api.default({params:Promise.resolve({token:candidate})});assert.equal(rendered.type,'UnavailablePage');if(!links.projectCallToken(candidate))assert.equal(h.calls.length,0);}
 });
 
 test('enquiry receipt exposes only a local invitation and respects consent before the new RPC', async () => {
@@ -249,5 +248,61 @@ test('enquiry outcomes, validation and honeypot never manufacture a booking invi
     assert.equal(result.status, expected);
     assert.equal(h.calls.length, 0);
     assert.equal('bookingUrl' in await result.json(), false);
+  }
+});
+
+const context = { params: Promise.resolve({ token }) };
+const confirmedPortal = { available: true, status: 'confirmed', startsAt: '2026-11-15T12:00:00Z', language: 'en', meetUrl: 'https://meet.google.com/abc-defg-hij' };
+test('online booking rejects cross-origin and invalid requests before touching the calendar', async () => {
+  for (const [body, origin, expected] of [[{operation:'book'}, 'https://evil.example',403], [{operation:'delete'},'https://halenn.com',400], [{operation:'book',language:12},'https://halenn.com',400], ['x'.repeat(2049),'https://halenn.com',400]]) {
+    const h=harness('online'); const response=await h.api.POST(enquiryRequest(body,origin),context);
+    assert.equal(response.status,expected); assert.equal(h.calls.length,0);
+  }
+});
+test('online booking exposes only public portal fields and never redirects to an unapproved provider', async () => {
+  const h=harness('online',{rpc:async()=>({data:{...confirmedPortal,email:'private@example.test',enquiry:'private message',secret:'private key'}})});
+  const response=await h.api.GET(null,context), body=await response.json();
+  assert.deepEqual(body,{portal:confirmedPortal}); assert.equal(response.headers.get('referrer-policy'),'no-referrer');
+  for(const endpoint of ['https://evil.example/exec','https://script.google.com.evil.example/macros/s/id/exec']) {
+    const unsafe=harness('online',{rpc:async()=>({data:{endpoint,envelope:{body:'{}'}}})});
+    const r=await unsafe.api.POST(enquiryRequest({operation:'book'}),context);
+    assert.equal(r.status,503); assert.equal((await r.json()).checking,true);
+  }
+});
+test('provider completion is signature-verified before returning the stored confirmed appointment', async () => {
+  const raw=' { "requestId": "'+token+'", "name": "Zoë 💬" }\n';
+  const h=harness('online',{rpc:async(name,args)=>{
+    if(name==='halenn_prepare_online_call') return {data:{endpoint:'https://script.google.com/macros/s/test_deployment/exec',envelope:{body:JSON.stringify({requestId:token}),signature:'request-signature',sentAt}}};
+    if(name==='halenn_finish_online_call') {assert.equal(args.raw_body,raw);assert.equal(args.signature,'a'.repeat(64));return {data:{accepted:true}};}
+    return {data:confirmedPortal};
+  },fetch:async(url,options)=>{assert.equal(url,'https://script.google.com/macros/s/test_deployment/exec');assert.equal(options.cache,'no-store');return Response.json({body:raw,signature:'a'.repeat(64),sentAt});}});
+  const response=await h.api.POST(enquiryRequest({operation:'book'}),context);
+  assert.deepEqual(await response.json(),{portal:confirmedPortal});
+  assert.deepEqual(h.calls.map(x=>x.name),['halenn_prepare_online_call','halenn_finish_online_call','halenn_online_call_portal']);
+});
+test('provider timeouts retain an uncertain booking outcome and forged results never confirm', async () => {
+  for(const failAt of ['fetch','signature']) {
+    const h=harness('online',{rpc:async(name)=>name==='halenn_prepare_online_call'?{data:{endpoint:'https://script.google.com/macros/s/test/exec',envelope:{body:'{}'}}}:{error:{code:'28000',message:'private diagnostic'}},
+      fetch:async()=>{if(failAt==='fetch')throw Error('private diagnostic');return Response.json({body:'{}',signature:'a'.repeat(64),sentAt});}});
+    const response=await h.api.POST(enquiryRequest({operation:'book'}),context),body=await response.json();
+    assert.equal(response.status,503); assert.equal(body.checking,true);assert.equal(JSON.stringify(body).includes('private diagnostic'),false);
+    assert.equal(h.calls.some(x=>x.name==='halenn_online_call_portal'),false);
+  }
+});
+test('signed callback preserves exact UTF-8 and rejects overlong bodies and stale headers', async () => {
+  const raw=' {"name":"Zoë 💬"}\r\n';
+  const h=harness('result',{rpc:async(name,args)=>{assert.equal(name,'halenn_finish_online_call');assert.equal(args.raw_body,raw);return {data:{accepted:true,private:'hidden'}};}});
+  assert.deepEqual(await (await h.api.POST(eventRequest(raw,{},1))).json(),{accepted:true});
+  for(const [body,headers,expected] of [['{}',{'x-halenn-timestamp':String(Number(sentAt)-301)},401],['a'.repeat(30001),{},413]]) {
+    const invalid=harness('result'),response=await invalid.api.POST(eventRequest(body,headers,1024));
+    assert.equal(response.status,expected);assert.equal(invalid.calls.length,0);
+  }
+});
+test('calendar download is available only for verified confirmed bookings and sends no invitation', async () => {
+  const h=harness('calendar',{rpc:async()=>({data:confirmedPortal})}),response=await h.api.GET(null,context),ics=await response.text();
+  assert.equal(response.status,200);assert.match(response.headers.get('content-type'),/^text\/calendar/);
+  assert.match(ics,/DTSTART:20261115T120000Z/);assert.match(ics,/DTEND:20261115T123000Z/);assert.match(ics,/METHOD:PUBLISH/);assert.doesNotMatch(ics,/ATTENDEE|METHOD:REQUEST/);
+  for(const p of [{...confirmedPortal,status:'pending'},{...confirmedPortal,meetUrl:'https://evil.example'},{...confirmedPortal,startsAt:'invalid'}]) {
+    assert.equal((await harness('calendar',{rpc:async()=>({data:p})}).api.GET(null,context)).status,404);
   }
 });

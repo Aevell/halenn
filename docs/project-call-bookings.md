@@ -1,5 +1,38 @@
 # Optional 30-minute project calls
 
+## Combined confirmation upgrade — prepared, not activated
+
+`202611120001_combined_call_confirmations.sql` adds an optional booking page on Halenn backed by the same Aevell calendar. A newly confirmed appointment sends one white, branded Halenn email containing the date, Amsterdam time, duration, language/host arrangement, Meet link, enquiry excerpt and next steps. It also includes a calendar download and a private cancellation link. Google events have **no customer attendees**, avoiding a separate Google invitation. The host must admit the customer to Meet. Calendar downloads are static entries: subsequent changes are communicated by email and may require updating the downloaded calendar entry.
+
+The enquiry remains submitted whether or not a call is booked. An unattempted enquiry acknowledgement is suppressed after booking; a pending calendar write holds it until the result is known. Customers who do not book retain the existing acknowledgement policy. An email already sent cannot be recalled: a customer booking after their enquiry acknowledgement was dispatched receives the later appointment confirmation too. Confirmed changes and cancellations have their own necessary updates, deduplicated by provider revision.
+
+All new features default to disabled. The current Google redirect remains in use until explicitly activated. No existing enquiries or frozen emails are backfilled, rewritten or resent by the migration.
+
+### Approval and rollout
+
+1. Complete local tests and review the booking page and email previews. Capture counts/digests of existing enquiries, activities and both existing outboxes before applying the new migration. Its expected configuration change is the additional `call_worker_error=false` field; its worker/status wrappers are intentional.
+2. Obtain action-time approval to add the Google `calendar.events.owned` permission and deploy the signed Apps Script web endpoint as Aevell, accessible to anyone. This expands the previous read-only grant. The code restricts writes to the Aevell calendar and deterministic Halenn-tagged events; Google grants broader access to owned calendars. Do not imply the OAuth scope itself is confined to Halenn events.
+3. Apply the migration, deploy the Next.js routes and add `OnlineBooking.gs` alongside the revised `Code.gs` and manifest. Reuse the existing secret; never display or copy it into code. Leave `online_booking_enabled=false` and `HALENN_ONLINE_BOOKING_ENABLED=false` during setup.
+4. After the owner authorizes Google, deploy the web app to execute as that owner, with access set to Anyone. Store its exact `/macros/s/<deployment-id>/exec` URL in `private.halenn_project_call_config.online_booking_endpoint`. Requests and responses use separate HMAC prefixes and a five-minute freshness window. An unauthenticated request cannot read availability or create an event. Website clients receive neither the signing secret nor the signed request envelope.
+5. Set the Apps Script property `HALENN_ONLINE_BOOKING_ENABLED=true`, then set the database `online_booking_enabled=true`. Keep the original sync enabled for historical Google bookings, recovery callbacks and the acknowledgement-worker heartbeat. The existing trigger runs both modules.
+6. Test a deliberately classified internal enquiry through the actual Halenn page: create one call, verify one customer confirmation, its enquiry excerpt and Meet link, and one linked analytics conversion. Retry the same operation and verify no duplicate. Verify cancellation and the non-booking acknowledgement path. Record provider acceptance separately from actual inbox delivery. Cancel the test appointment and preserve the excluded test audit trail.
+7. End future availability on the old Google appointment schedule without deleting existing appointments, and verify old native-booking links cannot create new appointments. Otherwise those direct links remain a route to Google's separate confirmation format. Preserve historical sync and existing cancellation/rescheduling access.
+
+For rollback, set `online_booking_enabled=false` to restore the previous Google redirect for new visits. This does not cancel appointments or stop delivery/recovery of already-created Halenn appointments. Leave the online Apps Script recovery enabled until all pending results have settled. Disabling the whole connection also removes the optional call offer; enquiries continue. Never reset outboxes or delete sales history as a rollback.
+
+Availability uses 30-minute calls on a 40-minute grid, daily 09:00–23:00 Amsterdam time (last start 22:20), 12 hours' notice, 10-minute buffers and three calls per day. Free/busy and capacity are rechecked under a script lock before creation. A timeout retains the deterministic event/request ID so retrying cannot create another appointment. The one shared calendar must contain the attending founder's unavailable times; this is not automatic round-robin scheduling across two personal calendars.
+
+Founder notification settings include separate call-email pending, provider-accepted and attention counts. Unknown booking results older than 15 minutes need review. The outbox preserves retry payloads and provider idempotency keys, and caps first sends at six per recipient and twenty total daily; quota exhaustion is surfaced for review. A confirmed calendar event is not evidence of email delivery or attendance.
+
+### Verification
+
+```sh
+node --test scripts/verify-project-call-routes.mjs scripts/google-project-calls/bridge.test.mjs scripts/google-project-calls/online-booking.test.mjs
+HALENN_PGLITE_MODULE=/absolute/path/to/pglite/dist/index.js node scripts/verify-combined-call-bookings.mjs
+```
+
+These tests exercise real migration functions and HMAC validation with isolated transport doubles. They do not prove production Google authorization, Meet creation or inbox delivery; the live rollout test remains required.
+
 ## Current setup — 11 November 2026
 
 The [Google booking page](https://calendar.app.google/e8dANPvyrGfH16zB7) is saved and publicly verified. The private Apps Script project is authorized, both triggers are installed, and the matching signing secret is saved in Script Properties and Supabase Vault. The owner has approved publication, activation and an end-to-end booking test. Database configuration and `HALENN_BOOKING_SYNC_ENABLED` are separate activation controls; deploying these files alone does not enable either. Verify the live connection using the rollout checks below.
