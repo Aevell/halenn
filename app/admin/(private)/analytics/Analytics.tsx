@@ -25,6 +25,8 @@ import {
 } from "../../lib/analytics";
 import { Bars, Columns, Empty, Panel, Stat, Trend } from "./Charts";
 import WebsiteAnalytics, { type WebsiteReport } from "./WebsiteAnalytics";
+import ProjectCalls from "./ProjectCalls";
+import type { ProjectCallStatus } from "../../lib/project-calls";
 import RecordActivity, {
   AnalyticsDialog,
   CorrectRecord,
@@ -59,12 +61,14 @@ export default function Analytics({
   now,
   preview = false,
   websitePreview,
+  projectCallPreview,
 }: {
   leads: Lead[];
   activity: Activity[];
   now: string;
   preview?: boolean;
   websitePreview?: WebsiteReport;
+  projectCallPreview?: ProjectCallStatus;
 }) {
   const search = useSearchParams();
   const [params, setParams] = useState(
@@ -818,9 +822,18 @@ export default function Analytics({
           <>
             <div className="ha-stats">
               <Stat
-                label="Meetings held"
-                value={model.meetingsHeld}
-                detail={`${model.meetingsBooked} bookings recorded in period`}
+                label="Meetings booked"
+                value={model.meetingsBooked}
+                detail={`${model.uniqueLeads("meeting_booked")} distinct leads · booked in this period`}
+                onClick={() =>
+                  inspect(
+                    "Meetings booked",
+                    model.inPeriod
+                      .filter((e) => e.kind === "meeting_booked" && e.lead_id)
+                      .map((e) => e.lead_id!),
+                    "Recorded bookings made in the selected period. The call itself may be scheduled for a later date.",
+                  )
+                }
               />
               <Stat
                 label="Attendance rate"
@@ -838,6 +851,7 @@ export default function Analytics({
                 detail={`Median · ${model.cycleSample} dated wins in period`}
               />
             </div>
+            {(!preview || projectCallPreview) && <ProjectCalls leads={leads} previewData={preview ? projectCallPreview : undefined} previewNow={Date.parse(now + "T12:00:00Z")} />}
             {!people.length && <div className="ha-onboarding"><div><strong>Activity details appear as you use the workspace</strong><p>Record calls and meetings to measure follow-up speed, attendance and team activity.</p></div></div>}
             <div className="ha-grid">
               <Panel

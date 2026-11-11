@@ -10,7 +10,7 @@ const destinations = [
 ] as const;
 
 export default function Navigation({ page = "home", homeHref = "/", pricingHref = "/pricing" }: {
-  page?: "home" | "pricing" | "about";
+  page?: "home" | "pricing" | "about" | "project-call";
   homeHref?: string;
   pricingHref?: string;
 }) {

@@ -52,6 +52,22 @@ try {
   assert.equal((await leadFor(realBefore)).is_test, false);
   assert.equal((await leadFor(realBefore)).acquisition_source, "Google");
   assert.equal((await leadFor(noConsent)).acquisition_source, "");
+  const beforeCallReport = await report(true);
+  await db.exec("reset role");
+  const enquiriesBeforeReportUpgrade = await scalar("select count(*)::int from public.halenn_website_enquiries");
+  const activitiesBeforeReportUpgrade = await scalar("select count(*)::int from public.halenn_activity");
+  await db.exec(await migration("202611110004_project_call_reporting"));
+  assert.equal(await scalar("select count(*)::int from public.halenn_website_enquiries"), enquiriesBeforeReportUpgrade);
+  assert.equal(await scalar("select count(*)::int from public.halenn_activity"), activitiesBeforeReportUpgrade);
+  const afterCallReport = await report(true);
+  assert.ok(afterCallReport.sources.every((row) => row.bookedCalls === 0));
+  const priorShape = (report) => {
+    const copy = structuredClone(report);
+    delete copy.updatedAt;
+    for (const row of copy.sources) delete row.bookedCalls;
+    return copy;
+  };
+  assert.deepEqual(priorShape(afterCallReport), priorShape(beforeCallReport), "new booking reporting preserves all existing report values");
   let r = await report();
   assert.equal(r.totals.visits, 1);
   assert.equal(r.totals.enquiries, 1);
@@ -114,6 +130,35 @@ try {
   await db.query("update public.halenn_website_enquiries set form_id=(select form_id from public.halenn_website_enquiries where id=$1) where id=$2", [real, mixed]);
   await db.query("update public.halenn_website_events set form_id=(select form_id from public.halenn_website_enquiries where id=$1) where id=$2", [real, mixed]);
   assert.equal((await report(false, "Instagram")).totals.enquiries, 1);
+  // Source booking conversion counts each acquired lead once, excluding corrected and test activity.
+  const bookedActivity = async (lead, voided = false) => {
+    await db.exec("reset role");
+    await db.query("insert into public.halenn_activity(lead_id,kind,channel,occurred_at,voided_at,void_reason) values($1,'meeting_booked','Website',now(),case when $2 then now() end,case when $2 then 'Fixture correction' else '' end)", [lead.id, voided]);
+  };
+  await bookedActivity(l); await bookedActivity(l);
+  await bookedActivity(mixedLead);
+  await bookedActivity(await leadFor(realBefore), true);
+  await bookedActivity(await leadFor(noConsent));
+  assert.equal((await report(false, "Instagram")).sources[0].bookedCalls, 1);
+  assert.equal((await report(true, "Instagram")).sources[0].bookedCalls, 2);
+  assert.equal((await report(false, "Google")).sources[0].bookedCalls, 0);
+  await db.query("update public.halenn_leads set is_test=true where id=$1", [l.id]);
+  assert.equal((await report(false, "Instagram")).sources.length, 0);
+  await db.query("update public.halenn_leads set is_test=false where id=$1", [l.id]);
+  assert.equal((await report(false, "Instagram")).sources[0].bookedCalls, 1);
+  // A later booking still belongs to the earlier visit cohort; it is not a new visit.
+  await identity(); await visit(40, "Referral");
+  const laterBooking = await leadFor(await enquiry(40));
+  await db.exec("reset role;select set_config('request.jwt.claim.sub','',false)");
+  await db.query("update public.halenn_website_visits set started_at=(current_date-2)::timestamp at time zone 'Europe/Amsterdam' where id=$1", [id(40)]);
+  await bookedActivity(laterBooking);
+  await db.exec("update private.halenn_website_tracking set started_at=now()-interval '3 days'");
+  await identity(true);
+  const earlierCohort = await scalar("select public.halenn_website_report_v2(current_date-2,current_date-2,'Referral','',false)");
+  assert.equal(earlierCohort.sources[0].bookedCalls, 1);
+  assert.equal(earlierCohort.sources[0].leads, 1);
+  assert.equal((await report(false, "Referral")).sources.length, 0);
+  assert.equal((await scalar("select public.halenn_website_report(current_date-2,current_date-2,'Referral','')")).sources[0].bookedCalls, 1);
   // Retention removes detailed visits, while the consented acquisition snapshot remains on the lead.
   await db.exec("reset role;select set_config('request.jwt.claim.sub','',false)");
   await db.query("update public.halenn_website_visits set started_at=now()-interval '91 days' where id=$1", [id(20)]);
@@ -126,5 +171,5 @@ try {
   await db.exec("update private.halenn_founders set needs_password=true");
   await identity(true);
   await assert.rejects(db.query("select public.halenn_website_report_v2(current_date,current_date,'','',true)"));
-  console.log("PASS: precise setup backfill; no lost records or invented stages; consented source snapshot; no-consent fallback; founder tests; spoof resistance; anonymous isolation; reversible exclusion; mixed visits/forms; won-to-date attribution; retention; password gate.");
+  console.log("PASS: precise setup backfill; no lost records or invented stages; consented source snapshot; no-consent fallback; founder tests; spoof resistance; anonymous isolation; reversible exclusion; mixed visits/forms; won-to-date attribution; booking activity deduplication and exclusions; later bookings in earlier cohorts; report upgrade preservation; retention; password gate.");
 } finally { await db.close(); }

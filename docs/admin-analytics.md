@@ -77,7 +77,7 @@ Website visits and their events are removed after 90 days through scheduled data
 - Subscription amounts are each customer's total monthly amount in a currency. Changes replace the previous amount, cancellations set it to zero, and these events do not count as cash payments. Churn counts opening subscribers inactive at period end, divided by opening subscribers.
 - Pipeline milestones use recorded evidence and do not infer skipped stages. Attendance uses held / (held + no-show) events in the period, not bookings made in the period.
 - A dash means there is insufficient recorded data to calculate the metric. Counts are shown alongside rates.
-- Website visits, quiz activity and on-site enquiry submissions are connected as described above. Calling platforms, calendars, payment providers and accounting systems are not automatically connected; their sales activities must still be recorded.
+- Website visits, quiz activity and on-site enquiry submissions are connected as described above. Provider-confirmed project-call bookings can feed the existing meeting activity records; call attendance, proposals, payments and other sales outcomes still require recorded evidence.
 
 ## Database and deployment
 
@@ -117,3 +117,29 @@ Additional checks: `node scripts/verify-analytics-attribution.mjs` with `HALENN_
 - Collections and costs use paired columns on the same currency scale, including below-zero collections when refunds exceed payments. Exact interval values remain available without relying on hover.
 - Retention compares only opening subscribers: still active versus inactive at period end. New subscribers do not enter that comparison. With no opening subscribers, the view explains that retention is not yet available. Upsells remain a separate headline metric; referrals are shown separately below retention.
 - The development-only preview includes `sample=refunds` for negative net collections, `sample=lost` for full opening-cohort churn and `sample=no-enquiries` for tracked visits without enquiries, alongside its populated and empty states.
+
+
+## Project-call booking reporting
+
+`202611110004_project_call_reporting.sql` adds `bookedCalls` to the existing source report without changing any existing JSON fields, records, source rules or founder permissions. It depends only on recorded `meeting_booked` activity and can be applied independently of the scheduling provider setup.
+
+- **Sales pipeline → Meetings booked** counts booking activities made during the selected period and shows the number of distinct leads. A future appointment is attributed to when it was booked, not its scheduled start time. It does not infer attendance or a pipeline-stage change.
+- The observed **Meeting booked** milestone counts each lead added in the selected period once if it has a non-corrected booking recorded to date. Later bookings can therefore appear for an earlier lead cohort; a stage label alone is not booking evidence.
+- **Visitor sources → sales → Booked calls** counts distinct enquiries/leads from the selected visit cohort with at least one non-corrected booking, measured to date. Repeated bookings for one lead do not increase this source-conversion count. Calls are optional, so a sale need not have a recorded booking.
+- Counts retain the enquiry's original consented source. Enquiries without analytics consent still contribute to operational sales analytics when linked to booking activity, but are not added to the consented visitor-source report. Test leads and corrected activity remain excluded by default.
+- These metrics describe bookings that were made. Cancellation does not erase that historical fact, and rescheduling should retain the original booking activity. Attendance remains **held / (held + no-show)** from recorded outcomes.
+- During a staged rollout, an older website report without `bookedCalls` shows a dash in the new column instead of inventing zero bookings.
+
+Checks cover distinct-lead milestones, activity dates versus acquisition cohorts, source filters, test and correction exclusions, later bookings in earlier visit cohorts, unchanged report fields and founder-only access.
+
+### Calendar follow-up in Sales pipeline
+
+- A compact sync timestamp and up to five upcoming confirmed project calls sit beneath the headline metrics. This operational view uses current calendar appointments, independently of the analytics date and source filters. Cancelled and past appointments are never shown as upcoming.
+- Only one founder attends each call: a verified Dutch preference displays **Dutch · Dave**; English displays **English · Dave or Terence**. Missing or unrecognised language displays a reminder to check before assigning a founder. This display does not automatically allocate a host or promise that both founders will attend.
+- **Calls needing a lead match** appears only when an imported call could not be matched confidently. It shows attendee identity, appointment time in Amsterdam, language and an explicit existing-lead selector. No lead is selected automatically. All founder-visible leads remain available, including clearly labelled test records. Unmatched calls are not included in lead conversion figures until matched.
+- Matching preserves the lead's original acquisition source. The database checks founder/password access, permits idempotent same-lead retries and rejects reassignment. Cancelled unmatched calls may be linked for history but do not create a new booking conversion. Existing historical booking activity is not erased by a later cancellation.
+- `/api/admin/project-calls` uses the existing signed-in session, validates founder and password state, returns private/no-store responses and rejects cross-origin POSTs. The RPCs repeat the database access guards. Missing RPCs during rollout quietly omit this operational area; a temporary refresh failure leaves other analytics available.
+
+Additional focused checks: `node --test scripts/verify-project-call-admin.mjs` covers access boundaries, bounded/validated mutation payloads, staged rollout, private response fields, conflict handling, language review and upcoming-only filtering.
+
+`/prototypes/analytics?sample=calls&tab=sales` displays fictional upcoming, unknown-language and cancelled/unmatched calls for visual review in development. Refresh and matching are disabled and no project-call API request is made. The prototype returns 404 in production; real analytics continues to require the signed-in founder session.

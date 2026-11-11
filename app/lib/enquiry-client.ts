@@ -35,6 +35,7 @@ export function useEnquirySubmission(enabled = true) {
   const invalidAt = useRef(0);
   const [pending, setPending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [bookingUrl, setBookingUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [conflict, setConflict] = useState(false);
 
@@ -67,6 +68,7 @@ export function useEnquirySubmission(enabled = true) {
           received: false,
         };
         setSent(false);
+        setBookingUrl(null);
         setError("");
         setConflict(false);
         invalidAt.current = 0;
@@ -163,6 +165,17 @@ export function useEnquirySubmission(enabled = true) {
           return;
         }
         current.received = true;
+        // Only a server-issued local invitation may be offered after receipt.
+        // Older responses and unavailable booking configuration still succeed.
+        setBookingUrl(
+          "bookingUrl" in result &&
+            typeof result.bookingUrl === "string" &&
+            /^\/project-call\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+              result.bookingUrl,
+            )
+            ? result.bookingUrl
+            : null,
+        );
         setSent(true);
         // The server records enquiry_received only after persistence succeeds.
       } catch {
@@ -187,6 +200,7 @@ export function useEnquirySubmission(enabled = true) {
     submit,
     pending,
     sent,
+    bookingUrl,
     error,
     conflict,
   };

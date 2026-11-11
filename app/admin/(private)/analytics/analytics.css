@@ -1234,3 +1234,38 @@ button.ha-bar-row:hover .ha-bar-track > span {
   .ha-reading-key { gap: 4px 12px; }
 }
 @media (max-width: 370px) { .ha-stats-three { grid-template-columns: 1fr; } }
+
+.ha-project-calls { margin: -6px 0 24px; }
+.ha-call-sync { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 16px; color: var(--ha-quiet); font-size: 12px; line-height: 1.7; margin-bottom: 16px; }
+.ha-call-sync button { font-size: 12px; }
+.ha-call-list { list-style: none; margin: 0; padding: 0; }
+.ha-call-match { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 1fr); gap: 24px; padding: 20px 0; border-top: 1px solid var(--edge); }
+.ha-call-match:last-child { padding-bottom: 0; }
+.ha-call-identity { display: grid; align-content: start; gap: 5px; overflow-wrap: anywhere; color: var(--sub); font-size: 13px; line-height: 1.65; }
+.ha-call-identity strong { color: var(--paper); font-weight: 500; }
+.ha-call-identity b { font-weight: 500; }
+.ha-call-identity small { color: var(--ha-quiet); font-size: 12px; }
+.ha-call-cancelled { color: var(--ha-caution); }
+.ha-call-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 10px 12px; }
+.ha-call-form > button { min-height: 42px; white-space: nowrap; }
+.ha-call-selected, .ha-call-error { grid-column: 1 / -1; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.ha-call-selected { color: var(--ha-quiet); }
+.ha-call-error { color: #efb0a6; }
+.ha-call-notice { color: var(--ha-positive); font-size: 12px; line-height: 1.7; margin-bottom: 16px; }
+.ha-project-calls > .ha-panel + .ha-panel { margin-top: 16px; }
+.ha-upcoming-calls small { display: block; font-size: 11px; color: var(--ha-quiet); line-height: 1.6; font-weight: 400; margin-top: 4px; }
+.ha-upcoming-calls td { vertical-align: top; }
+.ha .ha-upcoming-calls th, .ha .ha-upcoming-calls td { text-align: left; }
+.ha-upcoming-calls td:first-child { white-space: nowrap; padding-left: 0; }
+.ha-call-more { margin-top: 20px; font-size: 13px; }
+@media (max-width: 800px) { .ha-call-match { grid-template-columns: 1fr; gap: 14px; } }
+@media (max-width: 480px) { .ha-call-form { grid-template-columns: 1fr; } .ha-call-form > button { justify-self: start; } }
+@media (max-width: 600px) {
+  .ha .ha-upcoming-calls { min-width: 0; }
+  .ha-upcoming-calls thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .ha-upcoming-calls tbody, .ha-upcoming-calls tr, .ha-upcoming-calls td { display: block; }
+  .ha-upcoming-calls tr { padding: 16px 0; border-top: 1px solid var(--edge); }
+  .ha .ha-upcoming-calls td { padding: 3px 0; border: 0; overflow-wrap: anywhere; white-space: normal; }
+  .ha-upcoming-calls td:first-child { color: var(--ha-quiet); font-size: 12px; }
+  .ha-upcoming-calls td:nth-child(2) { padding-block: 7px; }
+}

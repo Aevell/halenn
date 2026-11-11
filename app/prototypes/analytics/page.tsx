@@ -4,6 +4,7 @@ import Analytics from "../../admin/(private)/analytics/Analytics";
 import { empty, type Lead } from "../../admin/lib/leads";
 import { type Activity } from "../../admin/lib/analytics";
 import { type WebsiteReport } from "../../admin/(private)/analytics/WebsiteAnalytics";
+import type { ProjectCallStatus } from "../../admin/lib/project-calls";
 import "../../admin/workspace.css";
 import "../../admin/(private)/analytics/analytics.css";
 
@@ -36,6 +37,7 @@ export default async function AnalyticsPreview({ searchParams }: {
     });
     const entries = [record("stage", null, "New")];
     if (i < 28) entries.push(record("contact_attempt"), record("conversation"));
+    if (i < 24) entries.push(record("meeting_booked"));
     if (i < 18) entries.push(record("meeting_held"));
     if (l.status === "Won") entries.push(record("stage", null, "Won"), record("payment", 65000), record("delivery_cost", 12500), record("subscription_started", 4700));
     if (i < 4) {
@@ -50,9 +52,9 @@ export default async function AnalyticsPreview({ searchParams }: {
     from: "2026-11-04", to: now, availableFrom: "2026-11-04", updatedAt: now + "T12:00:00Z",
     totals: { visitors: blank ? 0 : 63, visits: blank ? 0 : 80, pageViews: blank ? 0 : 234, quizStarts: blank ? 0 : 28, quizCompletions: blank ? 0 : 20, enquiries: blank ? 0 : 18, quizEnquiries: blank ? 0 : 9, formOpens: blank ? 0 : 27, formStarts: blank ? 0 : 23 },
     sources: blank ? [] : [
-      { source: "Instagram", visits: 38, visitors: 31, quizStarts: 16, enquiries: 9, leads: 9, customers: 3 },
-      { source: "Google", visits: 28, visitors: 23, quizStarts: 9, enquiries: 6, leads: 6, customers: 2 },
-      { source: "Direct", visits: 14, visitors: 9, quizStarts: 3, enquiries: 3, leads: 3, customers: 0 },
+      { source: "Instagram", visits: 38, visitors: 31, quizStarts: 16, enquiries: 9, leads: 9, bookedCalls: 5, customers: 3 },
+      { source: "Google", visits: 28, visitors: 23, quizStarts: 9, enquiries: 6, leads: 6, bookedCalls: 4, customers: 2 },
+      { source: "Direct", visits: 14, visitors: 9, quizStarts: 3, enquiries: 3, leads: 3, bookedCalls: 1, customers: 0 },
     ],
     trend: blank ? [] : [8, 10, 7, 13, 10, 17, 15].map((visits, i) => ({ date: `2026-11-${String(i + 4).padStart(2, "0")}`, visits, enquiries: [1, 2, 1, 3, 2, 5, 4][i] })),
     journey: ["Website visits", "Quiz seen", "Quiz started", "Recommendation reached", "Enquiry form opened", "Enquiry after recommendation"].map((label, i) => ({ label, count: blank ? 0 : [80, 45, 28, 20, 12, 8][i] })),
@@ -69,7 +71,7 @@ export default async function AnalyticsPreview({ searchParams }: {
     website.totals.enquiries = 0;
     website.totals.quizEnquiries = 0;
     website.trend.forEach((row) => { row.enquiries = 0; });
-    website.sources.forEach((row) => { row.enquiries = 0; row.leads = 0; row.customers = 0; });
+    website.sources.forEach((row) => { row.enquiries = 0; row.leads = 0; row.bookedCalls = 0; row.customers = 0; });
     website.devices.forEach((row) => { row.enquiries = 0; });
     website.forms = [];
     website.journey[website.journey.length - 1].count = 0;
@@ -77,5 +79,17 @@ export default async function AnalyticsPreview({ searchParams }: {
     website.quiz.pending += 1;
     website.quiz.branches.forEach((row) => { row.pending += row.enquired; row.enquired = 0; });
   }
-  return <div className="hw"><div className="hw-bar"><div className="hw-bar-inner"><a href="/prototypes/analytics">halenn / Preview</a></div></div><main className="hw-main"><Suspense><Analytics leads={leads} activity={activity} now={now} preview websitePreview={website} /></Suspense></main></div>;
+  const projectCalls: ProjectCallStatus | undefined = sample === "calls" ? {
+    enabled: true, configured: true, lastSyncAt: now + "T12:00:00Z",
+    upcoming: [
+      { id: id(501), leadId: leads[0].id, attendeeName: "Example Dutch customer", attendeeEmail: "dutch@example.com", preferredLanguage: "nl", startsAt: "2026-11-12T10:00:00Z", endsAt: "2026-11-12T10:30:00Z", bookedAt: now + "T10:00:00Z", status: "confirmed" },
+      { id: id(502), leadId: leads[1].id, attendeeName: "Example English customer", attendeeEmail: "english@example.com", preferredLanguage: "en", startsAt: "2026-11-13T14:00:00Z", endsAt: "2026-11-13T14:30:00Z", bookedAt: now + "T10:00:00Z", status: "confirmed" },
+      { id: id(503), leadId: leads[2].id, attendeeName: "Example customer", attendeeEmail: "customer@example.com", preferredLanguage: null, startsAt: "2026-11-16T11:00:00Z", endsAt: "2026-11-16T11:30:00Z", bookedAt: now + "T10:00:00Z", status: "confirmed" },
+    ],
+    unmatched: [
+      { id: id(504), attendeeName: "Example booking to review", attendeeEmail: "new-contact@example.com", preferredLanguage: null, startsAt: "2026-11-12T12:00:00Z", endsAt: "2026-11-12T12:30:00Z", bookedAt: now + "T10:00:00Z", status: "confirmed" },
+      { id: id(505), attendeeName: "Example cancelled booking", attendeeEmail: "cancelled@example.com", preferredLanguage: "en", startsAt: "2026-11-11T09:00:00Z", endsAt: "2026-11-11T09:30:00Z", bookedAt: now + "T09:00:00Z", status: "cancelled" },
+    ],
+  } : undefined;
+  return <div className="hw"><div className="hw-bar"><div className="hw-bar-inner"><a href="/prototypes/analytics">halenn / Preview</a></div></div><main className="hw-main"><Suspense><Analytics leads={leads} activity={activity} now={now} preview websitePreview={website} projectCallPreview={projectCalls} /></Suspense></main></div>;
 }

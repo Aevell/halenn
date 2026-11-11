@@ -1,0 +1,8 @@
+.page { background: #0c131d; color: #f5f4ef; min-height: 100vh; }
+.content { width: min(100% - 2 * var(--page-gutter, 6vw), 1320px); margin: 0 auto; padding: clamp(160px, 19vh, 230px) 0 130px; }
+.eyebrow { text-transform: uppercase; letter-spacing: .18em; font-size: .7rem; margin: 0 0 2rem; color: #aab7c6; }
+.content h1 { font-family: var(--font-heading), sans-serif; font-size: clamp(2.5rem, 5vw, 5rem); font-weight: 300; line-height: 1.12; letter-spacing: -.045em; margin: 0 0 2rem; }
+.content h1 span { color: #aebccd; }
+.content > p:not(.eyebrow) { max-width: 530px; color: #b9c2ce; font-size: 1rem; line-height: 1.8; margin: 0 0 1rem; }
+.content > a { margin-top: 1.5rem; }
+@media (max-width: 600px) { .content { padding-top: 140px; padding-bottom: 90px; } }

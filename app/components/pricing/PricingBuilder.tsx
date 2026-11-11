@@ -35,10 +35,8 @@ import {
 } from "../halenn/solution-guide";
 import s from "./pricing.module.css";
 import useSmartTabTitle from "../useSmartTabTitle";
-import {
-  enquiryReceivedMessage,
-  useEnquirySubmission,
-} from "../../lib/enquiry-client";
+import { useEnquirySubmission } from "../../lib/enquiry-client";
+import EnquirySuccess from "../enquiries/EnquirySuccess";
 
 function Arrow() {
   return (
@@ -591,142 +589,151 @@ export default function PricingBuilder({
         >
           ×
         </button>
-        <h2 id="enquiry-title">Request a quote.</h2>
-        <p>
-          {hasItems ? "Your estimate" : "Your enquiry"}
-          {guideText ? ", homepage guide answers" : ""} and any requirements
-          will be sent directly to Halenn.
-        </p>
-        {hasItems && (
-          <div className={s.enquirySummary}>
-            <strong>
-              {investmentLabel(result)}
-              {result.oneTime > 0 ? " one-time" : ""}
-            </strong>
-            <span>{monthlyLabel}</span>
-            {result.quoteRequired && (
-              <span>Custom work will be quoted separately.</span>
+        {submission.sent ? (
+          <EnquirySuccess
+            bookingUrl={submission.bookingUrl}
+            headingId="enquiry-title"
+            onContinueByEmail={() => dialog.current?.close()}
+          />
+        ) : (
+          <>
+            <h2 id="enquiry-title">Request a quote.</h2>
+            <p>
+              {hasItems ? "Your estimate" : "Your enquiry"}
+              {guideText ? ", homepage guide answers" : ""} and any requirements
+              will be sent directly to Halenn.
+            </p>
+            {hasItems && (
+              <div className={s.enquirySummary}>
+                <strong>
+                  {investmentLabel(result)}
+                  {result.oneTime > 0 ? " one-time" : ""}
+                </strong>
+                <span>{monthlyLabel}</span>
+                {result.quoteRequired && (
+                  <span>Custom work will be quoted separately.</span>
+                )}
+              </div>
             )}
-          </div>
-        )}
-        <form
-          ref={enquiryForm}
-          aria-busy={submission.pending}
-          onInput={submission.firstInput}
-          onInvalidCapture={submission.invalid}
-          onSubmit={(event) => {
-            event.preventDefault();
-            const data = new FormData(event.currentTarget);
-            const message = [
-              String(
-                data.get("message") ||
-                  "I’d like a quote for this starting point.",
-              ),
-              guideText,
-              hasItems ? buildBrief(selection, customNotes) : "",
-            ]
-              .filter(Boolean)
-              .join("\n\n");
-            void submission.submit({
-              name: String(data.get("name") || ""),
-              email: String(data.get("email") || ""),
-              company: String(data.get("company") || ""),
-              message,
-              website: String(data.get("website") || ""),
-            });
-          }}
-        >
-          <label>
-            Your name
-            <input
-              name="name"
-              autoComplete="name"
-              required
-              maxLength={100}
-              disabled={submission.pending || submission.sent}
-            />
-          </label>
-          <label>
-            Email
-            <input
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              maxLength={254}
-              disabled={submission.pending || submission.sent}
-            />
-          </label>
-          <label>
-            Business name (optional)
-            <input
-              name="company"
-              autoComplete="organization"
-              maxLength={180}
-              disabled={submission.pending || submission.sent}
-            />
-          </label>
-          <label>
-            {hasItems || guideText
-              ? "Anything else you’d like us to know? (optional)"
-              : "What do you have in mind?"}
-            <textarea
-              name="message"
-              rows={3}
-              required={!hasItems && !guideText}
-              maxLength={1800}
-              disabled={submission.pending || submission.sent}
-            />
-          </label>
-          <div
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              left: "-10000px",
-              width: 1,
-              height: 1,
-              overflow: "hidden",
-            }}
-          >
-            <label>
-              Leave this field empty
-              <input name="website" autoComplete="off" tabIndex={-1} />
-            </label>
-          </div>
-          <button
-            className={s.primary}
-            type="submit"
-            disabled={submission.pending || submission.sent}
-          >
-            {submission.pending
-              ? "Sending…"
-              : submission.sent
-                ? "Enquiry received"
-                : "Send enquiry"}{" "}
-            <Arrow />
-          </button>
-          <p className={s.help}>
-            We use your details to respond to your enquiry.{" "}
-            <a href="/privacy">Privacy policy</a>.
-          </p>
-          {submission.error && <p role="alert">{submission.error}</p>}
-          {submission.conflict && (
-            <button
-              type="button"
-              onClick={() => {
-                submission.restart();
-                enquiryForm.current?.reset();
+            <form
+              ref={enquiryForm}
+              aria-busy={submission.pending}
+              onInput={submission.firstInput}
+              onInvalidCapture={submission.invalid}
+              onSubmit={(event) => {
+                event.preventDefault();
+                const data = new FormData(event.currentTarget);
+                const message = [
+                  String(
+                    data.get("message") ||
+                      "I’d like a quote for this starting point.",
+                  ),
+                  guideText,
+                  hasItems ? buildBrief(selection, customNotes) : "",
+                ]
+                  .filter(Boolean)
+                  .join("\n\n");
+                void submission.submit({
+                  name: String(data.get("name") || ""),
+                  email: String(data.get("email") || ""),
+                  company: String(data.get("company") || ""),
+                  message,
+                  website: String(data.get("website") || ""),
+                });
               }}
             >
-              Start a new enquiry
-            </button>
-          )}
-          {submission.sent && <p role="status">{enquiryReceivedMessage}</p>}
-          <p className={s.help}>
-            Prefer email?{" "}
-            <a href="mailto:contact@halenn.com">contact@halenn.com</a>.
-          </p>
-        </form>
+              <label>
+                Your name
+                <input
+                  name="name"
+                  autoComplete="name"
+                  required
+                  maxLength={100}
+                  disabled={submission.pending || submission.sent}
+                />
+              </label>
+              <label>
+                Email
+                <input
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  maxLength={254}
+                  disabled={submission.pending || submission.sent}
+                />
+              </label>
+              <label>
+                Business name (optional)
+                <input
+                  name="company"
+                  autoComplete="organization"
+                  maxLength={180}
+                  disabled={submission.pending || submission.sent}
+                />
+              </label>
+              <label>
+                {hasItems || guideText
+                  ? "Anything else you’d like us to know? (optional)"
+                  : "What do you have in mind?"}
+                <textarea
+                  name="message"
+                  rows={3}
+                  required={!hasItems && !guideText}
+                  maxLength={1800}
+                  disabled={submission.pending || submission.sent}
+                />
+              </label>
+              <div
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  left: "-10000px",
+                  width: 1,
+                  height: 1,
+                  overflow: "hidden",
+                }}
+              >
+                <label>
+                  Leave this field empty
+                  <input name="website" autoComplete="off" tabIndex={-1} />
+                </label>
+              </div>
+              <button
+                className={s.primary}
+                type="submit"
+                disabled={submission.pending || submission.sent}
+              >
+                {submission.pending
+                  ? "Sending…"
+                  : submission.sent
+                    ? "Enquiry received"
+                    : "Send enquiry"}{" "}
+                <Arrow />
+              </button>
+              <p className={s.help}>
+                We use your details to respond to your enquiry.{" "}
+                <a href="/privacy">Privacy policy</a>.
+              </p>
+              {submission.error && <p role="alert">{submission.error}</p>}
+              {submission.conflict && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    submission.restart();
+                    enquiryForm.current?.reset();
+                  }}
+                >
+                  Start a new enquiry
+                </button>
+              )}
+              <p className={s.help}>
+                Prefer email?{" "}
+                <a href="mailto:contact@halenn.com">contact@halenn.com</a>.
+              </p>
+            </form>
+          </>
+        )}
       </dialog>
     </EstimateProvider>
   );
