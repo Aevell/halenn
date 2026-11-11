@@ -145,3 +145,11 @@ Internal mail continues to include the visitor's name, email, optional business 
 The sender, recipient, Reply-To, subject and complete plain-text content remain unchanged. The migration performs no sends, backfill or outbox updates. Already frozen pending/accepted payloads keep their previous HTML; only a new first dispatch uses the new design. Apply this migration after the public email assets are confirmed available, and verify a future notification without resetting or resending an existing record.
 
 The internal notification suite adds upgrade preservation, hostile/literal-marker/long-text handling and branded layout checks, then runs the existing delivery scenarios against the updated function. Set `HALENN_NOTIFICATION_PREVIEW=/private/tmp/halenn-enquiry-notification-preview.html` when running `scripts/verify-enquiry-notifications.mjs` to export a clearly synthetic nail-studio enquiry for visual review. This local preview makes no network or email-sending requests.
+
+### White customer receipts and internal alerts
+
+`202611110001_white_enquiry_emails.sql` replaces only the two private payload renderers. Both now use a white message surface, pale grey surround, navy headings and links, muted slate body text, and fine grey rules. The internal lead button is navy with white text. Manrope Light, Geist Regular, mobile spacing and Outlook fallbacks remain. Versioned navy logo images match the existing silhouettes and have a white backing so forced dark-mode colour inversion does not hide the logos. Clients can still transform other colours or substitute fonts.
+
+Publish and check both `/brand/email/halenn-wordmark-navy-v1.png` and `/brand/email/halenn-mark-navy-v1.png` before applying this migration. It performs no sends and changes no configuration, outbox rows, schedules, recipients, subjects, Reply-To addresses or plain text. Existing frozen retries remain unchanged.
+
+The customer verification suite applies the white upgrade over both dark templates and checks both outboxes, cron, configuration, no new requests, non-HTML payload equality, preserved retries, field escaping and new first sends. Set `HALENN_CONFIRMATION_PREVIEW` and `HALENN_WHITE_NOTIFICATION_PREVIEW` to export the actual generated HTML with synthetic data; no emails are sent.

@@ -114,6 +114,64 @@ try {
   });
   await db.exec(brandedSql);
 
+  await db.exec(await migration("202611100003_branded_enquiry_notification.sql"));
+  const whiteSql = await migration("202611110001_white_enquiry_emails.sql");
+  assert.ok(whiteSql.startsWith("begin;\n") && /commit;\s*$/.test(whiteSql));
+  await test("white email upgrade preserves both frozen outboxes, configuration, cron and all non-HTML content without sending", async () => {
+    await ready();
+    const pending = enquiry(); const accepted = enquiry();
+    await submit(pending); await submit(accepted);
+    await respond(accepted); await respond(accepted, 200, JSON.stringify({ id: id(998) }), {}, false); await worker();
+    const customerBefore = await query("select * from private.halenn_customer_confirmations order by enquiry_id");
+    const founderBefore = await query("select * from private.halenn_enquiry_notifications order by enquiry_id");
+    const configBefore = await query("select * from private.halenn_enquiry_notification_config");
+    const cronBefore = await query("select * from cron.test_jobs");
+    const requestsBefore = await query("select * from net.test_requests order by id");
+    await db.exec(whiteSql.replace(/^begin;\n/, "").replace(/commit;\s*$/, ""));
+    assert.deepEqual(await query("select * from private.halenn_customer_confirmations order by enquiry_id"), customerBefore);
+    assert.deepEqual(await query("select * from private.halenn_enquiry_notifications order by enquiry_id"), founderBefore);
+    assert.deepEqual(await query("select * from private.halenn_enquiry_notification_config"), configBefore);
+    assert.deepEqual(await query("select * from cron.test_jobs"), cronBefore);
+    assert.deepEqual(await query("select * from net.test_requests order by id"), requestsBefore);
+    const omitHtml = (payload) => Object.fromEntries(Object.entries(payload).filter(([key]) => key !== "html"));
+    for (const [fn, original] of [["halenn_customer_confirmation_payload", await outbox(pending)], ["halenn_notification_payload", await admin(pending)]]) {
+      const updated = (await query(`select private.${fn}($1) as p`, [pending.id]))[0].p;
+      assert.deepEqual(omitHtml(updated), omitHtml(original.payload));
+      assert.notEqual(updated.html, original.payload.html);
+      assert.ok(updated.html.includes('bgcolor="#ffffff"'));
+      for (const role of ["anon", "authenticated"])
+        assert.equal((await query("select has_function_privilege($1, $2, 'execute') as allowed", [role, `private.${fn}(uuid)`]))[0].allowed, false);
+    }
+    await respond(pending, 503, '{}'); await respond(pending, 503, '{}', {}, false); await worker(); await due(pending);
+    await query("update private.halenn_enquiry_notifications set next_attempt_at=clock_timestamp()-interval '1 second' where enquiry_id=$1", [pending.id]); await worker();
+    assert.deepEqual((await request(pending)).body, customerBefore.find(row => row.enquiry_id === pending.id).payload);
+    assert.deepEqual((await request(pending, false)).body, founderBefore.find(row => row.enquiry_id === pending.id).payload);
+    assert.equal(await requestCount(accepted), 1); assert.equal(await requestCount(accepted, false), 1);
+    const next = enquiry(); await submit(next);
+    for (const customer of [true, false]) assert.ok((await request(next, customer)).body.html.includes('bgcolor="#ffffff"'));
+  });
+  await db.exec(whiteSql);
+
+  await test("white internal email preserves hostile text, optional fields, long messages and a legible navy lead action", async () => {
+    await ready();
+    const message = '{{received}} {{reference}} %s <img src=x onerror="bad()"> & \'quoted\'\r\n\n' + 'LongToken'.repeat(2000);
+    const p = enquiry({ name: 'A <B> & "C"', email: 'alex@example.test', company: '{{reference}} <Company>', message });
+    await submit(p);
+    const payload = (await request(p, false)).body;
+    const escape = (v) => v.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+    for (const value of [p.name, p.email, p.company]) assert.ok(payload.html.includes(escape(value)));
+    assert.ok(payload.html.includes(escape(message).replaceAll('\r\n','\n').replaceAll('\n','<br>')));
+    assert.ok(!payload.html.includes('<img src=x'));
+    assert.ok(payload.text.includes(message));
+    assert.match(payload.html, /color:#ffffff;background-color:#111c29/);
+    assert.ok(payload.html.indexOf('>View this lead</a>') < payload.html.indexOf('>MESSAGE</h2>'));
+    const sample = enquiry({ name: 'Alex Morgan', email: 'alex@example.test', company: 'Studio Noor', message: 'I would like a website with online booking and automatic appointment reminders.\n\nCould you help me understand the options?', origin: 'quiz' });
+    await submit(sample);
+    if (process.env.HALENN_WHITE_NOTIFICATION_PREVIEW) await writeFile(process.env.HALENN_WHITE_NOTIFICATION_PREVIEW, (await request(sample, false)).body.html);
+    const noCompany = enquiry({ company: '' }); await submit(noCompany);
+    assert.ok(!(await request(noCompany, false)).body.html.includes('>BUSINESS</p>'));
+  });
+
   await test("analytics upgrade preserves both email outboxes and does not resend historical enquiries", async () => {
     await ready(); const p = enquiry(); await submit(p);
     const founderBefore = await admin(p), customerBefore = await outbox(p);
@@ -138,8 +196,8 @@ try {
     assert.ok(!/<script|javascript:|display\s*:\s*(?:flex|grid)|border-radius/i.test(html));
     const tables = html.match(/<table\b[^>]*>/g);
     assert.ok(tables.length >= 3 && tables.every((table) => table.includes('role="presentation"')));
-    assert.match(html, /src="https:\/\/halenn\.com\/brand\/email\/halenn-wordmark-v1\.png" alt="Halenn" width="167" height="24"/);
-    assert.match(html, /src="https:\/\/halenn\.com\/brand\/halenn-mark-v2-180\.png" alt="" width="48" height="48"/);
+    assert.match(html, /src="https:\/\/halenn\.com\/brand\/email\/halenn-wordmark-navy-v1\.png" alt="Halenn" width="167" height="24"/);
+    assert.match(html, /src="https:\/\/halenn\.com\/brand\/email\/halenn-mark-navy-v1\.png" alt="" width="48" height="48"/);
     for (const font of ["Manrope-Light.ttf", "Geist-Regular.ttf"])
       assert.ok(html.includes("https://halenn.com/brand/email/" + font));
     assert.ok(html.includes("<!--[if !mso]><!-->") && html.includes("<!--[if mso]><style>"));
@@ -151,7 +209,7 @@ try {
     assert.match(html, /padding:32px 24px !important/);
     assert.ok(html.includes("word-break:break-all;overflow-wrap:anywhere;"));
     assert.ok(html.includes('aria-hidden="true"') && html.includes("mso-hide:all"));
-    for (const colour of ["#07090d", "#0a1018", "#f2f1ed", "#b8c7d9", "#263347"])
+    for (const colour of ["#eef1f4", "#ffffff", "#111c29", "#536477", "#d8e0e8"])
       assert.ok(html.includes(colour));
   });
 
