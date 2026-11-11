@@ -151,6 +151,7 @@ try {
     for (const customer of [true, false]) assert.ok((await request(next, customer)).body.html.includes('bgcolor="#ffffff"'));
   });
   await db.exec(whiteSql);
+  await db.exec(await migration("202611110002_refined_enquiry_email_copy.sql"));
 
   await test("white internal email preserves hostile text, optional fields, long messages and a legible navy lead action", async () => {
     await ready();
@@ -163,8 +164,11 @@ try {
     assert.ok(payload.html.includes(escape(message).replaceAll('\r\n','\n').replaceAll('\n','<br>')));
     assert.ok(!payload.html.includes('<img src=x'));
     assert.ok(payload.text.includes(message));
+    assert.match(payload.html, /<h1[^>]*>New<br>enquiry\.<\/h1>/);
+    assert.ok(payload.text.includes("New enquiry"));
+    assert.ok(payload.text.includes("View enquiry: https://halenn.com/admin/leads?lead="));
     assert.match(payload.html, /color:#ffffff;background-color:#111c29/);
-    assert.ok(payload.html.indexOf('>View this lead</a>') < payload.html.indexOf('>MESSAGE</h2>'));
+    assert.ok(payload.html.indexOf('>View enquiry</a>') < payload.html.indexOf('>MESSAGE</h2>'));
     const sample = enquiry({ name: 'Alex Morgan', email: 'alex@example.test', company: 'Studio Noor', message: 'I would like a website with online booking and automatic appointment reminders.\n\nCould you help me understand the options?', origin: 'quiz' });
     await submit(sample);
     if (process.env.HALENN_WHITE_NOTIFICATION_PREVIEW) await writeFile(process.env.HALENN_WHITE_NOTIFICATION_PREVIEW, (await request(sample, false)).body.html);
@@ -250,6 +254,9 @@ try {
       assert.equal(r.body.subject, "We’ve received your enquiry | Halenn");
       assert.deepEqual(r.body.headers, { "Auto-Submitted": "auto-replied", "X-Auto-Response-Suppress": "All" });
       for (const body of [r.body.html, r.body.text]) {
+        assert.ok(body.includes("Thank you for considering Halenn for your next project."));
+        assert.ok(body.includes("We’ll review your enquiry and follow up to discuss your requirements and the next steps."));
+        assert.ok(body.includes("If there’s anything you’d like to add, simply reply to this email."));
         assert.ok(body.includes(p.id)); assert.ok(body.includes("(Amsterdam)"));
         assert.ok(!body.includes("evil.example")); assert.ok(!body.includes(p.name));
         assert.ok(!body.includes(p.company)); assert.ok(!body.includes(p.message));

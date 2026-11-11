@@ -153,3 +153,7 @@ The internal notification suite adds upgrade preservation, hostile/literal-marke
 Publish and check both `/brand/email/halenn-wordmark-navy-v1.png` and `/brand/email/halenn-mark-navy-v1.png` before applying this migration. It performs no sends and changes no configuration, outbox rows, schedules, recipients, subjects, Reply-To addresses or plain text. Existing frozen retries remain unchanged.
 
 The customer verification suite applies the white upgrade over both dark templates and checks both outboxes, cron, configuration, no new requests, non-HTML payload equality, preserved retries, field escaping and new first sends. Set `HALENN_CONFIRMATION_PREVIEW` and `HALENN_WHITE_NOTIFICATION_PREVIEW` to export the actual generated HTML with synthetic data; no emails are sent.
+
+### Refined wording
+
+`202611110002_refined_enquiry_email_copy.sql` applies the approved customer copy: thanks for considering Halenn, review and follow-up to discuss requirements and next steps, and an invitation to reply with additions. The customer preheader follows the same wording. Internal alerts use **New enquiry.** and **View enquiry**. HTML and plain-text versions are updated together; subjects and all visual styles/assets remain unchanged. This migration replaces only the two private renderers, without sending, backfilling or altering frozen retries.
