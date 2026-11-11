@@ -121,8 +121,10 @@ var HalennProjectCalls = (function () {
     return bytes.map(function (value) { return ((value + 256) % 256).toString(16).padStart(2, '0'); }).join('');
   }
 
-  function payload(events) {
-    return JSON.stringify({ version: 1, calendarId: CALENDAR_ID, events: events });
+  function payload(events, scanStartedAt) {
+    var body = { version: 1, calendarId: CALENDAR_ID, events: events };
+    if (scanStartedAt !== undefined) body.scanStartedAt = scanStartedAt;
+    return JSON.stringify(body);
   }
 
   function utf8Length(value) {
@@ -134,8 +136,8 @@ var HalennProjectCalls = (function () {
     return length;
   }
 
-  function postBatch(events, deps) {
-    var raw = payload(events);
+  function postBatch(events, deps, scanStartedAt) {
+    var raw = payload(events, scanStartedAt);
     var attempts = 3;
     var timestamp = String(Math.floor(deps.now() / 1000));
     var signature = bytesToHex(deps.hmac(timestamp + '.' + raw, deps.secret));
@@ -172,6 +174,7 @@ var HalennProjectCalls = (function () {
 
   /** deps make sync behavior testable without any Google or network access. */
   function runSync(state, deps) {
+    var scanStartedAt = new Date(deps.now()).toISOString();
     var known = JSON.parse(JSON.stringify(state.known || {}));
     var originalToken = state.syncToken || null;
     var token = originalToken;
@@ -243,9 +246,6 @@ var HalennProjectCalls = (function () {
     if (JSON.stringify(newState).length > MAX_STATE_BYTES) {
       throw new Error('Halenn sync state is too large for Script Properties; sync state was not advanced.');
     }
-    // An accepted empty batch is a heartbeat: the calendar was checked even
-    // when there were no project-call changes (including filtered-only deltas).
-    if (matched.length === 0) postBatch([], deps);
     var batch = [];
     matched.forEach(function (event) {
       var candidate = batch.concat([event]);
@@ -258,6 +258,10 @@ var HalennProjectCalls = (function () {
       }
     });
     if (batch.length) postBatch(batch, deps);
+    // Only this final accepted checkpoint proves all changes from a scan that
+    // began at scanStartedAt have reached Halenn. Partial batches never do.
+    postBatch([], deps, scanStartedAt);
+    newState.lastSuccessfulSync = new Date(deps.now()).toISOString();
     deps.save(newState);
     return { sent: matched.length, tracked: Object.keys(known).length, recovered: Boolean(originalToken && !token) };
   }

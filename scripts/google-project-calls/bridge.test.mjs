@@ -111,7 +111,7 @@ test('paginates incremental results and signs exact minimal batches of 50', () =
   } });
   const result = bridge.runSync({ syncToken: 'old-token', known: {} }, deps);
   assert.equal(result.sent, 51);
-  assert.deepEqual(calls.map((call) => JSON.parse(call.payload).events.length), [50, 1]);
+  assert.deepEqual(calls.map((call) => JSON.parse(call.payload).events.length), [50, 1, 0]);
   assert.equal(requests[0].syncToken, 'old-token');
   assert.equal(requests[1].pageToken, 'page-2');
   assert.equal(saved[0].syncToken, 'complete-token');
@@ -120,7 +120,9 @@ test('paginates incremental results and signs exact minimal batches of 50', () =
     assert.equal(call.url, 'https://halenn.com/api/project-call-events');
     assert.equal(call.headers['X-Halenn-Timestamp'], String(now / 1000));
     assert.equal(call.headers['X-Halenn-Signature'], createHmac('sha256', secret).update(`${call.headers['X-Halenn-Timestamp']}.${call.payload}`).digest('hex'));
-    assert.deepEqual(Object.keys(JSON.parse(call.payload)).sort(), ['calendarId', 'events', 'version']);
+    const body = JSON.parse(call.payload);
+    assert.deepEqual(Object.keys(body).sort(), body.events.length ? ['calendarId', 'events', 'version'] : ['calendarId', 'events', 'scanStartedAt', 'version']);
+    if (!body.events.length) assert.equal(body.scanStartedAt, new Date(now).toISOString());
     assert.equal(call.followRedirects, false);
   }
 });
@@ -137,8 +139,10 @@ test('transport and transient retries reuse identical bytes, timestamp and signa
     },
   });
   bridge.runSync({ known: {} }, deps);
-  assert.equal(sent.length, 3);
+  assert.equal(sent.length, 4);
   assert.deepEqual(sent[0], sent[1]); assert.deepEqual(sent[1], sent[2]);
+  assert.equal(JSON.parse(sent[3].payload).events.length, 0);
+  assert.equal(JSON.parse(sent[3].payload).scanStartedAt, new Date(now + 1000).toISOString());
   assert.deepEqual(delays, [500, 1000]);
   assert.equal(saved.length, 1);
 });
@@ -148,7 +152,7 @@ test('large Unicode payloads respect the byte bound as well as the 50-event boun
   const items = Array.from({ length: 50 }, (_, index) => event({ id: String(index).padStart(5, '0') + 'a'.repeat(1019), attendees: [attendee] }));
   const { deps, calls } = harness({ list: () => ({ items, nextSyncToken: 'next' }) });
   bridge.runSync({ syncToken: 'old', known: {} }, deps);
-  assert.ok(calls.length > 1);
+  assert.ok(calls.filter((call) => JSON.parse(call.payload).events.length).length > 1);
   assert.equal(calls.reduce((sum, call) => sum + JSON.parse(call.payload).events.length, 0), 50);
   for (const call of calls) {
     assert.ok(Buffer.byteLength(call.payload, 'utf8') <= 80000);
@@ -156,7 +160,7 @@ test('large Unicode payloads respect the byte bound as well as the 50-event boun
   }
 });
 
-test('empty and filtered-only successful scans send a signed empty heartbeat before saving state', () => {
+test('empty and filtered-only successful scans send one signed completion checkpoint before saving state', () => {
   for (const items of [[], [event({ summary: 'Private dentist appointment' })]]) {
     const order = [];
     const { deps, calls } = harness({
@@ -168,14 +172,14 @@ test('empty and filtered-only successful scans send a signed empty heartbeat bef
     const result = bridge.runSync({ syncToken: 'previous-token', known: {} }, deps);
     assert.equal(result.sent, 0);
     assert.equal(calls.length, 1);
-    assert.deepEqual(JSON.parse(calls[0].payload), { version: 1, calendarId, events: [] });
+    assert.deepEqual(JSON.parse(calls[0].payload), { version: 1, calendarId, events: [], scanStartedAt: new Date(now).toISOString() });
     assert.equal(calls[0].headers['X-Halenn-Signature'], createHmac('sha256', secret)
       .update(`${calls[0].headers['X-Halenn-Timestamp']}.${calls[0].payload}`).digest('hex'));
     assert.deepEqual(order, ['post', 'save']);
   }
 });
 
-test('failed empty heartbeat cannot advance the sync token or claim local success', () => {
+test('failed empty completion checkpoint cannot advance the sync token or claim local success', () => {
   const { deps, saved, delays } = harness({ fetch: () => ({ getResponseCode: () => 503 }) });
   assert.throws(() => bridge.runSync({ syncToken: 'old', known: {} }, deps), /not accept/);
   assert.equal(saved.length, 0);
@@ -200,14 +204,78 @@ test('rejected or incomplete batches never advance state; permanent rejection is
 
 test('partial batch acceptance remains safely replayable', () => {
   let request = 0;
+  const bodies = [];
   const state = { syncToken: 'old', known: {} };
   const { deps, saved } = harness({
     list: () => ({ items: Array.from({ length: 51 }, (_, i) => event({ id: `call${i}` })), nextSyncToken: 'next' }),
-    fetch: () => { request += 1; return { getResponseCode: () => request === 1 ? 200 : 503 }; },
+    fetch: (_url, options) => { request += 1; bodies.push(JSON.parse(options.payload)); return { getResponseCode: () => request === 1 ? 200 : 503 }; },
   });
   assert.throws(() => bridge.runSync(state, deps), /not accept/);
   assert.equal(request, 4); assert.equal(saved.length, 0);
+  assert.ok(bodies.every((body) => body.events.length > 0 && !('scanStartedAt' in body)));
   assert.deepEqual(state, { syncToken: 'old', known: {} });
+});
+
+test('completion checkpoint records scan start before listing and follows every accepted data batch', () => {
+  const order = []; const bodies = []; let clock = now;
+  const { deps } = harness({
+    now: () => clock,
+    list: (_id, options) => {
+      order.push(options.pageToken ? 'list-2' : 'list-1');
+      clock += 60_000;
+      if (!options.pageToken) return { items: Array.from({ length: 51 }, (_, index) => event({ id: `call${index}` })), nextPageToken: 'second-page' };
+      return { items: [], nextSyncToken: 'complete-token' };
+    },
+    fetch: (_url, options) => {
+      const body = JSON.parse(options.payload);
+      bodies.push(body);
+      order.push(body.events.length ? `data-${body.events.length}` : 'complete');
+      if ('scanStartedAt' in body) {
+        assert.equal(body.events.length, 0);
+        assert.equal(body.scanStartedAt, new Date(now).toISOString());
+        assert.equal(Number(options.headers['X-Halenn-Timestamp']), clock / 1000);
+      }
+      clock += 1000;
+      return { getResponseCode: () => 200 };
+    },
+    save: (state) => {
+      order.push('save');
+      assert.equal(state.syncToken, 'complete-token');
+      assert.equal(state.lastSuccessfulSync, new Date(clock).toISOString());
+    },
+  });
+  bridge.runSync({ syncToken: 'old', known: {} }, deps);
+  assert.deepEqual(order, ['list-1', 'list-2', 'data-50', 'data-1', 'complete', 'save']);
+  assert.ok(bodies.slice(0, -1).every((body) => !('scanStartedAt' in body)));
+});
+
+test('final checkpoint failure after accepted data batches leaves old state and retries identical checkpoint bytes', () => {
+  const requests = [];
+  const initial = { syncToken: 'old', known: {} };
+  const { deps, saved } = harness({
+    list: () => ({ items: Array.from({ length: 51 }, (_, index) => event({ id: `call${index}` })), nextSyncToken: 'next' }),
+    fetch: (_url, options) => {
+      requests.push(plain(options));
+      return { getResponseCode: () => JSON.parse(options.payload).events.length ? 200 : 503 };
+    },
+  });
+  assert.throws(() => bridge.runSync(initial, deps), /not accept/);
+  assert.deepEqual(requests.map((request) => JSON.parse(request.payload).events.length), [50, 1, 0, 0, 0]);
+  assert.deepEqual(requests[2], requests[3]); assert.deepEqual(requests[3], requests[4]);
+  assert.equal(JSON.parse(requests[2].payload).scanStartedAt, new Date(now).toISOString());
+  assert.equal(saved.length, 0);
+  assert.deepEqual(initial, { syncToken: 'old', known: {} });
+});
+
+test('a failed later calendar page cannot publish a completion checkpoint', () => {
+  const { deps, calls, saved } = harness({
+    list: (_id, options) => {
+      if (options.pageToken) throw new Error('503 Calendar unavailable');
+      return { items: [event()], nextPageToken: 'second-page' };
+    },
+  });
+  assert.throws(() => bridge.runSync({ syncToken: 'old', known: {} }, deps), /Calendar unavailable/);
+  assert.equal(calls.length, 0); assert.equal(saved.length, 0);
 });
 
 test('expired token triggers full resync and resolves a known missing booking by ID', () => {

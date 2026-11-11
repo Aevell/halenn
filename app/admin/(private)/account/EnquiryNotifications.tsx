@@ -9,7 +9,14 @@ type DeliveryCounts = {
   lastAcceptedAt: string | null;
 };
 
-type CustomerStatus = DeliveryCounts & { enabled: boolean; skipped: number };
+type CustomerStatus = DeliveryCounts & {
+  enabled: boolean;
+  skipped: number;
+  waitingForBooking: number;
+  bookingSuppressed: number;
+  bookingReview: number;
+  hasBookingPolicy: boolean;
+};
 type NotificationStatus = DeliveryCounts & {
   enabled: boolean;
   configured: boolean;
@@ -17,10 +24,13 @@ type NotificationStatus = DeliveryCounts & {
   customer: CustomerStatus | null;
 };
 
+function validCount(count: unknown): count is number {
+  return typeof count === "number" && Number.isSafeInteger(count) && count >= 0;
+}
+
 function validCounts(status: Record<string, unknown>): boolean {
-  return [status.pending, status.accepted, status.attention].every(
-    (count) => typeof count === "number" && Number.isSafeInteger(count) && count >= 0,
-  ) && (status.lastAcceptedAt === null || (
+  return [status.pending, status.accepted, status.attention].every(validCount)
+  && (status.lastAcceptedAt === null || (
     typeof status.lastAcceptedAt === "string" &&
     Number.isFinite(Date.parse(status.lastAcceptedAt))
   ));
@@ -37,11 +47,19 @@ function readStatus(value: unknown): NotificationStatus | null {
   ) return null;
   const customer = status.customer && typeof status.customer === "object"
     ? status.customer as Record<string, unknown> : null;
+  const bookingFields = ["waitingForBooking", "bookingSuppressed", "bookingReview"] as const;
+  const customerValid = customer && typeof customer.enabled === "boolean" &&
+    validCount(customer.skipped) && validCounts(customer) &&
+    bookingFields.every((field) => customer[field] === undefined || validCount(customer[field]));
   return {
     ...status,
-    customer: customer && typeof customer.enabled === "boolean" &&
-      typeof customer.skipped === "number" && Number.isSafeInteger(customer.skipped) &&
-      customer.skipped >= 0 && validCounts(customer) ? customer as CustomerStatus : null,
+    customer: customerValid ? {
+      ...customer,
+      waitingForBooking: customer.waitingForBooking ?? 0,
+      bookingSuppressed: customer.bookingSuppressed ?? 0,
+      bookingReview: customer.bookingReview ?? 0,
+      hasBookingPolicy: bookingFields.every((field) => validCount(customer[field])),
+    } as CustomerStatus : null,
   } as NotificationStatus;
 }
 
@@ -96,12 +114,25 @@ export default async function EnquiryNotifications() {
             </span>
           </header>
           <p>{customerActive
-            ? <>Customers receive an acknowledgement after sending an enquiry. Replies go to <strong>{status.recipient}</strong>.</>
+            ? <>{status.customer?.hasBookingPolicy
+              ? "Customers receive an enquiry acknowledgement unless a matching booking covers it."
+              : "Customers receive an acknowledgement after sending an enquiry."} Replies go to <strong>{status.recipient}</strong>.</>
             : "Automatic customer confirmations are not active. Enquiries are still saved in Leads."}</p>
           {status.customer && <>
             <Counts counts={status.customer} />
+            {status.customer.hasBookingPolicy && <>
+              <dl className="hw-notification-counts hw-notification-booking-counts" aria-label="Customer booking checks">
+                <div><dt>Waiting for booking check</dt><dd>{status.customer.waitingForBooking.toLocaleString("en-GB")}</dd></div>
+                <div><dt>Booking receipt only</dt><dd>{status.customer.bookingSuppressed.toLocaleString("en-GB")}</dd></div>
+              </dl>
+              <p className="hw-notification-note">New enquiry confirmations wait 15 minutes, then check a fresh calendar sync. A matching booking uses Google’s booking confirmation only.</p>
+              <p className="hw-notification-note">If the enquiry confirmation has already been sent, a later booking still receives Google’s booking email.</p>
+              {status.customer.bookingReview > 0 && <p className="hw-notification-note">
+                {status.customer.bookingReview.toLocaleString("en-GB")} booking {status.customer.bookingReview === 1 ? "check is" : "checks are"} included in Needs review.
+              </p>}
+            </>}
             <p className="hw-notification-note">
-              {status.customer.skipped.toLocaleString("en-GB")} skipped by delivery safeguards. Repeated submissions, unsupported addresses, older enquiries and daily limits can skip a confirmation; the enquiry itself is kept.
+              {status.customer.skipped.toLocaleString("en-GB")} skipped by {status.customer.hasBookingPolicy ? "other delivery safeguards" : "delivery safeguards"}. Repeated submissions, unsupported addresses, older enquiries and daily limits can skip a confirmation; the enquiry itself is kept.
             </p>
             <p className="hw-notification-note">Up to 40 customer confirmations per 24 hours, with at most one per address per hour and three per day. Temporary sending problems are retried automatically.</p>
           </>}

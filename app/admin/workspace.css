@@ -779,6 +779,11 @@
   gap: 14px;
   margin: 24px 0;
 }
+.hw-notification-booking-counts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding-top: 18px;
+  border-top: 1px solid var(--edge);
+}
 .hw-notification-counts dt {
   color: var(--sub);
   font-size: 11px;

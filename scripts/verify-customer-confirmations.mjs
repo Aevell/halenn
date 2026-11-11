@@ -3,8 +3,10 @@
 import assert from "node:assert/strict";
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-const { PGlite } = await import(process.env.HALENN_PGLITE_MODULE || "@electric-sql/pglite");
-const db = new PGlite();
+const modulePath = process.env.HALENN_PGLITE_MODULE || "@electric-sql/pglite";
+const { PGlite } = await import(modulePath);
+const { pgcrypto } = await import(modulePath.endsWith("/dist/index.js") ? modulePath.replace(/index\.js$/, "contrib/pgcrypto.js") : "@electric-sql/pglite/contrib/pgcrypto");
+const db = new PGlite({ extensions: { pgcrypto } });
 const root = fileURLToPath(new URL("../", import.meta.url));
 const migration = (name) => readFile(root + "supabase/migrations/" + name, "utf8");
 const id = (n) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
@@ -152,6 +154,10 @@ try {
   });
   await db.exec(whiteSql);
   await db.exec(await migration("202611110002_refined_enquiry_email_copy.sql"));
+  // Exercise the new dispatcher with optional booking disabled: ordinary mail,
+  // rate limits, frozen retries and failure isolation must retain their behaviour.
+  await db.exec(await migration("202611110003_project_call_bookings.sql"));
+  await db.exec(await migration("202611110005_booking_aware_confirmations.sql"));
 
   await test("white internal email preserves hostile text, optional fields, long messages and a legible navy lead action", async () => {
     await ready();
@@ -324,7 +330,7 @@ try {
       if (i === 40) assert.equal((await outbox(p)).last_error, "daily_limit");
     }
     assert.equal((await query("select count(*)::int as n from private.halenn_customer_confirmations where first_attempt_at is not null"))[0].n, 40);
-    const definition = (await query("select pg_get_functiondef('private.halenn_dispatch_customer_confirmation(uuid)'::regprocedure) as definition"))[0].definition;
+    const definition = (await query("select pg_get_functiondef('private.halenn_dispatch_customer_confirmation_delivery(uuid)'::regprocedure) as definition"))[0].definition;
     assert.ok(definition.indexOf("pg_advisory_xact_lock(73904105)") < definition.indexOf("last_error = 'daily_limit'"), "Shared transaction lock protects recipient and global reservation checks");
   });
 
@@ -444,6 +450,7 @@ try {
       await denied("select * from private.halenn_customer_confirmations");
       await denied("select private.halenn_customer_confirmation_payload($1)", [p.id]);
       await denied("select private.halenn_dispatch_customer_confirmation($1)", [p.id]);
+      await denied("select private.halenn_dispatch_customer_confirmation_delivery($1)", [p.id]);
       await denied("select private.halenn_process_customer_confirmations()");
       await denied("select private.halenn_process_admin_enquiry_notifications()");
       await denied("select private.halenn_process_enquiry_notifications()");
@@ -453,7 +460,7 @@ try {
     await denied("select public.halenn_enquiry_notification_status()"); await db.exec("reset role");
     const s = await status();
     assert.deepEqual(Object.keys(s).sort(), ["enabled", "configured", "keyExists", "recipient", "pending", "accepted", "attention", "lastAcceptedAt", "customer"].sort());
-    assert.deepEqual(Object.keys(s.customer).sort(), ["enabled", "pending", "accepted", "attention", "skipped", "lastAcceptedAt"].sort());
+    assert.deepEqual(Object.keys(s.customer).sort(), ["enabled", "pending", "accepted", "attention", "skipped", "lastAcceptedAt", "waitingForBooking", "bookingSuppressed", "bookingReview"].sort());
     assert.equal(s.customer.enabled, true); assert.equal(s.customer.accepted, 1); assert.equal(s.customer.pending, 0);
     assert.ok(!JSON.stringify(s).includes(p.email)); assert.ok(!JSON.stringify(s).includes("re_local_test_placeholder"));
     await db.exec("update private.halenn_founders set needs_password=true;set local role authenticated");
