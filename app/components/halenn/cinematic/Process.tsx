@@ -8,7 +8,7 @@ import s from "./process.module.css";
 const steps = [
   {
     title: "Tell us what you need.",
-    text: "Share what you want to improve and the tools you already use. We’ll help you find the right approach. No technical brief needed.",
+    text: "Send a short enquiry about what you want to improve. We’ll reply by email, with an optional 30-minute call to explore your idea together.",
   },
   {
     title: "Agree a clear plan.",
@@ -57,7 +57,7 @@ export default function Process() {
       </ol>
 
       <div className={s.nextStep}>
-        <p>Start with a conversation. We’ll work out the details together.</p>
+        <p>Start with a short enquiry. We’ll work out the details together.</p>
         <button
           className={`${controls.action} ${controls.quiet} ${s.action}`}
           onClick={() => setEnquiryGoal("I’d like to discuss a project.\n\nWhat I want to improve in my business is: ")}

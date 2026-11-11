@@ -21,7 +21,7 @@ const questions = [
   },
   {
     question: "What happens after I send an enquiry?",
-    answer: "We review your idea, clarify any questions and put together a proposal with the scope, price and expected timeline. You can review it before deciding whether to go ahead.",
+    answer: "We review your enquiry and reply by email. After sending, you can also book an optional 30-minute project call to discuss your idea. Once we understand what you need, we prepare a proposal with the scope, price and expected timeline for you to review before deciding.",
   },
 ];
 

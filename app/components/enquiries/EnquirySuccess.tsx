@@ -8,11 +8,11 @@ import s from "./enquiry-success.module.css";
 export default function EnquirySuccess({
   bookingUrl,
   headingId,
-  onContinueByEmail,
+  onDone,
 }: {
   bookingUrl: string | null;
   headingId: string;
-  onContinueByEmail: () => void;
+  onDone: () => void;
 }) {
   const heading = useRef<HTMLHeadingElement>(null);
 
@@ -24,10 +24,11 @@ export default function EnquirySuccess({
     <div className={s.success}>
       <p className={s.eyebrow}>Enquiry received</p>
       <h2 id={headingId} ref={heading} tabIndex={-1} className={s.heading}>
-        {bookingUrl ? "Let’s discuss your project." : "Your enquiry is with us."}
+        Your enquiry is with us.
       </h2>
       <p role="status" className={s.receipt}>
-        Thank you. Your enquiry has been received.
+        Thank you. We’ll review your enquiry and reply by email with the next
+        steps.
       </p>
 
       {bookingUrl && (
@@ -41,24 +42,19 @@ export default function EnquirySuccess({
             href={bookingUrl}
             className={`${controls.action} ${controls.plainArrow} ${s.bookingAction}`}
           >
-            <span>Book a project call</span>
+            <span>Book a 30-minute call</span>
             <ActionArrow />
           </a>
+          <p className={s.bookingHint}>
+            Choose a time on our Google booking page. Use the same email address
+            as your enquiry.
+          </p>
         </div>
       )}
 
-      <div className={s.emailOption}>
-        <p>
-          {bookingUrl
-            ? "Prefer email? We’ll follow up on your enquiry."
-            : "We’ll review your enquiry and follow up by email about the next steps."}
-        </p>
-        <button
-          type="button"
-          className={s.continue}
-          onClick={onContinueByEmail}
-        >
-          Continue by email
+      <div className={s.actions}>
+        <button type="button" className={s.done} onClick={onDone}>
+          Done
         </button>
       </div>
     </div>
