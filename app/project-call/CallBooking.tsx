@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "
 import Link from "next/link";
 import Navigation from "../components/halenn/cinematic/Navigation";
 import SiteFooter from "../components/SiteFooter";
+import BookingCalendar from "./BookingCalendar";
 import { callPortal, type CallPortal } from "../lib/online-call";
 import styles from "./project-call.module.css";
 
@@ -20,7 +21,7 @@ export default function CallBooking({ token, initial, asOf }: { token: string; i
   const [slots, setSlots] = useState<string[]>([]);
   const [selected, setSelected] = useState("");
   const [language, setLanguage] = useState<"en" | "nl">("en");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(initial.available && !["confirmed", "pending", "review"].includes(initial.status ?? "new") && !initial.cancelRequested);
   const [working, setWorking] = useState(false);
   const [checking, setChecking] = useState(initial.status === "pending" || !!initial.cancelRequested);
   const [error, setError] = useState("");
@@ -140,18 +141,26 @@ export default function CallBooking({ token, initial, asOf }: { token: string; i
       </section> : <div className={styles.bookingGrid}>
         <section aria-labelledby="choose-time">
           <h2 id="choose-time">Choose your time.</h2>
-          <label className={styles.field}>Date <input type="date" value={day} min={today} max={lastDay} onChange={event => setDay(event.target.value)} disabled={working} /></label>
-          <p className={styles.quiet}>All times shown in Amsterdam time. Calls last 30 minutes.</p>
-          <div aria-busy={loading} className={styles.slots} role="group" aria-label="Available appointment times">
-            {loading ? <p role="status">Checking available times…</p> : slots.map(slot => <button key={slot} type="button" aria-pressed={slot === selected} onClick={() => setSelected(slot)} disabled={working}>{time(slot)}</button>)}
+          <p className={styles.quiet}>30 minutes · Google Meet · Amsterdam time</p>
+          <div className={styles.dateAndTimes}>
+            <BookingCalendar value={day} min={today} max={lastDay} disabled={working} onChange={chosenDay => { if (chosenDay !== day) { setDay(chosenDay); setSelected(""); setSlots([]); setLoading(true); } }} />
+            <div className={styles.timeChoices}>
+              <h3>{new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", weekday: "short", day: "numeric", month: "short" }).format(new Date(`${day}T12:00:00Z`))}</h3>
+              <div aria-busy={loading} className={styles.slots} role="group" aria-label="Available appointment times">
+                {loading ? <p role="status">Finding available times…</p> : slots.map(slot => <button key={slot} type="button" aria-pressed={slot === selected} onClick={() => setSelected(slot)} disabled={working}><span>{time(slot)}</span>{slot === selected && <span className={styles.slotCheck} aria-hidden="true">✓</span>}</button>)}
+              </div>
+              {!loading && !slots.length && !error && <p className={styles.quiet} role="status">No times on this date. Please choose another day.</p>}
+              {!loading && error && <button className={styles.textButton} onClick={() => load(day)}>Try loading times again</button>}
+            </div>
           </div>
-          {!loading && !slots.length && !error && <p className={styles.quiet}>No times are available on this date. Please choose another day.</p>}
-          {!loading && error && <button className={styles.textButton} onClick={() => load(day)}>Try loading times again</button>}
         </section>
         <section className={styles.bookingSummary} aria-labelledby="call-details">
           <h2 id="call-details">Your project call.</h2>
           <p>We’ll discuss your business, your priorities and how Halenn could help. There’s no need to prepare a technical brief.</p>
-          <label className={styles.field}>Preferred language<select value={language} onChange={event => setLanguage(event.target.value as "en" | "nl")} disabled={working}><option value="en">English</option><option value="nl">Dutch</option></select></label>
+          <fieldset className={styles.languageChoices} disabled={working}>
+            <legend>Preferred language</legend>
+            {(["en", "nl"] as const).map(option => <label key={option}><input type="radio" name="call-language" value={option} checked={language === option} onChange={() => setLanguage(option)} /><span>{option === "en" ? "English" : "Dutch"}</span></label>)}
+          </fieldset>
           <p className={styles.quiet}>{language === "nl" ? "Dave will join you." : "Dave or Terence will join you."}</p>
           {selected && <div className={styles.selection} aria-live="polite"><strong>{fullDate(selected)}</strong><br />{time(selected)} · Amsterdam time{localTime && <p className={styles.quiet}>Your local time: {localTime}</p>}</div>}
           <button className={styles.primary} disabled={!selected || working || loading} onClick={() => act("book")}>{working ? "Confirming your call…" : "Confirm my call"}<span aria-hidden="true">↗</span></button>
