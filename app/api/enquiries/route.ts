@@ -7,31 +7,51 @@ import {
   sameOrigin,
 } from "../../lib/website-server";
 import { cleanEnquiry } from "../../lib/website-model";
+import { projectCallPath } from "../../lib/project-call-links";
+
+const saveUnavailable = () => NextResponse.json(
+  { error: "We couldn’t confirm receipt of your enquiry. Please try again, or email contact@halenn.com." },
+  { status: 503, headers: privateHeaders },
+);
+
 export async function POST(request: NextRequest) {
   if (!sameOrigin(request))
     return NextResponse.json(
       { error: "Please send your enquiry from the website form." },
       { status: 403, headers: privateHeaders },
     );
+  let payload: ReturnType<typeof cleanEnquiry>;
   try {
     const raw = await limitedJson(request, 100000);
     if (raw && typeof raw === "object" && "website" in raw && raw.website)
       return NextResponse.json({ ok: true }, { headers: privateHeaders });
-    const payload = cleanEnquiry(raw);
+    payload = cleanEnquiry(raw);
     if (!analyticsAllowed(request)) payload.tracking = null;
-    const { data, error } = await (await intakeDatabase()).rpc(
-      "halenn_submit_website_enquiry",
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error && error.message.startsWith("Please")
+            ? error.message
+            : "Please check your enquiry and try again.",
+      },
+      { status: 400, headers: privateHeaders },
+    );
+  }
+  try {
+    const db = await intakeDatabase();
+    let { data, error } = await db.rpc(
+      "halenn_submit_website_enquiry_with_booking",
       { payload },
     );
-    if (error)
-      return NextResponse.json(
-        {
-          error:
-            "Your enquiry could not be saved. Please try again, or email contact@halenn.com.",
-        },
-        { status: 503, headers: privateHeaders },
-      );
-    if (data === "limited")
+    // Keep intake available while the optional booking migration is rolled out.
+    // Never retry a failed or timed-out write through a different endpoint.
+    if (error && ["PGRST202", "42883"].includes(error.code)) {
+      ({ data, error } = await db.rpc("halenn_submit_website_enquiry", { payload }));
+    }
+    if (error) return saveUnavailable();
+    const outcome = typeof data === "string" ? data : data?.result;
+    if (outcome === "limited")
       return NextResponse.json(
         {
           error:
@@ -39,7 +59,7 @@ export async function POST(request: NextRequest) {
         },
         { status: 429, headers: privateHeaders },
       );
-    if (data === "conflict")
+    if (outcome === "conflict")
       return NextResponse.json(
         {
           error:
@@ -47,17 +67,14 @@ export async function POST(request: NextRequest) {
         },
         { status: 409, headers: privateHeaders },
       );
-    if (data !== "received") throw Error("Unexpected response.");
-    return NextResponse.json({ ok: true }, { headers: privateHeaders });
-  } catch (e) {
+    if (outcome !== "received") return saveUnavailable();
     return NextResponse.json(
-      {
-        error:
-          e instanceof Error && e.message.startsWith("Please")
-            ? e.message
-            : "Please check your enquiry and try again.",
-      },
-      { status: 400, headers: privateHeaders },
+      { ok: true, bookingUrl: projectCallPath(data?.bookingUrl) },
+      { headers: privateHeaders },
     );
+  } catch {
+    // A transport failure may happen after persistence. Keep the request ID for
+    // a safe retry, without claiming the visitor entered invalid details.
+    return saveUnavailable();
   }
 }

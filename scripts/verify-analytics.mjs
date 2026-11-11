@@ -255,3 +255,34 @@ test("first contact timing distinguishes minutes, hours and unknown values", asy
   assert.equal(contactDuration(6 / 24), "6 hr");
   assert.equal(contactDuration(2), "2 days");
 });
+
+
+test("bookings count recorded activity while the milestone counts distinct cohort leads to date", () => {
+  const booked = lead(91, { channel: "Website", acquisition_source: "Google" });
+  const later = lead(92, { channel: "Website", acquisition_source: "Google" });
+  const older = lead(93, { channel: "Website", acquisition_source: "Google", created_at: "2026-09-01T12:00:00Z" });
+  const stageOnly = lead(94, { channel: "Website", acquisition_source: "Google", status: "Meeting booked" });
+  const corrected = lead(95, { channel: "Website", acquisition_source: "Google" });
+  const internal = lead(96, { channel: "Website", acquisition_source: "Google", is_test: true });
+  const otherSource = lead(97, { channel: "Website", acquisition_source: "Instagram" });
+  const leads = [booked, later, older, stageOnly, corrected, internal, otherSource];
+  const events = [
+    event(booked, "meeting_booked", "2026-10-02"),
+    event(booked, "meeting_booked", "2026-10-03"),
+    event(later, "meeting_booked", "2026-11-02"),
+    event(older, "meeting_booked", "2026-10-04"),
+    event(stageOnly, "stage", "2026-10-04", { to_stage: "Meeting booked" }),
+    event(corrected, "meeting_booked", "2026-10-05", { voided_at: "2026-10-06T12:00:00Z" }),
+    event(internal, "meeting_booked", "2026-10-06"),
+    event(otherSource, "meeting_booked", "2026-10-06"),
+  ];
+  const m = model(leads, events, { channel: "Google" });
+  assert.equal(m.meetingsBooked, 3);
+  assert.equal(m.uniqueLeads("meeting_booked"), 2);
+  assert.deepEqual(m.milestones.find((row) => row.label === "Meeting booked").ids, [booked.id, later.id]);
+  assert.equal(m.meetingsHeld, 0);
+  assert.equal(m.attendance, null);
+  const withTests = model(leads, events, { channel: "Google", includeTests: true });
+  assert.equal(withTests.meetingsBooked, 4);
+  assert.equal(withTests.milestones.find((row) => row.label === "Meeting booked").ids.length, 3);
+});

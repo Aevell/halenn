@@ -28,6 +28,7 @@ export type WebsiteReport = {
     quizStarts: number;
     enquiries: number;
     leads: number;
+    bookedCalls?: number;
     customers: number;
   }[];
   devices: { device: string; visits: number; enquiries: number }[];
@@ -385,9 +386,9 @@ export default function WebsiteAnalytics({
             <Panel
               wide
               when={data.totals.visits > 0}
-              basis="Visits started in this period · customer wins to date"
+              basis="Visits started in this period · bookings and customer wins to date"
               title="Visitor sources → sales"
-              description="Each consented enquiry keeps the source of its visit. Customers are those enquiries marked won, even when the sale happens later."
+              description="Each consented enquiry keeps the source of its visit. Booked calls count enquiries with a recorded booking, once per lead. Customers are enquiries marked won, even when the booking or sale happens later."
             >
               {sortedSources.length ? (
                 <>
@@ -398,6 +399,7 @@ export default function WebsiteAnalytics({
                           <th>Source</th>
                           <th>Visits</th>
                           <th>Enquiries</th>
+                          <th>Booked calls</th>
                           <th>Customers</th>
                           <th>Enquiry-to-customer</th>
                         </tr>
@@ -420,6 +422,7 @@ export default function WebsiteAnalytics({
                             </th>
                             <td>{number(row.visits)}</td>
                             <td>{number(row.leads)}</td>
+                            <td>{row.bookedCalls === undefined ? "—" : number(row.bookedCalls)}</td>
                             <td>{number(row.customers)}</td>
                             <td>
                               {percentage(row.customers, row.leads)}

@@ -471,6 +471,12 @@ export function buildAnalytics(
         .map((l) => l.id),
     },
     {
+      label: "Meeting booked",
+      ids: cohort
+        .filter((l) => history(l.id).some((e) => e.kind === "meeting_booked"))
+        .map((l) => l.id),
+    },
+    {
       label: "Meeting held",
       ids: cohort
         .filter((l) => history(l.id).some((e) => e.kind === "meeting_held"))
