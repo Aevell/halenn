@@ -24,7 +24,7 @@ export function sameOrigin(r: NextRequest) {
     return false;
   }
 }
-export async function limitedJson(r: Request, max: number) {
+export async function limitedJson(r: Request | Response, max: number) {
   if (Number(r.headers.get("content-length")) > max)
     throw Error("Request too large.");
   const reader = r.body?.getReader();
