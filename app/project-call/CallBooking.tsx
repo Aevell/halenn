@@ -119,7 +119,7 @@ export default function CallBooking({ token, initial, asOf }: { token: string; i
 
   async function act(operation: "book" | "cancel" | "reschedule") {
     if (working) return;
-    setWorking(true); setError(""); setCancelPrompt(false);
+    setWorking(true); setError(""); setNotice(""); setCancelPrompt(false);
     if (operation === "reschedule" && pendingChange.current === undefined) {
       previousChange.current = portal.rescheduleId;
       pendingChange.current = null;
