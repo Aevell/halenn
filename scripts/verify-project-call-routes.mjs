@@ -306,3 +306,14 @@ test('calendar download is available only for verified confirmed bookings and se
     assert.equal((await harness('calendar',{rpc:async()=>({data:p})}).api.GET(null,context)).status,404);
   }
 });
+
+test('reschedule forwards only the operation and selected time to the same signed flow',async()=>{
+ const h=harness('online',{rpc:async(name,args)=>{assert.equal(name,'halenn_prepare_online_call');assert.equal(args.operation,'reschedule');assert.equal(args.starts_at,'2026-11-16T12:00:00Z');assert.equal(args.eventId,undefined);return {data:{portal:confirmedPortal}};}});
+ const response=await h.api.POST(enquiryRequest({operation:'reschedule',startsAt:'2026-11-16T12:00:00Z',eventId:'untrusted',email:'untrusted@example.test'}),context);assert.equal(response.status,200);
+});
+test('reschedule state is validated and calendar updates retain a stable UID with a later sequence',()=>{
+ for(const extra of [{reschedulePending:'yes'},{canReschedule:1},{rescheduleId:'bad'},{rescheduleOutcome:'other'},{updatedAt:'bad'},{calendarSequence:-1}]) assert.equal(onlineCall.callPortal({...confirmedPortal,...extra}),null);
+ const first=onlineCall.callCalendar(confirmedPortal.startsAt,confirmedPortal.meetUrl,token,0,'2026-11-12T10:00:00Z');
+ const next=onlineCall.callCalendar('2026-11-16T12:00:00Z',confirmedPortal.meetUrl,token,1,'2026-11-12T11:00:00Z');
+ assert.equal(first.match(/UID:[^\r]+/)[0],next.match(/UID:[^\r]+/)[0]);assert.match(next,/SEQUENCE:1/);assert.match(next,/DTSTAMP:20261112T110000Z/);
+});

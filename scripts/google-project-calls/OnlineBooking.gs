@@ -6,6 +6,8 @@ var HalennOnlineCalls = (function () {
   var TITLE = 'Halenn · Project call';
   var TRACK = 'HALENN_ONLINE_TRACK_';
   var RESULT = 'HALENN_ONLINE_RESULT_';
+  var MOVE = 'HALENN_ONLINE_MOVE_';
+  var CHANGE = 'HALENN_ONLINE_CHANGE_';
   var UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
   var MEET = /^https:\/\/meet\.google\.com\/[a-z]{3}-[a-z]{4}-[a-z]{3}$/;
   function equal(a, b) {
@@ -25,8 +27,10 @@ var HalennOnlineCalls = (function () {
       || !equal(input.signature, signature('online-request.' + input.sentAt + '.' + input.body, deps))) throw new Error('Invalid request');
     var request = JSON.parse(input.body);
     if (request.version !== 1 || request.calendarId !== CALENDAR || !UUID.test(request.requestId)
-      || ['availability', 'book', 'cancel'].indexOf(request.operation) === -1) throw new Error('Invalid request');
+      || ['availability', 'book', 'cancel', 'reschedule'].indexOf(request.operation) === -1) throw new Error('Invalid request');
     if (request.operation !== 'availability' && request.eventId !== 'halenn' + request.requestId.replace(/-/g, '')) throw new Error('Invalid event');
+    if (request.operation === 'reschedule' && (!UUID.test(request.changeId || '') || !isFinite(Date.parse(request.expectedUpdated)))) throw new Error('Invalid change');
+    if (request.excludeEventId && (!UUID.test(request.excludeCallId || '') || request.excludeEventId !== 'halenn' + request.excludeCallId.replace(/-/g, ''))) throw new Error('Invalid exclusion');
     return request;
   }
   function offset(day, deps) {
@@ -41,15 +45,45 @@ var HalennOnlineCalls = (function () {
     var zone = offset(day, deps);
     return { start: new Date(day + 'T08:00:00' + zone).toISOString(), end: new Date(day + 'T23:59:59' + zone).toISOString(), zone: zone };
   }
-  function slots(day, deps) {
+  function owned(event, id) {
+    return event && event.extendedProperties && event.extendedProperties.private && event.extendedProperties.private.halennOnlineCall === id;
+  }
+  function slots(day, deps, excluded) {
     var range = bounds(day, deps);
     var busy = deps.busy(range.start, range.end);
     if (!Array.isArray(busy)) throw new Error('Calendar unavailable');
     var events = deps.list(range.start, range.end);
     var count = events.filter(function (event) {
-      return event.status !== 'cancelled' && event.summary && event.summary.indexOf(TITLE) === 0;
+      return event.status !== 'cancelled' && (!excluded || event.id !== excluded.id) && event.summary && event.summary.indexOf(TITLE) === 0;
     }).length;
     if (count >= 3) return [];
+    if (excluded) {
+      var ownStart = Date.parse(excluded.start.dateTime), ownEnd = Date.parse(excluded.end.dateTime);
+      if (!isFinite(ownStart) || !isFinite(ownEnd) || ownEnd <= ownStart) throw new Error('Calendar unavailable');
+      // Free/busy intervals can merge overlapping events. Remove only our own
+      // interval, then restore every other opaque event from the complete list.
+      var remaining = [];
+      busy.forEach(function (block) {
+        var from = Date.parse(block.start), to = Date.parse(block.end);
+        if (!isFinite(from) || !isFinite(to) || to <= from) throw new Error('Calendar unavailable');
+        if (to <= ownStart || from >= ownEnd) remaining.push(block);
+        else {
+          if (from < ownStart) remaining.push({ start: block.start, end: new Date(ownStart).toISOString() });
+          if (to > ownEnd) remaining.push({ start: new Date(ownEnd).toISOString(), end: block.end });
+        }
+      });
+      events.forEach(function (event) {
+        if (event.id === excluded.id || event.status === 'cancelled' || event.transparency === 'transparent') return;
+        function edge(value) {
+          if (!value) throw new Error('Calendar unavailable');
+          return value.dateTime || (value.date ? value.date + 'T00:00:00' + offset(value.date, deps) : '');
+        }
+        var from = edge(event.start), to = edge(event.end);
+        if (!isFinite(Date.parse(from)) || !isFinite(Date.parse(to)) || Date.parse(to) <= Date.parse(from)) throw new Error('Calendar unavailable');
+        remaining.push({ start: from, end: to });
+      });
+      busy = remaining;
+    }
     var available = [], first = Date.parse(day + 'T09:00:00' + range.zone);
     for (var minute = 0; minute <= 800; minute += 40) {
       var start = first + minute * 60000, end = start + 30 * 60000;
@@ -67,6 +101,8 @@ var HalennOnlineCalls = (function () {
     var body = { version: 1, calendarId: CALENDAR, requestId: request.requestId,
       operation: request.operation, eventId: request.eventId, status: event.status,
       updated: event.updated || new Date(deps.now()).toISOString() };
+    var changeId = event.extendedProperties && event.extendedProperties.private && event.extendedProperties.private.halennRescheduleChange;
+    if (UUID.test(changeId || '')) body.changeId = changeId;
     if (event.status === 'cancelled') return body;
     if (event.status !== 'confirmed') return null;
     var entries = event.conferenceData && event.conferenceData.entryPoints || [];
@@ -81,25 +117,83 @@ var HalennOnlineCalls = (function () {
   function remember(body, deps) {
     if (!body) return;
     // Persist before delivery. The existing scheduled sync retries missed callbacks.
-    deps.save(RESULT + body.requestId, JSON.stringify(body));
+    var pending = JSON.parse(deps.load(RESULT + body.requestId) || 'null');
+    if (!pending || !(Date.parse(pending.updated) > Date.parse(body.updated))) deps.save(RESULT + body.requestId, JSON.stringify(body));
     deliver(body, deps);
   }
   function deliver(body, deps) {
     try {
       if (deps.deliver(envelope(body, deps))) {
-        deps.remove(RESULT + body.requestId);
+        if (deps.load(RESULT + body.requestId) === JSON.stringify(body)) deps.remove(RESULT + body.requestId);
         if (body.status === 'unavailable') return;
         var tracking = JSON.parse(deps.load(TRACK + body.requestId) || '{}');
+        if ((tracking.version && Date.parse(body.updated) < Date.parse(tracking.version)) || (tracking.status === 'cancelled' && body.status !== 'cancelled')) return;
         tracking.version = body.updated;
         tracking.status = body.status;
+        if (body.start) tracking.start = body.start;
         deps.save(TRACK + body.requestId, JSON.stringify(tracking));
       }
     } catch (_) { /* Signed result is retained; no secrets or response bodies logged. */ }
   }
+  function reschedule(request, deps) {
+    var saved = deps.load(CHANGE + request.changeId);
+    if (saved) {
+      var cached = JSON.parse(saved);
+      if (cached.body.requestId !== request.requestId) throw new Error('Invalid change');
+      remember(cached.body, deps);
+      return envelope(cached.body, deps);
+    }
+    var event = deps.get(request.eventId);
+    if (!event || event.status === 'cancelled') {
+      if (!deps.load(TRACK + request.requestId)) throw new Error('Unknown calendar event');
+      event = { status: 'cancelled', updated: new Date(deps.now()).toISOString() };
+    } else if (!owned(event, request.requestId)) throw new Error('Unexpected calendar event');
+    var outcome = 'conflict', start = new Date(request.start);
+    if (!isFinite(start.getTime())) throw new Error('Invalid time');
+    if (event.status === 'confirmed') {
+      if (event.extendedProperties.private.halennRescheduleChange === request.changeId) {
+        // The patch committed, but its response or callback was lost.
+        outcome = Date.parse(event.start.dateTime) === start.getTime() ? 'confirmed' : 'conflict';
+      } else if (Date.parse(event.updated) === Date.parse(request.expectedUpdated) && Date.parse(event.start.dateTime) > deps.now()) {
+        deps.save(MOVE + request.changeId, JSON.stringify(request));
+        if (slots(deps.format(start, 'yyyy-MM-dd'), deps, event).indexOf(start.toISOString()) === -1) outcome = 'unavailable';
+        else {
+          var privateProperties = Object.assign({}, event.extendedProperties.private, { halennRescheduleChange: request.changeId });
+          try {
+            event = deps.patch(request.eventId, {
+              start: { dateTime: start.toISOString(), timeZone: 'Europe/Amsterdam' },
+              end: { dateTime: new Date(start.getTime() + 1800000).toISOString(), timeZone: 'Europe/Amsterdam' },
+              extendedProperties: { private: privateProperties }
+            }, event.etag);
+            outcome = 'confirmed';
+          } catch (error) {
+            if (!/precondition|412/i.test(String(error))) throw new Error('Change is being checked');
+            event = deps.get(request.eventId);
+            if (!event || event.status === 'cancelled') event = { status: 'cancelled', updated: new Date(deps.now()).toISOString() };
+            else if (!owned(event, request.requestId)) throw new Error('Unexpected calendar event');
+          }
+        }
+      }
+    }
+    var body = result(request, event, deps);
+    if (!body) throw new Error('Change is being checked');
+    body.changeId = request.changeId; body.rescheduleOutcome = outcome;
+    // Cache the terminal result before delivering it: a replay must never move
+    // a call back after the customer has made a subsequent change.
+    deps.save(CHANGE + request.changeId, JSON.stringify({ completedAt: deps.now(), body: body }));
+    deps.remove(MOVE + request.changeId);
+    remember(body, deps);
+    return envelope(body, deps);
+  }
   function process(input, deps) {
     var request = authenticate(input, deps);
-    if (request.operation === 'availability') return envelope({ version: 1, calendarId: CALENDAR,
-      requestId: request.requestId, operation: 'availability', slots: slots(request.day, deps) }, deps);
+    if (request.operation === 'availability') {
+      var excluded = request.excludeEventId ? deps.get(request.excludeEventId) : null;
+      if (excluded && excluded.status !== 'cancelled' && !owned(excluded, request.excludeCallId)) throw new Error('Unexpected calendar event');
+      return envelope({ version: 1, calendarId: CALENDAR, requestId: request.requestId,
+        operation: 'availability', slots: slots(request.day, deps, excluded && excluded.status !== 'cancelled' ? excluded : null) }, deps);
+    }
+    if (request.operation === 'reschedule') return reschedule(request, deps);
     var event = deps.get(request.eventId);
     if (request.operation === 'book') {
       if (!event) {
@@ -160,6 +254,13 @@ var HalennOnlineCalls = (function () {
     return envelope(body, deps);
   }
   function reconcile(deps) {
+    Object.keys(deps.properties()).filter(function (key) { return key.indexOf(CHANGE) === 0; }).forEach(function (key) {
+      var cached = JSON.parse(deps.load(key));
+      if (cached.completedAt < deps.now() - 7 * 86400000 && !deps.load(RESULT + cached.body.requestId)) deps.remove(key);
+    });
+    Object.keys(deps.properties()).filter(function (key) { return key.indexOf(MOVE) === 0; }).slice(0,20).forEach(function (key) {
+      try { reschedule(JSON.parse(deps.load(key)), deps); } catch (_) { /* Preserve uncertain moves for recovery. */ }
+    });
     Object.keys(deps.properties()).filter(function (key) { return key.indexOf(RESULT) === 0; }).slice(0,40).forEach(function (key) {
       var pendingResult = deps.load(key);
       if (pendingResult) deliver(JSON.parse(pendingResult), deps);
@@ -199,6 +300,10 @@ var HalennOnlineCalls = (function () {
       get: function (id) { try { return Calendar.Events.get(CALENDAR, id); } catch (error) {
         if (/not found|gone|404|410/i.test(String(error))) return null; throw new Error('Calendar unavailable'); } },
       insert: function (event) { return Calendar.Events.insert(event, CALENDAR, { conferenceDataVersion: 1, sendUpdates: 'none' }); },
+      patch: function (id, fields, etag) {
+        if (typeof etag !== 'string' || !etag) throw new Error('Calendar version unavailable');
+        return Calendar.Events.patch(fields, CALENDAR, id, { conferenceDataVersion: 1, sendUpdates: 'none' }, { 'If-Match': etag });
+      },
       cancel: function (id) { Calendar.Events.remove(CALENDAR, id, { sendUpdates: 'none' }); },
       busy: function (start, end) {
         var response = Calendar.Freebusy.query({ timeMin: start, timeMax: end, items: [{ id: CALENDAR }] });

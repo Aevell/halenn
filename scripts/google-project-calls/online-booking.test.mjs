@@ -16,15 +16,16 @@ const format=(date,pattern)=>{
   return offset.replace('GMT','').replace(':','');
 };
 function fixture(overrides={}){
- const store=new Map(),events=new Map(),sent=[];let inserts=0,cancels=0;
+ const store=new Map(),events=new Map(),sent=[];let inserts=0,cancels=0,patches=0;
  const deps={secret,now:()=>Date.parse('2026-11-11T12:00:00Z'),format,
   hmac:(value,key)=>[...createHmac('sha256',key).update(value).digest()].map(v=>v>127?v-256:v),
   load:k=>store.get(k)||null,save:(k,v)=>store.set(k,v),remove:k=>store.delete(k),properties:()=>Object.fromEntries(store),sleep:()=>{},
   busy:()=>[],list:()=>[],get:id=>events.get(id)||null,
-  insert:raw=>{inserts++;const event={...copy(raw),status:'confirmed',created:new Date(deps.now()).toISOString(),updated:new Date(deps.now()).toISOString(),hangoutLink:'https://meet.google.com/abc-defg-hij'};events.set(raw.id,event);return event;},
+  insert:raw=>{inserts++;const event={...copy(raw),status:'confirmed',etag:'version-1',created:new Date(deps.now()).toISOString(),updated:new Date(deps.now()).toISOString(),hangoutLink:'https://meet.google.com/abc-defg-hij'};events.set(raw.id,event);return event;},
+  patch:(id,fields,etag)=>{patches++;assert.equal(etag,events.get(id).etag);const event={...events.get(id),...copy(fields),updated:new Date(deps.now()+patches*1000).toISOString(),etag:'version-'+(patches+1)};events.set(id,event);return event;},
   cancel:id=>{cancels++;events.set(id,{status:'cancelled',updated:new Date(deps.now()+100).toISOString()});},
   deliver:envelope=>{sent.push(copy(envelope));return true;},...overrides};
- return {deps,store,events,sent,inserts:()=>inserts,cancels:()=>cancels};
+ return {deps,store,events,sent,inserts:()=>inserts,cancels:()=>cancels,patches:()=>patches};
 }
 function signed(deps,extra={}){
  const body=JSON.stringify({version:1,calendarId:'aevellgroup@gmail.com',requestId,operation:'book',eventId,start:'2026-11-12T08:00:00.000Z',name:'Test Customer',email:'customer@example.test',language:'en',...extra});
@@ -92,4 +93,66 @@ test('native calendar deletion is detected through the tracked request',()=>{
 });
 test('legacy sync never guesses an attendee for website-managed appointments',()=>{
  const f=fixture();app.process(signed(f.deps),f.deps);assert.equal(context.HalennProjectCalls.selectEvent(f.events.get(eventId),{}),null);
+});
+
+const changeId='10000000-0000-4000-8000-000000000001';
+const move=(f,extra={})=>signed(f.deps,{operation:'reschedule',changeId,expectedUpdated:f.events.get(eventId).updated,start:'2026-11-12T10:00:00.000Z',...extra});
+test('rescheduling patches the same event, preserves Meet and language, with no guest invitation',()=>{
+ const f=fixture();app.process(signed(f.deps,{language:'nl'}),f.deps);const original=copy(f.events.get(eventId));
+ const request=move(f);const result=JSON.parse(app.process(request,f.deps).body);app.process(request,f.deps);
+ const changed=f.events.get(eventId);assert.equal(f.inserts(),1);assert.equal(f.patches(),1);assert.equal(f.cancels(),0);
+ assert.equal(changed.id,eventId);assert.equal(changed.hangoutLink,original.hangoutLink);assert.equal(changed.description,original.description);assert.equal(changed.attendees,undefined);
+ assert.equal(changed.start.dateTime,'2026-11-12T10:00:00.000Z');assert.equal(Date.parse(changed.end.dateTime)-Date.parse(changed.start.dateTime),1800000);
+ assert.equal(result.rescheduleOutcome,'confirmed');assert.equal(result.changeId,changeId);
+});
+test('moving on a full day excludes only this call from the three-call limit',()=>{
+ const f=fixture();app.process(signed(f.deps),f.deps);const own=f.events.get(eventId);
+ const other=id=>({...copy(own),id,start:{dateTime:'2026-11-12T18:00:00Z'},end:{dateTime:'2026-11-12T18:30:00Z'}});
+ f.deps.list=()=>[own,other('other1'),other('other2')];f.deps.busy=()=>[{start:own.start.dateTime,end:own.end.dateTime}];
+ const slots=JSON.parse(app.process(signed(f.deps,{operation:'availability',day:'2026-11-12',excludeEventId:eventId,excludeCallId:requestId}),f.deps).body).slots;
+ assert.ok(slots.includes('2026-11-12T10:00:00.000Z'));assert.equal(JSON.parse(app.process(move(f),f.deps).body).rescheduleOutcome,'confirmed');
+ f.deps.list=()=>[other('other1'),other('other2'),other('other3')];assert.equal(JSON.parse(app.process(move(f,{changeId:changeId.replace(/1$/,'2'),start:'2026-11-12T12:00:00.000Z'}),f.deps).body).rescheduleOutcome,'unavailable');
+});
+test('merged freebusy never hides another overlapping event or an all-day block',()=>{
+ const f=fixture();app.process(signed(f.deps),f.deps);const own=f.events.get(eventId);
+ const other={id:'other',status:'confirmed',start:{dateTime:own.start.dateTime},end:{dateTime:own.end.dateTime}};
+ f.deps.busy=()=>[{start:own.start.dateTime,end:own.end.dateTime}];f.deps.list=()=>[own,other];
+ assert.ok(!copy(app.slots('2026-11-12',f.deps,own)).includes(own.start.dateTime));
+ other.transparency='transparent';assert.ok(copy(app.slots('2026-11-12',f.deps,own)).includes(own.start.dateTime));
+ delete other.transparency;other.start={date:'2026-11-12'};other.end={date:'2026-11-13'};
+ assert.equal(app.slots('2026-11-12',f.deps,own).length,0);
+});
+test('unavailable changes preserve the original and remain terminal when the time later opens',()=>{
+ const f=fixture();app.process(signed(f.deps),f.deps);const original=copy(f.events.get(eventId)),request=move(f);
+ f.deps.busy=()=>[{start:'2026-11-12T09:00:00Z',end:'2026-11-12T11:00:00Z'}];
+ assert.equal(JSON.parse(app.process(request,f.deps).body).rescheduleOutcome,'unavailable');assert.deepEqual(f.events.get(eventId),original);
+ f.deps.busy=()=>[];assert.equal(JSON.parse(app.process(request,f.deps).body).rescheduleOutcome,'unavailable');assert.equal(f.patches(),0);
+});
+test('stale versions and concurrent Calendar changes cannot be overwritten',()=>{
+ const f=fixture();app.process(signed(f.deps),f.deps);
+ assert.equal(JSON.parse(app.process(move(f,{expectedUpdated:'2026-11-10T12:00:00Z'}),f.deps).body).rescheduleOutcome,'conflict');assert.equal(f.patches(),0);
+ const original=copy(f.events.get(eventId));f.deps.patch=()=>{throw Error('Precondition failed 412');};
+ assert.equal(JSON.parse(app.process(move(f,{changeId:changeId.replace(/1$/,'2')}),f.deps).body).rescheduleOutcome,'conflict');assert.deepEqual(f.events.get(eventId),original);
+});
+test('a patch that commits before a lost response is recovered without a second write',()=>{
+ const f=fixture();app.process(signed(f.deps),f.deps);const patch=f.deps.patch;
+ f.deps.patch=(...args)=>{patch(...args);throw Error('Lost response');};
+ assert.throws(()=>app.process(move(f),f.deps),/being checked/);assert.ok(f.store.has('HALENN_ONLINE_MOVE_'+changeId));
+ f.deps.patch=patch;app.reconcile(f.deps);assert.equal(f.patches(),1);assert.ok(!f.store.has('HALENN_ONLINE_MOVE_'+changeId));
+ assert.equal(JSON.parse(f.sent.at(-1).body).rescheduleOutcome,'confirmed');
+});
+test('old change retries never rewind newer tracking or discard a newer pending callback',()=>{
+ const f=fixture();app.process(signed(f.deps),f.deps);const first=move(f);app.process(first,f.deps);
+ const second=move(f,{changeId:changeId.replace(/1$/,'2'),start:'2026-11-12T12:00:00.000Z'});f.deps.deliver=()=>false;app.process(second,f.deps);
+ const pending=f.store.get('HALENN_ONLINE_RESULT_'+requestId);f.deps.deliver=()=>true;app.process(first,f.deps);
+ assert.equal(f.store.get('HALENN_ONLINE_RESULT_'+requestId),pending);app.reconcile(f.deps);
+ assert.equal(f.events.get(eventId).start.dateTime,'2026-11-12T12:00:00.000Z');assert.equal(f.patches(),2);
+ f.deps.now=()=>Date.parse('2026-11-11T12:00:03Z');app.process(signed(f.deps,{operation:'cancel'}),f.deps);app.process(first,f.deps);
+ assert.equal(JSON.parse(f.store.get('HALENN_ONLINE_TRACK_'+requestId)).status,'cancelled');
+});
+test('rescheduling and exclusion reject an event owned by someone else',()=>{
+ const f=fixture();app.process(signed(f.deps),f.deps);f.events.get(eventId).extendedProperties.private.halennOnlineCall='other';
+ assert.throws(()=>app.process(move(f),f.deps),/Unexpected calendar event/);
+ assert.throws(()=>app.process(signed(f.deps,{operation:'availability',day:'2026-11-12',excludeEventId:eventId,excludeCallId:requestId}),f.deps),/Unexpected calendar event/);
+ assert.equal(f.patches(),0);
 });
