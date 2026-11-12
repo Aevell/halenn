@@ -26,7 +26,7 @@ export async function POST(request: NextRequest, { params }: Context) {
     const raw = await limitedJson(request, 2048);
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw Error();
     input = raw as Record<string, unknown>;
-    if (!["availability", "book", "cancel"].includes(String(input.operation))) throw Error();
+    if (!["availability", "book", "cancel", "reschedule"].includes(String(input.operation))) throw Error();
     for (const key of ["day", "startsAt", "language"]) if (input[key] != null && (typeof input[key] !== "string" || String(input[key]).length > 40)) throw Error();
   } catch { return reply({ error: "Please check your appointment details." }, 400); }
   try {

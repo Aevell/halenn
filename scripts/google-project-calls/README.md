@@ -1,6 +1,6 @@
 # Google Calendar project-call sync
 
-Owner-run Apps Script for Halenn's optional project calls. The original sync reads the shared Gmail calendar and sends verified booking changes to `https://halenn.com/api/project-call-events`. The separately gated `OnlineBooking.gs` module adds signed availability, creation and cancellation requests and sends results to `/api/project-call-result`. It creates organizer-only events without customer attendees; Halenn's existing Resend connection sends the combined confirmation.
+Owner-run Apps Script for Halenn's optional project calls. The original sync reads the shared Gmail calendar and sends verified booking changes to `https://halenn.com/api/project-call-events`. The separately gated `OnlineBooking.gs` module adds signed availability, creation, rescheduling and cancellation requests and sends results to `/api/project-call-result`. It creates organizer-only events without customer attendees; Halenn's existing Resend connection sends the combined confirmation.
 
 **The combined-confirmation upgrade is live and verified.** The owner approved `calendar.events.owned` and the signed web-app deployment, completed authorization, and both booking flags are enabled. A real enquiry, booking, combined inbox confirmation, analytics milestone and cancellation were verified. See the [live rollout record and controls](../../docs/project-call-bookings.md#combined-confirmation-upgrade--live). The old native appointment schedule has been retired; existing appointments and historical sync remain. The older setup instructions below describe the original read-only integration, not the current customer journey or authorization for a new permission grant. Add both `.gs` files when installing the updated manifest; any fresh installation must keep the new flag false until its endpoint is configured, authorized and verified.
 
@@ -119,3 +119,15 @@ node --test scripts/google-project-calls/bridge.test.mjs
 ```
 
 Tests execute `Code.gs` in an isolated JavaScript context with mocked Google/network interfaces. They cover strict filtering, payload minimization, language parsing, stale and ID-only tombstones, HMAC bytes, pagination, retry behavior, signed empty heartbeats, partial failure, expired-token recovery and atomic bounded storage. They do not install triggers, call Google, call Halenn or send messages.
+
+### Self-service rescheduling
+
+Apply `202611120002_call_rescheduling.sql` before enabling `rescheduling_enabled` in the private booking config. Update the existing Apps Script web-app deployment with `OnlineBooking.gs`, preserving its URL, owner and scopes, and publish the corresponding website code. Enable the flag only once both are deployed. Setting it back to false prevents new moves; finish/reconciliation still settle changes already in progress.
+
+The booking page moves the existing tagged event with an ETag-conditional patch, preserving the Meet link and enquiry. Availability excludes that event from the daily capacity and its busy interval, but restores other overlapping opaque events. The original time remains booked until the patch succeeds. New times retain the 12-hour notice, Amsterdam hours, ten-minute buffer and three-call daily limit; customers can request up to three changes per 24 hours.
+
+Each change has a database ID, expected Calendar version and a persisted Apps Script intent. Retries reuse that change. The private event marker recovers a committed patch whose response was lost; terminal results cannot replay an earlier move. Reconciliation retries pending intents and callbacks. Conflicts retain the actual Calendar state rather than overwriting it. Pending changes older than 15 minutes appear in notification attention counts.
+
+A successful move updates the same analytics booking row and queues one branded update email including the enquiry. It does not log another initial-booking conversion. Already-attempted email payloads remain frozen; unattempted superseded notices are skipped. Calendar downloads use a stable UID and increasing sequence, but customers should replace a previously saved calendar copy—downloads are not calendar subscriptions.
+
+Release verification: use an explicitly excluded internal test lead, book, reschedule, inspect the same Calendar event/Meet link and the updated analytics time, verify one update email with no enquiry acknowledgement or Google guest invitation, then cancel the test appointment. Never modify a real customer's appointment for testing.

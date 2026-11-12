@@ -88,6 +88,71 @@ try {
   const finish=async(result,override)=>{const raw=JSON.stringify(result),stamp=String(Math.floor(Date.now()/1000));const signature=override||createHmac('sha256',secret).update('online-response.'+stamp+'.'+raw).digest('hex'); await identity('anon');const r=await scalar("select public.halenn_finish_online_call($1,$2,$3)",[raw,signature,stamp]);await identity();return r;};
   const portal=async token=>{await identity('anon');const r=await scalar("select public.halenn_online_call_portal($1)",[token]);await identity();return r;};
   const notices=()=>query("select * from private.halenn_call_confirmations order by created_at");
+  const rescheduleMigration=await migration("202611120002_call_rescheduling");
+  await test("rescheduling upgrade preserves appointments and frozen emails, with the feature gated off",async()=>{
+    await online();const {token}=await invited();await finish(resultFor(await prepare(token)));
+    const before=await query('select * from private.halenn_call_confirmations');const calls=await query('select to_jsonb(b) as value from private.halenn_online_calls b');
+    const sent=await scalar('select count(*) from net.test_requests');await db.exec(withoutTransaction(rescheduleMigration));
+    assert.deepEqual(await notices(),before);assert.equal(await scalar('select count(*) from net.test_requests'),sent);
+    assert.deepEqual(await query("select to_jsonb(b)-'calendar_sequence' as value from private.halenn_online_calls b"),calls);
+    assert.equal((await portal(token)).canReschedule,false);await rejected(()=>prepare(token,'reschedule',new Date(Date.parse(tomorrow())+2400000).toISOString()),'55000');
+  });
+  await db.exec(rescheduleMigration);
+  const rescheduling=async()=>{await online();await db.exec('update private.halenn_project_call_config set rescheduling_enabled=true');};
+  const booked=async()=>{await rescheduling();const invite=await invited();const prepared=await prepare(invite.token);const result=resultFor(prepared);await finish(result);return {...invite,result};};
+  const moveResult=(r,original,extra={})=>{const body=JSON.parse(r.envelope.body);return resultFor(r,{created:original.created,updated:new Date(Date.parse(body.expectedUpdated)+1000).toISOString(),changeId:body.changeId,rescheduleOutcome:'confirmed',...extra});};
+  const later=start=>new Date(Date.parse(start)+2400000).toISOString();
+  await test("reschedule preparation holds the original, fixes identity and reuses pending changes",async()=>{
+    const {token,result}=await booked();const before=await portal(token);assert.equal(before.canReschedule,true);
+    const ready=await prepare(token,'availability');const availability=JSON.parse(ready.envelope.body);assert.equal(availability.excludeEventId,result.eventId);
+    const move=await prepare(token,'reschedule',later(result.start));const body=JSON.parse(move.envelope.body);
+    assert.equal(body.requestId,result.requestId);assert.equal(body.eventId,result.eventId);assert.equal(body.language,undefined);assert.equal(body.email,undefined);
+    const pending=await portal(token);assert.equal(pending.startsAt,before.startsAt);assert.equal(pending.reschedulePending,true);assert.equal(pending.canReschedule,false);
+    const retry=JSON.parse((await prepare(token,'reschedule',later(later(result.start)))).envelope.body);assert.equal(retry.changeId,body.changeId);assert.equal(retry.start,body.start);
+    await rejected(()=>prepare(token,'cancel'),'55000');
+  });
+  await test("successful reschedule updates one appointment and one conversion, with one updated email",async()=>{
+    const {p,token,result}=await booked();const before=await portal(token);const move=await prepare(token,'reschedule',later(result.start));const changed=moveResult(move,result);
+    await finish(changed);await finish(changed);await finish(result);
+    const after=await portal(token);assert.equal(after.reschedulePending,false);assert.equal(after.rescheduleOutcome,'confirmed');assert.equal(after.calendarSequence,1);
+    assert.equal(Date.parse(after.startsAt),Date.parse(changed.start));assert.equal(after.meetUrl,before.meetUrl);assert.equal(after.language,before.language);
+    assert.equal(await scalar('select count(*)::int from private.halenn_online_calls'),1);assert.equal(await scalar('select count(*)::int from private.halenn_project_call_bookings'),1);
+    assert.equal(await activityCount(await leadFor(p)),1);assert.equal((await confirmation(p)).status,'skipped');
+    const mails=await notices();assert.equal(mails.length,2);assert.equal(mails[1].kind,'updated');assert.match(mails[1].payload.text,/Manage your call/);assert.match(mails[1].payload.text,/saved a calendar copy/);assert.match(mails[1].payload.text,/Please help with our website/);
+  });
+  await test("unavailable targets leave the confirmed booking and email history unchanged",async()=>{
+    const {token,result}=await booked();const before=await portal(token);const move=await prepare(token,'reschedule',later(result.start));
+    await finish(moveResult(move,result,{...result,operation:'reschedule',changeId:JSON.parse(move.envelope.body).changeId,rescheduleOutcome:'unavailable'}));
+    const after=await portal(token);assert.equal(after.startsAt,before.startsAt);assert.equal(after.rescheduleOutcome,'unavailable');assert.equal(after.canReschedule,true);assert.equal(after.calendarSequence,0);assert.equal((await notices()).length,1);
+  });
+  await test("conflicts show the actual calendar time and do not count another conversion",async()=>{
+    const {p,token,result}=await booked();const move=await prepare(token,'reschedule',later(result.start));const actual=later(later(result.start));
+    await finish(moveResult(move,result,{rescheduleOutcome:'conflict',start:actual,end:new Date(Date.parse(actual)+1800000).toISOString()}));
+    assert.equal(Date.parse((await portal(token)).startsAt),Date.parse(actual));assert.equal((await portal(token)).rescheduleOutcome,'conflict');assert.equal(await activityCount(await leadFor(p)),1);
+  });
+  await test("sync recovers a committed move and late callbacks cannot rewind later moves",async()=>{
+    const {token,result}=await booked();const first=moveResult(await prepare(token,'reschedule',later(result.start)),result);
+    await finish({...first,operation:'sync'});assert.equal((await portal(token)).reschedulePending,false);
+    const second=moveResult(await prepare(token,'reschedule',later(first.start)),result);await finish(second);await finish(first);await finish({...first,operation:'sync'});
+    assert.equal(Date.parse((await portal(token)).startsAt),Date.parse(second.start));assert.equal((await portal(token)).calendarSequence,2);assert.equal((await notices()).length,3);
+  });
+  await test("forged changes, wrong times and unchanged provider versions cannot confirm",async()=>{
+    const {token,result}=await booked();const move=await prepare(token,'reschedule',later(result.start));const valid=moveResult(move,result);
+    await rejected(()=>finish({...valid,changeId:id(999)}),'22023');await rejected(()=>finish({...valid,start:result.start}),'22023');await rejected(()=>finish({...valid,updated:result.updated}),'22023');
+    assert.equal((await portal(token)).reschedulePending,true);assert.equal((await notices()).length,1);
+  });
+  await test("cancellation during an external change settles pending reschedules safely",async()=>{
+    const {token,result}=await booked();const move=await prepare(token,'reschedule',later(result.start));
+    await finish(moveResult(move,result,{status:'cancelled',rescheduleOutcome:'conflict'}));const after=await portal(token);
+    assert.equal(after.status,'cancelled');assert.equal(after.reschedulePending,false);assert.equal(after.canReschedule,false);await rejected(()=>prepare(token,'reschedule'),'55000');
+  });
+  await test("rescheduling enforces times, notice, past-call protection and daily limits",async()=>{
+    const {token,result}=await booked();await rejected(()=>prepare(token,'reschedule',new Date().toISOString()),'22023');await rejected(()=>prepare(token,'reschedule',new Date(Date.parse(result.start)+60000).toISOString()),'22023');
+    for(let i=0;i<3;i++){const move=await prepare(token,'reschedule',later(result.start));await finish(moveResult(move,result,{...result,operation:'reschedule',changeId:JSON.parse(move.envelope.body).changeId,rescheduleOutcome:'unavailable'}));}
+    await rejected(()=>prepare(token,'reschedule',later(result.start)),'54000');
+    await db.exec("update private.halenn_online_calls set starts_at=clock_timestamp()-interval '1 minute'");assert.equal((await portal(token)).canReschedule,false);await rejected(()=>prepare(token,'reschedule'),'55000');
+    await rejected(async()=>{await identity('anon');await query('select * from private.halenn_call_reschedules');},'42501');
+  });
   await test("invalid tokens and unsupported times cannot create a calendar request",async()=>{
     await online(); const {token}=await invited();
     await rejected(()=>prepare(id(999),'book'),'55000');
