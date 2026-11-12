@@ -8,12 +8,10 @@ import { Editor } from "./Forms";
 import Generate, { defaultRequest } from "./Generate";
 function Dialog({
   title,
-  drawer,
   onClose,
   children,
 }: {
   title: string;
-  drawer: boolean;
   onClose: () => void;
   children: React.ReactNode;
 }) {
@@ -39,7 +37,7 @@ function Dialog({
         { opacity: 1, transform: "none" },
         {
           opacity: 0,
-          transform: drawer ? "translateX(22px)" : "translateY(6px)",
+          transform: "translateY(6px)",
         },
       ],
       { duration: 150, easing: "ease-out", fill: "forwards" },
@@ -50,7 +48,7 @@ function Dialog({
     <dialog
       ref={ref}
       aria-labelledby="hw-dialog-title"
-      className={"hw-dialog " + (drawer ? "hw-drawer" : "hw-import")}
+      className="hw-dialog"
       onCancel={(e) => {
         e.preventDefault();
         dismiss();
@@ -243,7 +241,6 @@ export default function Leads({ leads, now }: { leads: Lead[]; now: string }) {
       {modal && (
         <Dialog
           key={mode ?? selected?.id}
-          drawer={mode !== "generate"}
           title={
             mode === "generate"
               ? "Generate leads"

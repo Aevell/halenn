@@ -1,6 +1,7 @@
 "use client";
 import WorkspaceSelect from "../../WorkspaceSelect";
 import { useState, useRef } from "react";
+import { flushSync } from "react-dom";
 import { columns, type Lead } from "../../lib/leads";
 import { ImportForm } from "./Forms";
 
@@ -48,6 +49,10 @@ export default function Generate({
 }) {
   const [view, setView] = useState<"build" | "import">("build");
   const [notice, setNotice] = useState("");
+  const [copiedRequest, setCopiedRequest] = useState("");
+  const [copying, setCopying] = useState(false);
+  const importButton = useRef<HTMLButtonElement>(null);
+  const codexLink = useRef<HTMLAnchorElement>(null);
   const field = useRef<HTMLTextAreaElement>(null);
   const prompt = request.services.length ? build(request) : "";
   function change(patch: Partial<Request>) {
@@ -55,14 +60,26 @@ export default function Generate({
     setNotice("");
   }
   async function copy() {
+    if (!prompt || copying) return;
+    setCopying(true);
     try {
       await navigator.clipboard.writeText(prompt);
-      setNotice("Request copied.");
     } catch {
       field.current?.focus();
       field.current?.select();
       setNotice("Select and copy the request below.");
+      setCopying(false);
+      return;
     }
+    // Commit the import view before handing focus to the desktop app.
+    flushSync(() => {
+      setCopiedRequest(prompt);
+      setNotice("");
+      setView("import");
+      setCopying(false);
+    });
+    importButton.current?.focus();
+    codexLink.current?.click();
   }
   return (
     <>
@@ -74,6 +91,7 @@ export default function Generate({
           Build request
         </button>
         <button
+          ref={importButton}
           aria-pressed={view === "import"}
           onClick={() => setView("import")}
         >
@@ -148,7 +166,7 @@ export default function Generate({
             ))}
           </div>
           <label>
-            Request for ChatGPT
+            Request for Codex
             <textarea
               ref={field}
               readOnly
@@ -159,13 +177,25 @@ export default function Generate({
           </label>
           <footer>
             <span role="status">{notice}</span>
-            <button className="hw-primary" disabled={!prompt} onClick={copy}>
-              Copy request
+            <button className="hw-primary" disabled={!prompt || copying} onClick={copy}>
+              {copying ? "Copying…" : "Copy & open Codex"}
             </button>
           </footer>
         </div>
       </div>
       <div className="hw-workflow-panel" hidden={view !== "import"}>
+        {copiedRequest && (
+          <div className="hw-handoff">
+            <p role="status">Request copied. Send it in Codex, then paste the results below.</p>
+            <p>
+              Didn’t open?{" "}
+              <a ref={codexLink} href={`codex://threads/new?prompt=${encodeURIComponent(copiedRequest)}`}>
+                Open Codex
+              </a>
+              {" "}or paste the copied request into your chat.
+            </p>
+          </div>
+        )}
         <ImportForm leads={leads} done={done} cancel={cancel} />
       </div>
     </>
