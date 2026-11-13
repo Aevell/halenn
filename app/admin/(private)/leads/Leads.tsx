@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Arrow } from "../../../components/halenn/Brand";
 import { statuses, due, dateLabel, type Lead } from "../../lib/leads";
 import { Editor } from "./Forms";
+import LeadDetails from "./LeadDetails";
 import Generate, { defaultRequest } from "./Generate";
 function Dialog({
   title,
@@ -258,8 +259,10 @@ export default function Leads({ leads, now }: { leads: Lead[]; now: string }) {
               done={done}
               cancel={close}
             />
+          ) : selected ? (
+            <LeadDetails lead={selected} done={done} />
           ) : (
-            <Editor lead={selected} done={done} />
+            <Editor done={done} />
           )}
         </Dialog>
       )}
