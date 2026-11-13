@@ -1164,3 +1164,23 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+.hw-outreach-intro {
+  margin: 0;
+  color: var(--sub);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.hw-outreach textarea {
+  line-height: 1.6;
+}
+.hw-outreach footer {
+  align-items: center;
+  flex-wrap: wrap;
+}
+.hw-outreach footer [role="status"] {
+  flex: 1 1 180px;
+  color: var(--sub);
+  font-size: 14px;
+  line-height: 1.5;
+}
