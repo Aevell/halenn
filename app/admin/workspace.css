@@ -1184,3 +1184,51 @@
   font-size: 14px;
   line-height: 1.5;
 }
+
+.hw-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+  padding: 0 18px 12px;
+}
+.hw-quick-actions button {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--action);
+  font-size: 13px;
+  text-align: left;
+}
+.hw-quick-actions button span,
+.hw-quick-actions > span {
+  color: var(--sub);
+  font-size: 12px;
+}
+.hw-quick-actions button:hover:not(:disabled) {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.hw-quick-actions button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.hw-quick-actions [role="alert"] {
+  color: #f0b8a9;
+}
+.hw-list > li {
+  border-bottom: 1px solid var(--edge);
+}
+.hw-list > li > .hw-row {
+  border-bottom: 0;
+}
+@media (max-width: 680px) {
+  .hw-quick-actions {
+    padding-inline: 2px;
+  }
+}

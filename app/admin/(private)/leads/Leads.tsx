@@ -6,6 +6,7 @@ import { Arrow } from "../../../components/halenn/Brand";
 import { statuses, due, dateLabel, type Lead } from "../../lib/leads";
 import { Editor } from "./Forms";
 import LeadDetails from "./LeadDetails";
+import QuickActions from "./QuickActions";
 import Generate, { defaultRequest } from "./Generate";
 function Dialog({
   title,
@@ -213,6 +214,7 @@ export default function Leads({ leads, now }: { leads: Lead[]; now: string }) {
                     {dateLabel(l.follow_up, now)}
                   </time>
                 </button>
+                <QuickActions lead={l} now={now} />
               </li>
             ))}
           </ul>
