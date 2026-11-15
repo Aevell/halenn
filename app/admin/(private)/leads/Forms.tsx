@@ -79,6 +79,19 @@ export function Editor({
           )}
         </label>
       ))}
+      <details className="hw-sales-details">
+        <summary>Google Maps embed (optional)</summary>
+        <div className="hw-sales-fields">
+          <p>In Google Maps, open the business, choose Share → Embed a map, then Copy HTML. Paste it here. Leave blank to use the company panel.</p>
+          <label>
+            Google Maps embed
+            <textarea aria-label="Google Maps embed" rows={3} maxLength={12000}
+              placeholder="Paste the embed HTML or https://www.google.com/maps/embed?pb=…"
+              value={fields.maps_embed ?? ""}
+              onChange={(e) => input("maps_embed", e.target.value)} />
+          </label>
+        </div>
+      </details>
       <div className="hw-pair">
         <WorkspaceSelect
           label="Status"

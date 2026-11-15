@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import type { Lead } from "../../lib/leads";
 import { Editor } from "./Forms";
+import Overview from "./Overview";
 
 type Format = "email" | "short";
 
@@ -104,20 +105,27 @@ function Outreach({ lead }: { lead: Lead }) {
   );
 }
 
-export default function LeadDetails({ lead, done }: {
+export default function LeadDetails({ lead, now, done }: {
   lead: Lead;
+  now: string;
   done: (message: string) => void;
 }) {
-  const [view, setView] = useState<"details" | "outreach">("details");
+  const [view, setView] = useState<"overview" | "details" | "outreach">("overview");
   return (
     <>
       <div className="hw-switcher" role="group" aria-label="Lead views">
-        <button type="button" aria-pressed={view === "details"} onClick={() => setView("details")}>
-          Details
+        <button type="button" aria-pressed={view === "overview"} onClick={() => setView("overview")}>
+          Overview
         </button>
         <button type="button" aria-pressed={view === "outreach"} onClick={() => setView("outreach")}>
           Outreach
         </button>
+        <button type="button" aria-pressed={view === "details"} onClick={() => setView("details")}>
+          Edit details
+        </button>
+      </div>
+      <div className="hw-workflow-panel" hidden={view !== "overview"}>
+        <Overview lead={lead} now={now} active={view === "overview"} edit={() => setView("details")} />
       </div>
       <div className="hw-workflow-panel" hidden={view !== "details"}>
         <Editor lead={lead} done={done} />

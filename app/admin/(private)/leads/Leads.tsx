@@ -262,7 +262,7 @@ export default function Leads({ leads, now }: { leads: Lead[]; now: string }) {
               cancel={close}
             />
           ) : selected ? (
-            <LeadDetails lead={selected} done={done} />
+            <LeadDetails lead={selected} now={now} done={done} />
           ) : (
             <Editor done={done} />
           )}
