@@ -47,7 +47,7 @@ export function Empty({
   return (
     <div className="ha-empty">
       <span className="ha-empty-mark" aria-hidden="true">
-        —
+        No data
       </span>
       <h3>{title}</h3>
       {children && <p>{children}</p>}

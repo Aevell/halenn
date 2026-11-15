@@ -422,7 +422,7 @@ export default function WebsiteAnalytics({
                             </th>
                             <td>{number(row.visits)}</td>
                             <td>{number(row.leads)}</td>
-                            <td>{row.bookedCalls === undefined ? "—" : number(row.bookedCalls)}</td>
+                            <td>{row.bookedCalls === undefined ? "N/A" : number(row.bookedCalls)}</td>
                             <td>{number(row.customers)}</td>
                             <td>
                               {percentage(row.customers, row.leads)}

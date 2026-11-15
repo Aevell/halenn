@@ -247,7 +247,7 @@ export default function CallBooking({ token, initial, asOf }: { token: string; i
           </div>
         </section>
       </div>}
-      <Link className={styles.backLink} href="/">{portal.status === "confirmed" ? "Back to Halenn" : "Done — hear from us by email"}<span aria-hidden="true">↗</span></Link>
+      <Link className={styles.backLink} href="/">{portal.status === "confirmed" ? "Back to Halenn" : "Done. Hear from us by email"}<span aria-hidden="true">↗</span></Link>
     </main>
     <SiteFooter />
   </div>;

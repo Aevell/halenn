@@ -184,7 +184,7 @@ export function Editor({
       <label className="hw-test-toggle">
         <input type="checkbox" checked={fields.is_test ?? false}
           onChange={(e) => setFields((f) => ({ ...f, is_test: e.target.checked }))} />
-        Test lead — exclude from analytics by default
+        Test lead (excluded from analytics by default)
       </label>
       {error && <p role="alert">{error}</p>}
       <footer>
@@ -225,6 +225,7 @@ export function ImportForm({
           placeholder={columns.join("   ")}
         />
       </label>
+      <p className="hw-import-help">Google Maps embed is optional. Older six-column batches still work.</p>
       {problem && <p role="alert">{problem}</p>}
       {rows.length > 0 && (
         <>
@@ -232,7 +233,7 @@ export function ImportForm({
           <div className="hw-preview">
             {rows.slice(0, 200).map((r, i) => (
               <div key={i}>
-                <b>{r.fields.company || "Missing company"}</b>
+                <b>{r.fields.company || "Missing company"}{r.label === "Ready" && r.fields.maps_embed && <small className="hw-map-imported">Map included</small>}</b>
                 <span>{r.label}</span>
               </div>
             ))}

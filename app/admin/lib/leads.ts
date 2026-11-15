@@ -86,6 +86,7 @@ export const columns = [
   "Contact",
   "Source URL",
   "Notes",
+  "Google Maps embed",
 ];
 export function today() {
   return new Intl.DateTimeFormat("sv-SE", {
@@ -101,7 +102,7 @@ export function due(lead: Fields, date: string) {
   );
 }
 export function dateLabel(date: string | null, now: string) {
-  if (!date) return "—";
+  if (!date) return "Not scheduled";
   if (date === now) return "Today";
   return new Intl.DateTimeFormat("en-GB", {
     month: "short",
@@ -220,7 +221,8 @@ export function preview(text: string, existing: Fields[]) {
       problem:
         "This looks like a Markdown table. Ask for tab-separated columns, then paste the result here.",
     };
-  if (lines[0]?.trim().toLowerCase() === columns.join("\t").toLowerCase())
+  const header = lines[0]?.trim().toLowerCase();
+  if ([columns, columns.slice(0, 6)].some(names => header === names.join("\t").toLowerCase()))
     lines.shift();
   const rows = lines.map((line) => {
     const [
@@ -230,6 +232,7 @@ export function preview(text: string, existing: Fields[]) {
       contact = "",
       source = "",
       notes = "",
+      maps_embed = "",
       ...extra
     ] = line.split("\t");
     const raw = {
@@ -240,6 +243,7 @@ export function preview(text: string, existing: Fields[]) {
       contact,
       source,
       notes,
+      maps_embed,
     };
     try {
       if (extra.length) throw new Error("Too many columns");

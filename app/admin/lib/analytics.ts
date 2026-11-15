@@ -200,7 +200,7 @@ export function median(values: number[]) {
 }
 export function money(value: number | null, currency: Currency) {
   return value === null
-    ? "—"
+    ? "N/A"
     : new Intl.NumberFormat("en-GB", {
         style: "currency",
         currency,
@@ -209,14 +209,14 @@ export function money(value: number | null, currency: Currency) {
 }
 export function rate(value: number | null) {
   return value === null
-    ? "—"
+    ? "N/A"
     : new Intl.NumberFormat("en-GB", { maximumFractionDigits: 1 }).format(
         value,
       ) + "%";
 }
 export function duration(value: number | null) {
   return value === null
-    ? "—"
+    ? "N/A"
     : value < 1
       ? "< 1 day"
       : new Intl.NumberFormat("en-GB", { maximumFractionDigits: 1 }).format(
@@ -224,7 +224,7 @@ export function duration(value: number | null) {
         ) + (value === 1 ? " day" : " days");
 }
 export function contactDuration(days: number | null) {
-  if (days === null) return "—";
+  if (days === null) return "N/A";
   if (days < 1 / 1440) return "< 1 min";
   if (days < 1 / 24) return `${Math.floor(days * 1440)} min`;
   if (days < 1) return `${Number((days * 24).toFixed(1))} hr`;

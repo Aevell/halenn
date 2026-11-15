@@ -36,3 +36,25 @@ test('Markdown tables and malformed fenced output never become importable leads'
     assert.deepEqual(result.rows, []);
   }
 });
+
+test('map imports support seven columns and legacy six-column headers', () => {
+  const url = 'https://www.google.com/maps/embed?pb=!1m18!2m3!1d123';
+  const text = [columns.join('\t'), ['Studio', 'studio.example', 'Booking', '', 'https://studio.example', 'Notes', url].join('\t')].join('\n');
+  for (const input of [text, '```tsv\n' + text + '\n```']) {
+    const result = preview(input, []);
+    assert.equal(result.rows.length, 1);
+    assert.equal(result.rows[0].label, 'Ready');
+    assert.equal(result.rows[0].fields.maps_embed, url);
+  }
+  const old = preview(columns.slice(0,6).join('\t') + '\nOld Studio\told.example\tBooking\t\t\tNotes', []);
+  assert.equal(old.rows.length, 1);
+  assert.equal(old.rows[0].label, 'Ready');
+  assert.equal(old.rows[0].fields.maps_embed, '');
+});
+
+test('map import flags unsafe maps and still skips duplicates', () => {
+  const row = (company, map) => [company, '', '', '', '', '', map].join('\t');
+  const result = preview([row('Valid', ''), row('Valid', ''), row('Unsafe', 'https://evil.example/embed')].join('\n'), []);
+  assert.deepEqual(result.rows.slice(0,2).map(r => r.label), ['Ready', 'Duplicate']);
+  assert.notEqual(result.rows[2].label, 'Ready');
+});
