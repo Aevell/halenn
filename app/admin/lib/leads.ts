@@ -1,3 +1,4 @@
+import { mapEmbed } from "./maps.ts";
 export const statuses = [
   "New",
   "Contacted",
@@ -52,6 +53,7 @@ export type Fields = {
   offer?: string;
   lost_reason?: string;
   is_test?: boolean;
+  maps_embed?: string;
 };
 export type Lead = Fields & {
   id: string;
@@ -138,6 +140,7 @@ export function clean(input: Fields): Fields {
   }
   if (!fields.company || fields.company.length > 180)
     throw new Error("Enter a company name (up to 180 characters).");
+  if (input.maps_embed !== undefined) fields.maps_embed = mapEmbed(input.maps_embed);
   fields.website = web(fields.website);
   fields.source = web(fields.source);
   if (!statuses.includes(input.status))

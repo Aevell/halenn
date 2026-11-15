@@ -1232,3 +1232,126 @@
     padding-inline: 2px;
   }
 }
+
+.hw-lead-overview {
+  display: grid;
+  gap: 22px;
+}
+.hw-company-panel {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-height: 190px;
+  padding: 28px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #101923;
+}
+.hw-company-panel::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -10%;
+  background: url("/brand/halenn-silk-v1.png") center / cover;
+  opacity: 0.18;
+}
+.hw-company-initials {
+  font-size: clamp(42px, 8vw, 66px);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  color: var(--action);
+}
+.hw-company-panel h3 {
+  font-size: 24px;
+  overflow-wrap: anywhere;
+}
+.hw-company-panel p {
+  margin: 8px 0 0;
+  color: var(--sub);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.hw-lead-map {
+  overflow: hidden;
+  border-radius: 14px;
+  background: #101923;
+}
+.hw-lead-map iframe {
+  display: block;
+  width: 100%;
+  height: 240px;
+  border: 0;
+}
+.hw-map-caption,
+.hw-overview-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+}
+.hw-map-caption {
+  padding: 4px 14px;
+  color: var(--sub);
+  font-size: 13px;
+}
+.hw-lead-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.hw-lead-facts > div {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 10px;
+}
+.hw-lead-facts > div > span:first-child,
+.hw-lead-contact dt {
+  color: var(--sub);
+  font-size: 13px;
+}
+.hw-lead-overview > .hw-quick-actions {
+  padding: 0;
+}
+.hw-lead-opportunity {
+  padding-top: 22px;
+  border-top: 1px solid var(--edge);
+}
+.hw-lead-opportunity h3 {
+  font-size: 20px;
+}
+.hw-lead-opportunity p,
+.hw-overview-notes p {
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 12px 0;
+}
+.hw-lead-contact {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+}
+.hw-lead-contact dd {
+  margin: 6px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.hw-overview-notes summary {
+  min-height: 40px;
+  cursor: pointer;
+}
+@media (max-width: 440px) {
+  .hw-company-panel {
+    flex-direction: column;
+    align-items: start;
+    padding: 22px;
+    gap: 16px;
+  }
+  .hw-lead-map iframe {
+    height: 210px;
+  }
+}
