@@ -523,7 +523,7 @@ export default function Analytics({
         {!websiteView && <div className="ha-reading-key">
           <span>{selectedTab === "acquisition" ? "Leads added in this period · results to date" : selectedTab === "growth" ? "Position at period end · activity during this period" : "During this period"}</span>
           {((selectedTab === "overview" || selectedTab === "acquisition") && model.cohort.length > 0 && model.cohort.length < 20) &&
-            <span className="ha-sample-note">Limited data · {model.cohort.length} leads — compare counts alongside rates</span>}
+            <span className="ha-sample-note">Limited data · {model.cohort.length} leads. Compare counts alongside rates</span>}
         </div>}
         {selectedTab === "overview" && (
           <>
@@ -1092,7 +1092,7 @@ export default function Analytics({
               <Stat
                 label="Active subscriptions"
                 value={
-                  model.subscriptionsRecorded ? model.activeSubscriptions : "—"
+                  model.subscriptionsRecorded ? model.activeSubscriptions : "N/A"
                 }
                 detail={`${model.newSubscriptions} additions versus the start of the period`}
               />

@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import type { Lead } from "../../lib/leads";
 import { Editor } from "./Forms";
+import { withoutEmDashes } from "../../lib/copy";
 import Overview from "./Overview";
 
 type Format = "email" | "short";
@@ -16,18 +17,18 @@ function messageFor(lead: Lead, short: boolean) {
   const idea = opportunity
     ? `A possible starting point for ${company}:\n${opportunity}`
     : `I'd love to explore whether we could help ${company} with its website or day-to-day digital work.`;
-  return [
+  return withoutEmDashes([
     `Hi ${company} team,`,
     introduction,
     idea,
     "Would you be open to a quick chat to see if this would be useful?",
     short ? "Halenn · halenn.com" : "Best,\nThe Halenn team\nhttps://halenn.com",
-  ].join("\n\n");
+  ].join("\n\n"));
 }
 
 function Outreach({ lead }: { lead: Lead }) {
   const [format, setFormat] = useState<Format>("email");
-  const [subject, setSubject] = useState(() => `An idea for ${lead.company}`);
+  const [subject, setSubject] = useState(() => withoutEmDashes(`An idea for ${lead.company}`));
   const [drafts, setDrafts] = useState(() => ({
     email: messageFor(lead, false),
     short: messageFor(lead, true),
@@ -36,9 +37,9 @@ function Outreach({ lead }: { lead: Lead }) {
   const [copying, setCopying] = useState(false);
   const [manualCopy, setManualCopy] = useState(false);
   const fallback = useRef<HTMLTextAreaElement>(null);
-  const copiedText = format === "email" && subject.trim()
+  const copiedText = withoutEmDashes(format === "email" && subject.trim()
     ? `Subject: ${subject.trim()}\n\n${drafts[format]}`
-    : drafts[format];
+    : drafts[format]);
 
   async function copy() {
     setCopying(true);

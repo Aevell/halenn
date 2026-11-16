@@ -1355,3 +1355,17 @@
     height: 210px;
   }
 }
+
+.hw-import-help,
+.hw-map-imported {
+  color: var(--sub);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.hw-import-help {
+  margin: 0;
+}
+.hw-map-imported {
+  display: block;
+  font-weight: 400;
+}

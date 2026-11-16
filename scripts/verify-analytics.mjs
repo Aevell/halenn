@@ -249,7 +249,7 @@ test("visitor acquisition source follows leads into sales and source filters", (
 
 test("first contact timing distinguishes minutes, hours and unknown values", async () => {
   const { contactDuration } = await import("../app/admin/lib/analytics.ts");
-  assert.equal(contactDuration(null), "—");
+  assert.equal(contactDuration(null), "N/A");
   assert.equal(contactDuration(0), "< 1 min");
   assert.equal(contactDuration(15 / 1440), "15 min");
   assert.equal(contactDuration(6 / 24), "6 hr");

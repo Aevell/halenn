@@ -1,4 +1,5 @@
 "use client";
+import { withoutEmDashes } from "../../lib/copy";
 import WorkspaceSelect from "../../WorkspaceSelect";
 import { useState, useRef } from "react";
 import { flushSync } from "react-dom";
@@ -27,11 +28,12 @@ function build(r: Request) {
   const region = r.location.trim();
   const place =
     region.toLowerCase() === "netherlands" ? "the Netherlands" : region;
-  return [
+  return withoutEmDashes([
     `Find up to ${r.count} ${r.independent ? "independent " : ""}${r.business.trim() || "businesses"}${place ? " in " + place : ""} that could benefit from Halenn’s services. Focus on ${new Intl.ListFormat("en", { type: "disjunction" }).format(r.services.map((s) => services[s]))}.`,
     `For each company, describe one specific opportunity you can verify on a public page, explain which selected service would help, and include that page’s URL. ${r.contact ? "Only include companies with a published business contact and provide it." : "Include a published business contact when available."} Leave unknown fields blank, never guess contact details, and return fewer leads if fewer qualify.`,
+    `For Google Maps embed, find the matching business and use Google Maps → Share → Embed a map. Return only the real HTTPS embed URL beginning https://www.google.com/maps/embed?pb=, not the iframe HTML, a search link or a shortened share link. Never invent an embed URL or its pb value. If you cannot access or verify the embed, leave that field blank and keep the lead. Do not use em dashes anywhere in your response.`,
     `Return one tab-separated code block with this exact header:\n${columns.join("\t")}\nUse actual tabs between fields and one line per company. Keep blank fields in their original positions.\n\nIf no leads qualify, return only the header.`,
-  ].join("\n\n");
+  ].join("\n\n"));
 }
 
 export default function Generate({

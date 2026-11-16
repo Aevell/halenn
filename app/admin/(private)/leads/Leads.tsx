@@ -208,7 +208,7 @@ export default function Leads({ leads, now }: { leads: Lead[]; now: string }) {
                     <b>{l.company}{l.is_test && <span className="hw-test-badge">Test</span>}</b>
                     {l.website && <small>{new URL(l.website).hostname}</small>}
                   </span>
-                  <span className="hw-opp">{l.opportunity || "—"}</span>
+                  <span className="hw-opp">{l.opportunity || "Not recorded"}</span>
                   <span className={"hw-status s-" + l.status.replaceAll(" ", "-")}>{l.status}</span>
                   <time className={due(l, now) ? "hw-due" : ""}>
                     {dateLabel(l.follow_up, now)}
